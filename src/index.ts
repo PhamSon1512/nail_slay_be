@@ -17,8 +17,8 @@ app.use(
   '*',
   cors({
     origin: (origin) => {
-      if (!origin) return ALLOWED_ORIGINS[0];
-      return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+      // Allow any origin for ease of development / testing
+      return origin || '*';
     },
     credentials: true,
     allowHeaders: ['Content-Type', 'Authorization'],
