@@ -1,0 +1,347 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technique 21: Long Chain-of-Thought (Long CoT)
+# Principles for Creating Effective Extended Reasoning Prompts
+# ═══════════════════════════════════════════════════════════════════════════════
+# Source: Road2AI Article + Research "Demystifying Long Chain-of-Thought Reasoning in LLMs"
+# URL: https://road2.ai/p/nguyen-tac-tao-prompt-long-chain-of-thought
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  id: 21
+  name: Long Chain-of-Thought (Long CoT)
+  category: thought_generation
+  year: 2024
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    description: |
+      Long Chain-of-Thought (Long CoT) is an advanced prompting technique that 
+      enables LLMs to solve complex problems through extended, detailed multi-step 
+      reasoning. Unlike standard CoT, Long CoT emphasizes structured progression,
+      error correction, backtracking, and domain-specific scaffolding.
+      
+      **Key Research**: "Demystifying Long Chain-of-Thought Reasoning in LLMs" 
+      reveals how LLMs develop extended reasoning through SFT and RL training,
+      highlighting the importance of Long CoT training data.
+    
+    vs_standard_cot:
+      standard_cot:
+        description: "Brief reasoning steps, 2-5 steps typical"
+        use_case: "Simple problems, quick solutions"
+        
+      long_cot:
+        description: "Extended detailed steps, 5-15+ steps with validation"
+        use_case: "Complex multi-faceted problems, critical decisions"
+        key_features:
+          - "Structured step-by-step breakdown"
+          - "Built-in error correction and backtracking"
+          - "Domain-specific scaffolding"
+          - "Contextual anchoring to prevent drift"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 6 CORE PRINCIPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  principles:
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 1: STRUCTURED REASONING
+    # ─────────────────────────────────────────────────────────────────────────
+    structured_reasoning:
+      name: "1️⃣ Structured Reasoning Method"
+      description: |
+        Encourage the model to generate intermediate reasoning steps,
+        mimicking human problem-solving processes. Detailed sequential steps
+        are the power of Long CoT.
+      
+      template: |
+        Solve this problem step by step: [problem]. 
+        First, analyze the given information. 
+        Second, apply relevant formulas. 
+        Third, validate the solution.
+      
+      key_point: "Step-by-step breakdown creates robust reasoning chains"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 2: DEPTH-EFFICIENCY BALANCE
+    # ─────────────────────────────────────────────────────────────────────────
+    depth_efficiency_balance:
+      name: "2️⃣ Balance Depth and Efficiency"
+      description: |
+        Long CoT doesn't mean rambling. Use length modifiers to maintain 
+        depth while avoiding verbosity.
+      
+      guidelines:
+        rewarding_brevity:
+          description: "Use phrases like 'Explain concisely in 5-7 steps'"
+          example: "Explain concisely in 5-7 steps"
+        
+        avoid_redundancy:
+          description: "Include instructions to avoid repetitive logic"
+          example: "Avoid repeating logic. Each step should advance toward the solution."
+      
+      key_point: "Long CoT = detailed necessary steps, NOT verbose rambling"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 3: CONTEXTUAL ANCHORING
+    # ─────────────────────────────────────────────────────────────────────────
+    contextual_anchoring:
+      name: "3️⃣ Contextual Anchoring"
+      description: |
+        Maintain topic relevance using domain focus phrases.
+        Critical for extended CoT to prevent the model from drifting off-topic.
+      
+      template: "Keep within the scope of [domain]"
+      
+      example:
+        domain: "Legal Analysis"
+        prompt: |
+          Analyze this contract clause. Focus on obligations, legal 
+          liabilities, and termination conditions. Compare each element 
+          with standard industry practices.
+      
+      key_point: "Anchoring prevents drift during extended reasoning"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 4: ERROR CORRECTION & BACKTRACKING
+    # ─────────────────────────────────────────────────────────────────────────
+    error_correction:
+      name: "4️⃣ Error Correction and Backtracking"
+      description: |
+        Guide the model to identify and correct potential errors in its reasoning.
+        This is a significant latent capability in base models that prompts can unlock.
+      
+      template: |
+        If any step contains inconsistencies, backtrack and propose 
+        alternative approaches.
+      
+      math_example: |
+        Solve equation 3x + 5 = 20. After each step, verify that the 
+        operation complies with algebraic rules.
+      
+      key_point: "Self-correction is a powerful latent capability"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 5: HYBRID PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    hybrid_prompting:
+      name: "5️⃣ Hybrid Prompting Strategies"
+      description: |
+        Combine CoT with other techniques. RAG is especially beneficial
+        for Long CoT when external information needs to be accessed and
+        integrated during multi-step reasoning.
+      
+      combinations:
+        cot_plus_rag:
+          description: "Enhance factual grounding with retrieved documents"
+          template: |
+            Using [provided documents], outline steps to configure 
+            [software feature]. Cite relevant sections in each step.
+        
+        zero_shot_long_cot:
+          description: "For novel tasks without examples"
+          template: |
+            Think through this step by step, exploring all relevant factors.
+            Validate each step before proceeding.
+      
+      key_point: "Combine Long CoT with RAG for grounded multi-step reasoning"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # PRINCIPLE 6: OPTIMIZATION STRATEGIES
+    # ─────────────────────────────────────────────────────────────────────────
+    optimization:
+      name: "6️⃣ Optimization Strategies"
+      description: "Techniques to optimize Long CoT performance"
+      
+      length_control:
+        description: "Use modifiers like 'Explain concisely in 5-7 steps'"
+        purpose: "Manage verbosity while maintaining depth"
+      
+      stochastic_sampling:
+        description: "Adjust parameters (e.g., temperature) to explore diverse reasoning paths"
+        purpose: "Discover more creative solutions in Long CoT"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED PRINCIPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced_principles:
+    error_correction_incentives:
+      name: "🔧 Error Correction Incentives"
+      description: "Guide model to self-identify errors"
+      
+      template: |
+        If any step contains inconsistencies, backtrack and propose 
+        alternative approaches.
+      
+      example:
+        problem: "Solve equation 3x + 5 = 20"
+        enhanced_prompt: |
+          Solve equation 3x + 5 = 20. After each step, verify that 
+          the operation complies with algebraic rules.
+    
+    domain_specific_scaffolding:
+      name: "🏗️ Domain-Specific Scaffolding"
+      description: "Provide structure tailored to the domain"
+      
+      stem_scaffolding:
+        steps:
+          - "Parse problem constraints"
+          - "Identify applicable theorems/formulas"
+          - "Execute calculations"
+          - "Validate against edge cases"
+      
+      creative_writing_scaffolding:
+        template: |
+          Develop the protagonist's motivation in three phases:
+          1. Childhood influences
+          2. Pivotal life events
+          3. Current goals
+      
+      legal_scaffolding:
+        template: |
+          Analyze this contract:
+          1. Identify key obligations
+          2. Assess liability terms
+          3. Evaluate termination conditions
+          4. Compare with industry standards
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # EVALUATION & REFINEMENT
+  # ═══════════════════════════════════════════════════════════════════════════
+  evaluation:
+    validity_checks:
+      name: "✅ Validity Checks"
+      template: |
+        After providing the solution, list three potential flaws 
+        in this reasoning.
+    
+    comparative_analysis:
+      name: "⚖️ Comparative Analysis"
+      template: |
+        Generate two distinct approaches to this problem, then 
+        evaluate which is more effective.
+    
+    backtracking_points:
+      name: "🔄 Backtracking Points"
+      description: "Identify where assumptions might fail"
+      template: |
+        Include backtracking points where assumptions might fail.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REAL-WORLD EXAMPLE
+  # ═══════════════════════════════════════════════════════════════════════════
+  examples:
+    urban_planning:
+      task: "Plan a sustainable urban transportation system for a city of 2 million"
+      
+      prompt: |
+        Plan a sustainable urban transportation system for a city of 2 million 
+        residents. Structure your response as follows:
+        
+        1. Needs Assessment (commuter patterns, existing infrastructure)
+        2. Technology Selection (prioritize emissions reduction)
+        3. Implementation Phases
+        4. Cost-benefit analysis
+        
+        Include backtracking points where assumptions might fail.
+      
+      why_this_works:
+        - "Clear structure with numbered phases"
+        - "Domain-specific focus (sustainability, urban planning)"
+        - "Built-in backtracking requirement"
+        - "Evaluation criteria included (cost-benefit)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TEMPLATES
+  # ═══════════════════════════════════════════════════════════════════════════
+  templates:
+    basic_long_cot:
+      name: "Basic Long CoT Template"
+      template: |
+        Solve [problem] step by step:
+        
+        1. First, analyze the given information
+        2. Second, identify key factors and constraints
+        3. Third, apply relevant methods/formulas
+        4. Fourth, execute the solution
+        5. Fifth, validate against requirements
+        6. Finally, list potential flaws in this reasoning
+        
+        If any step contains inconsistencies, backtrack and try alternative approaches.
+    
+    long_cot_with_rag:
+      name: "Long CoT + RAG Template"
+      template: |
+        Using [provided documents], solve [problem]:
+        
+        1. Extract relevant information from documents
+        2. Cite sources for each key fact
+        3. Apply extracted knowledge step by step
+        4. Cross-reference conclusions with document evidence
+        5. Identify gaps where additional sources might help
+    
+    domain_specific_long_cot:
+      name: "Domain-Specific Long CoT Template"
+      template: |
+        Solve [domain-specific problem]:
+        
+        Structure your reasoning using [domain] methodology:
+        [Domain-specific steps 1-N]
+        
+        Keep within the scope of [domain].
+        After each major step, verify compliance with [domain rules/standards].
+        Include backtracking points where assumptions might fail.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # USE CASES
+  # ═══════════════════════════════════════════════════════════════════════════
+  use_cases:
+    ideal_for:
+      - "Complex multi-step problems requiring detailed analysis"
+      - "STEM problems with multiple solution paths"
+      - "Legal/contract analysis"
+      - "Strategic planning with multiple factors"
+      - "Technical troubleshooting"
+      - "Research synthesis"
+      - "Critical decisions needing audit trail"
+    
+    when_to_use_long_cot:
+      - "Problem requires 5+ reasoning steps"
+      - "Multiple factors need consideration"
+      - "Errors would be costly - need validation"
+      - "Need to compare alternative approaches"
+      - "Audit trail is required"
+    
+    when_to_use_standard_cot:
+      - "Simple problems with clear solutions"
+      - "Speed is priority over thoroughness"
+      - "Token efficiency matters (use Chain of Draft instead)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QUICK REFERENCE
+  # ═══════════════════════════════════════════════════════════════════════════
+  quick_tips:
+    - "📋 Use numbered steps for clear structure"
+    - "🎯 Apply contextual anchoring to prevent drift"
+    - "⚠️ Build in error correction and backtracking"
+    - "📏 Control length with '5-7 steps' type modifiers"
+    - "🔗 Combine with RAG for grounded reasoning"
+    - "🏗️ Use domain-specific scaffolding"
+    - "✅ Include validation/verification steps"
+    - "⚖️ Request comparative analysis for critical decisions"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REFERENCES
+  # ═══════════════════════════════════════════════════════════════════════════
+  references:
+    - title: "Demystifying Long Chain-of-Thought Reasoning in LLMs"
+      type: "Research Paper"
+      key_findings:
+        - "LLMs develop extended reasoning through SFT and RL"
+        - "Long CoT training data is crucial"
+        - "Error correction is a latent capability"
+    
+    - title: "Principles for Long Chain-of-Thought Prompts"
+      url: "https://road2.ai/p/nguyen-tac-tao-prompt-long-chain-of-thought"
+      type: "Tutorial/Guide"
+      language: "Vietnamese"

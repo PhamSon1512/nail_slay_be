@@ -1,0 +1,301 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 4: SELF-CONSISTENCY
+# Ensemble Reasoning for Higher Accuracy
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Self-Consistency"
+  rank: 4
+  impact: "Significant Accuracy Boost"
+  introduced_by: "Wang et al., 2022 (Google)"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Self-Consistency generates multiple reasoning paths for the same problem,
+      then selects the most consistent answer through majority voting. Instead
+      of relying on a single greedy decode, it samples diverse reasoning chains
+      and aggregates their conclusions.
+    
+    why_important: |
+      - **5-15% accuracy improvement**: Consistent gains across tasks
+      - **Reduces variance**: More reliable outputs
+      - **Catches errors**: If most paths agree, likely correct
+      - **Works with CoT**: Multiplies CoT effectiveness
+    
+    key_insight: |
+      "If multiple different reasoning paths arrive at the same answer, 
+      that answer is more likely to be correct."
+      
+      Complex problems can be solved through different approaches - 
+      correct methods should converge on the same answer.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # HOW IT WORKS
+  # ═══════════════════════════════════════════════════════════════════════════
+  mechanism:
+    process:
+      - step: "Sample multiple outputs"
+        detail: "Generate 5-40 different reasoning chains (high temperature)"
+      
+      - step: "Extract answers"
+        detail: "Parse the final answer from each chain"
+      
+      - step: "Majority vote"
+        detail: "Count occurrences of each unique answer"
+      
+      - step: "Return winner"
+        detail: "Output the most frequent answer"
+    
+    parameters:
+      temperature:
+        description: "Higher temperature = more diverse reasoning paths"
+        typical_value: "0.7 - 1.0"
+        rationale: "Need diversity to get different paths"
+      
+      num_samples:
+        description: "Number of reasoning chains to generate"
+        typical_value: "5-40 (diminishing returns after ~20)"
+        tradeoff: "More samples = higher cost but better accuracy"
+      
+      voting_method:
+        options:
+          - "Majority vote (most common)"
+          - "Weighted by confidence (if model provides)"
+          - "Weighted by reasoning chain quality"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  implementation:
+    pseudocode: |
+      function self_consistency(prompt, n_samples=10):
+          answers = []
+          
+          for i in range(n_samples):
+              # Generate with high temperature for diversity
+              response = llm.generate(prompt, temperature=0.7)
+              answer = extract_answer(response)
+              answers.append(answer)
+          
+          # Count votes
+          vote_counts = Counter(answers)
+          
+          # Return majority answer
+          return vote_counts.most_common(1)[0][0]
+    
+    prompt_template: |
+      Solve this problem step by step. Think through it carefully.
+      
+      Problem: {problem}
+      
+      Let's approach this step by step:
+    
+    extraction_tips:
+      - "Use regex to find 'Answer: X' or 'Therefore, X'"
+      - "Look for boxed answers: \\boxed{X}"
+      - "Handle different formats: 'The answer is X', 'X is the result'"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_math:
+      problem: "A store has 45 apples. They sell 18, then receive 27 more. How many apples do they have?"
+      
+      sample_1: |
+        Starting: 45 apples
+        After selling: 45 - 18 = 27 apples
+        After receiving: 27 + 27 = 54 apples
+        Answer: 54
+      
+      sample_2: |
+        Let me calculate step by step.
+        Initial inventory: 45
+        Sold: 18
+        Remaining: 45 - 18 = 27
+        New shipment: 27
+        Total: 27 + 27 = 54
+        Answer: 54
+      
+      sample_3: |
+        Let's track the apples:
+        Start with 45
+        Subtract 18 sold: 45 - 18 = 27
+        Add 27 received: 27 + 27 = 54
+        Final count: 54
+        Answer: 54
+      
+      sample_4: |
+        Apples = 45 - 18 + 27
+        = 27 + 27
+        = 54
+        Answer: 54
+      
+      sample_5: |
+        Starting inventory: 45
+        Subtract sales: -18
+        Add receipt: +27
+        Net change: -18 + 27 = +9
+        Final: 45 + 9 = 54
+        Answer: 54
+      
+      aggregation: |
+        Votes:
+        - 54: 5 votes
+        
+        Final Answer: 54 (unanimous)
+
+    example_with_disagreement:
+      problem: "If a bat and ball cost $1.10 total, and the bat costs $1 more than the ball, how much does the ball cost?"
+      
+      sample_1_wrong: |
+        Total: $1.10
+        Bat costs $1 more
+        So ball = $0.10
+        Answer: $0.10  ← WRONG (common mistake)
+      
+      sample_2_correct: |
+        Let ball = x
+        Then bat = x + 1
+        Total: x + (x + 1) = 1.10
+        2x + 1 = 1.10
+        2x = 0.10
+        x = 0.05
+        Answer: $0.05  ← CORRECT
+      
+      sample_3_correct: |
+        If ball = $0.10, bat = $1.10
+        But that's $1.20 total, not $1.10
+        
+        Let's solve algebraically:
+        ball + bat = 1.10
+        bat = ball + 1
+        ball + ball + 1 = 1.10
+        2*ball = 0.10
+        ball = 0.05
+        Answer: $0.05  ← CORRECT
+      
+      sample_4_correct: |
+        This is a trick question!
+        Let ball cost = b
+        Bat cost = b + 1.00
+        b + b + 1.00 = 1.10
+        2b = 0.10
+        b = 0.05
+        The ball costs 5 cents.
+        Answer: $0.05  ← CORRECT
+      
+      sample_5_wrong: |
+        Ball costs $0.10
+        Bat costs $1 more = $1.10
+        Total = $1.20... wait that's wrong.
+        
+        Hmm, let me recalculate:
+        Actually ball must be $0.05
+        Answer: $0.05  ← CORRECT (self-corrected!)
+      
+      aggregation: |
+        Votes:
+        - $0.05: 4 votes
+        - $0.10: 1 vote
+        
+        Final Answer: $0.05 (majority wins, correct!)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    weighted_voting:
+      description: "Weight votes by reasoning chain quality or confidence"
+      methods:
+        - name: "Confidence-weighted"
+          description: "Ask model for confidence, weight by that"
+          template: |
+            Solve this problem and rate your confidence (1-10):
+            [Problem]
+            
+            Solution: [...]
+            Confidence: [1-10]
+        
+        - name: "Length-weighted"
+          description: "Longer, more detailed chains get more weight"
+          rationale: "More thorough reasoning = more reliable"
+        
+        - name: "Complexity-weighted"
+          description: "Weight by number of reasoning steps"
+          rationale: "Complex problems need complex solutions"
+
+    universal_self_consistency:
+      description: "Apply consistency across paraphrased questions"
+      process:
+        - "Paraphrase the question multiple ways"
+        - "Answer each paraphrased version"
+        - "Check consistency across different framings"
+      benefit: "Catches answers that depend on question phrasing"
+
+    rationale_verification:
+      description: "Verify the reasoning, not just the answer"
+      process:
+        - "Generate multiple solutions"
+        - "For each solution, verify each step"
+        - "Only count solutions with valid reasoning"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WHEN TO USE
+  # ═══════════════════════════════════════════════════════════════════════════
+  when_to_use:
+    ideal_for:
+      - "Math and logic problems with definitive answers"
+      - "Multiple choice questions"
+      - "Fact-based questions"
+      - "Code that has verifiable outputs"
+      - "Any task where accuracy > speed"
+    
+    not_ideal_for:
+      - "Open-ended creative tasks"
+      - "Subjective questions (no 'correct' answer)"
+      - "Real-time applications (too slow)"
+      - "Simple tasks (overkill)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Use temperature 0.7-1.0"
+      why: "Need diversity in reasoning paths"
+    
+    - tip: "Request explicit final answer format"
+      why: "Makes extraction reliable"
+      example: "End with 'Final Answer: [X]'"
+    
+    - tip: "5-10 samples is usually enough"
+      why: "Diminishing returns after that"
+    
+    - tip: "Combine with CoT"
+      why: "Self-Consistency amplifies CoT benefits"
+    
+    - tip: "Monitor vote distribution"
+      why: "Close votes = uncertain, unanimous = confident"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Low temperature"
+      problem: "All paths nearly identical, no diversity"
+      fix: "Use temperature 0.7+"
+    
+    - mistake: "Poor answer extraction"
+      problem: "Can't aggregate if can't parse answers"
+      fix: "Enforce structured output format"
+    
+    - mistake: "Too few samples"
+      problem: "Ties, insufficient diversity"
+      fix: "Use at least 5 samples"
+    
+    - mistake: "Using for creative tasks"
+      problem: "No 'correct' answer to vote on"
+      fix: "Reserve for tasks with definitive answers"

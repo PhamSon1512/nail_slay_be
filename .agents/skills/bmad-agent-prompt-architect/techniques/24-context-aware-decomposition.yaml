@@ -1,0 +1,91 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 24: CONTEXT-AWARE DECOMPOSITION (CAD)
+# Preventing Tunnel Vision During Complex Task Breakdown
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Context-Aware Decomposition (CAD)"
+  rank: 24
+  impact: "High"
+  introduced_by: "Community synthesis from systems thinking + LLM research, 2025"
+
+  overview:
+    definition: |
+      Context-Aware Decomposition breaks complex problems into 3-5 core components
+      while maintaining explicit awareness of the global context and inter-component
+      dependencies. Unlike naive decomposition (which solves each part in isolation),
+      CAD requires each sub-solution to explicitly account for how it interacts with
+      and affects other components.
+
+    why_important: |
+      - Prevents «tunnel vision» — solving parts without seeing how they fit together
+      - Produces more coherent, integrated final answers
+      - Especially valuable for systems design, architecture, and engineering tasks
+      - Forces the model to think about interdependencies before finalizing
+
+    key_insight: |
+      Decomposition without re-integration context produces locally correct but 
+      globally incoherent answers. CAD forces synthesis at every step.
+
+  when_to_use:
+    ideal_for:
+      - "Software architecture decisions"
+      - "Business strategy (multiple stakeholder perspectives)"
+      - "Complex technical writing (specs, RFCs, ADRs)"
+      - "System design where components interact"
+      - "Any analysis where «it depends on the other parts» is the answer"
+
+    not_ideal_for:
+      - "Independent sub-tasks with no cross-dependencies"
+      - "Simple single-domain problems"
+
+  implementation:
+    pattern_1_standard_cad:
+      name: "Standard CAD"
+      template: |
+        Problem: {complex_problem}
+        
+        Step 1 — Global context:
+        State the overall goal and what success looks like.
+        
+        Step 2 — Identify components:
+        List 3-5 core aspects of this problem.
+        
+        Step 3 — Per-component analysis:
+        For each component:
+        a) What is its role in the system?
+        b) Solve it as if it were isolated.
+        c) How does it interact with the other components?
+        d) What constraints does it impose on others?
+        
+        Step 4 — Integration:
+        Combine the per-component solutions into a final answer.
+        Explicitly resolve any tensions or trade-offs identified.
+        
+        Step 5 — Global coherence check:
+        Does the integrated answer meet the original success criteria?
+
+    pattern_2_dependency_mapping:
+      name: "Dependency-First CAD"
+      template: |
+        Before solving, map the structure:
+        
+        Components: {component_list}
+        
+        Dependency map:
+        - {component_A} → depends on → {component_B}
+        - {component_C} → affects → {component_A}
+        
+        Solve in dependency order:
+        1. {independent_components_first}
+        2. {dependent_components_next}
+        
+        Integrate with full dependency awareness.
+
+  combine_with:
+    - technique: "Adaptive Graph of Thoughts (Rank 23)"
+      reason: "AGoT handles adaptive expansion of complex components CAD identified"
+    - technique: "Chain-of-Thought (Rank 1)"
+      reason: "Use CoT within each CAD component for step-by-step reasoning"
+    - technique: "Structured Output (Rank 7)"
+      reason: "Output each component as a structured section for clarity"

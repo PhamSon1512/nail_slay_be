@@ -1,0 +1,350 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 2: FEW-SHOT PROMPTING
+# The Foundation of In-Context Learning
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Few-Shot Prompting"
+  rank: 2
+  impact: "Foundational"
+  introduced_by: "Brown et al., 2020 (OpenAI GPT-3 Paper)"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Few-Shot Prompting provides the LLM with a small number of examples 
+      (typically 2-5) demonstrating the desired input-output pattern before 
+      presenting the actual task. The model learns the pattern from these 
+      examples and applies it to new inputs.
+    
+    why_important: |
+      - **Foundation of modern prompting**: Most techniques build on this
+      - **No training required**: Instantly adapt model to new tasks
+      - **Shows, don't tells**: Examples are more powerful than descriptions
+      - **Universal applicability**: Works for almost any task type
+    
+    key_insight: |
+      "Show the model what you want, don't just tell it."
+      
+      One well-crafted example is worth a hundred words of instruction.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # THE SCIENCE OF EXAMPLE SELECTION
+  # ═══════════════════════════════════════════════════════════════════════════
+  example_selection:
+    principles:
+      diversity:
+        description: "Cover different cases/variations"
+        example: |
+          For sentiment analysis, include:
+          - Strongly positive example
+          - Strongly negative example  
+          - Neutral/mixed example
+          - Edge case (sarcasm, etc.)
+      
+      similarity:
+        description: "Examples similar to target improve performance"
+        technique: "KNN-based exemplar selection"
+        process:
+          - "Embed all candidate examples"
+          - "Embed the input query"
+          - "Select K nearest examples by cosine similarity"
+      
+      complexity_matching:
+        description: "Match example complexity to expected task complexity"
+        insight: "Overly simple examples may lead to oversimplified outputs"
+      
+      quality_over_quantity:
+        description: "3 excellent examples beat 10 mediocre ones"
+        guideline: "Each example should be a gold standard"
+
+    optimal_number:
+      research_findings:
+        - "1-shot: Good for simple patterns"
+        - "3-5 shots: Sweet spot for most tasks"
+        - "5-10 shots: Complex tasks with variation"
+        - "10+ shots: Diminishing returns, consider fine-tuning"
+      
+      tradeoff: |
+        More examples = More context used = Less room for actual content
+        Balance example count against context window limits.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # EXAMPLE ORDERING MATTERS
+  # ═══════════════════════════════════════════════════════════════════════════
+  ordering:
+    research_insight: |
+      The ORDER of examples significantly affects performance.
+      Models are sensitive to recency (last examples) and primacy (first examples).
+    
+    best_practices:
+      - "Put most similar example last (closest to query)"
+      - "Put diverse examples in the middle"
+      - "Start with a clear, typical example"
+    
+    experiment:
+      finding: "Random ordering can cause up to 15% performance variance"
+      recommendation: "Test multiple orderings for critical applications"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  implementation:
+    pattern_1_basic:
+      name: "Standard Few-Shot"
+      template: |
+        Input: [Example 1 input]
+        Output: [Example 1 output]
+        
+        Input: [Example 2 input]
+        Output: [Example 2 output]
+        
+        Input: [Example 3 input]
+        Output: [Example 3 output]
+        
+        Input: [Actual input]
+        Output:
+
+    pattern_2_labeled:
+      name: "Labeled Few-Shot"
+      template: |
+        Task: [Task description]
+        
+        Example 1:
+        Input: [input]
+        Output: [output]
+        
+        Example 2:
+        Input: [input]
+        Output: [output]
+        
+        Now your turn:
+        Input: [actual input]
+        Output:
+
+    pattern_3_xml_structured:
+      name: "XML-Structured Few-Shot"
+      template: |
+        <examples>
+          <example>
+            <input>[Example 1 input]</input>
+            <output>[Example 1 output]</output>
+          </example>
+          <example>
+            <input>[Example 2 input]</input>
+            <output>[Example 2 output]</output>
+          </example>
+        </examples>
+        
+        <task>
+          <input>[Actual input]</input>
+          <output>
+
+    pattern_4_with_explanation:
+      name: "Explained Few-Shot"
+      template: |
+        Example 1:
+        Input: [input]
+        Reasoning: [Why this produces this output]
+        Output: [output]
+        
+        Example 2:
+        Input: [input]
+        Reasoning: [Why this produces this output]
+        Output: [output]
+        
+        Your task:
+        Input: [actual input]
+        Reasoning:
+        Output:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_classification:
+      task: "Sentiment Analysis"
+      
+      basic_prompt: |
+        Classify the sentiment: "This product is amazing!"
+      
+      world_class_prompt: |
+        Classify the sentiment of each text as POSITIVE, NEGATIVE, or NEUTRAL.
+        
+        Text: "I absolutely love this product! Best purchase ever!"
+        Sentiment: POSITIVE
+        
+        Text: "Terrible quality. Broke after one day. Want my money back."
+        Sentiment: NEGATIVE
+        
+        Text: "It works as expected. Nothing special but does the job."
+        Sentiment: NEUTRAL
+        
+        Text: "The packaging was damaged but the product itself is great."
+        Sentiment: POSITIVE
+        
+        Text: "This product is amazing!"
+        Sentiment:
+
+    example_2_extraction:
+      task: "Named Entity Extraction"
+      
+      world_class_prompt: |
+        Extract entities from the text in JSON format.
+        
+        Text: "Apple CEO Tim Cook announced the new iPhone 15 in Cupertino."
+        Entities: {"company": "Apple", "person": "Tim Cook", "product": "iPhone 15", "location": "Cupertino"}
+        
+        Text: "Elon Musk's Tesla delivered 500,000 vehicles in Shanghai last quarter."
+        Entities: {"person": "Elon Musk", "company": "Tesla", "number": "500,000", "location": "Shanghai", "time": "last quarter"}
+        
+        Text: "Microsoft acquired GitHub for $7.5 billion in 2018."
+        Entities: {"company": ["Microsoft", "GitHub"], "money": "$7.5 billion", "year": "2018"}
+        
+        Text: "Sundar Pichai revealed Google's new AI model Gemini at the annual conference."
+        Entities:
+
+    example_3_transformation:
+      task: "Code Translation"
+      
+      world_class_prompt: |
+        Convert Python code to JavaScript.
+        
+        Python:
+        ```python
+        def greet(name):
+            return f"Hello, {name}!"
+        
+        result = greet("World")
+        print(result)
+        ```
+        
+        JavaScript:
+        ```javascript
+        function greet(name) {
+            return `Hello, ${name}!`;
+        }
+        
+        const result = greet("World");
+        console.log(result);
+        ```
+        
+        ---
+        
+        Python:
+        ```python
+        numbers = [1, 2, 3, 4, 5]
+        squared = [x**2 for x in numbers]
+        print(squared)
+        ```
+        
+        JavaScript:
+        ```javascript
+        const numbers = [1, 2, 3, 4, 5];
+        const squared = numbers.map(x => x ** 2);
+        console.log(squared);
+        ```
+        
+        ---
+        
+        Python:
+        ```python
+        async def fetch_data(url):
+            response = await requests.get(url)
+            return response.json()
+        ```
+        
+        JavaScript:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    dynamic_few_shot:
+      description: "Select examples at runtime based on input"
+      implementation: |
+        1. Maintain a library of high-quality examples
+        2. When query comes in, embed it
+        3. Find K most similar examples from library
+        4. Construct prompt with selected examples
+      benefit: "Always relevant examples, better performance"
+
+    self_generated_icl:
+      description: "Let model generate its own examples first"
+      template: |
+        Task: [Description]
+        
+        First, generate 3 examples of input-output pairs for this task:
+        [Model generates examples]
+        
+        Now, using those examples as reference, process this input:
+        [Actual input]
+
+    progressive_few_shot:
+      description: "Start simple, increase complexity"
+      template: |
+        Level 1 (Simple):
+        Input: [simple example]
+        Output: [output]
+        
+        Level 2 (Medium):
+        Input: [medium example]
+        Output: [output]
+        
+        Level 3 (Complex - like your task):
+        Input: [complex example]
+        Output: [output]
+        
+        Your task (Complex):
+        Input: [actual input]
+        Output:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Use consistent formatting across examples"
+      why: "Model learns format as part of the pattern"
+      example: "Always use same delimiter, same structure"
+    
+    - tip: "Include edge cases"
+      why: "Teaches model how to handle unusual inputs"
+      example: "Empty input, very long input, special characters"
+    
+    - tip: "Match example difficulty to task"
+      why: "Too simple examples → oversimplified outputs"
+      example: "If task is complex, use complex examples"
+    
+    - tip: "Add negative examples"
+      why: "Shows what NOT to do"
+      example: "Wrong: X, Correct: Y"
+    
+    - tip: "Test with the actual examples removed"
+      why: "Ensures model doesn't just pattern-match"
+      example: "Verify outputs are generalized, not memorized"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "All examples are too similar"
+      problem: "Model may not generalize"
+      fix: "Include diverse examples covering different cases"
+    
+    - mistake: "Examples contain errors"
+      problem: "Model learns the errors too"
+      fix: "Triple-check every example for accuracy"
+    
+    - mistake: "Inconsistent formatting"
+      problem: "Confuses the model about expected output format"
+      fix: "Use template to ensure consistency"
+    
+    - mistake: "Too many examples"
+      problem: "Exceeds context window, dilutes signal"
+      fix: "3-5 high-quality examples typically optimal"
+    
+    - mistake: "Examples too different from actual task"
+      problem: "Model can't transfer the pattern"
+      fix: "Use examples similar in structure and complexity"

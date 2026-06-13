@@ -1,0 +1,313 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: MULTIMODAL PROMPTING
+# Image + Text + Audio + Video Prompts
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Multimodal Prompting"
+  rank: 18
+  impact: "High"
+  era: "2024+"
+  models: ["GPT-4V", "Claude 3", "Gemini Pro Vision"]
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Multimodal prompting leverages multiple input types (text, images, 
+      audio, video) in a single prompt to unlock capabilities of vision-language
+      models. Instead of describing an image, you can show it directly.
+    
+    modalities:
+      text_image: "Most common - combine text instructions with images"
+      text_audio: "Transcription, audio analysis"
+      text_video: "Video understanding, frame analysis"
+      image_image: "Compare, contrast, or combine images"
+      multi_input: "Combine 3+ modalities"
+    
+    why_important:
+      - "An image is worth 1000 words - literally more efficient"
+      - "Some tasks impossible with text-only (visual analysis)"
+      - "More natural human-like interaction"
+      - "Unlocks new use cases: OCR, document processing, visual QA"
+    
+    key_insight: |
+      "Don't describe what you can show."
+      
+      Multimodal models can see, hear, and read - use all channels.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PATTERNS & TEMPLATES
+  # ═══════════════════════════════════════════════════════════════════════════
+  patterns:
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 1: IMAGE ANALYSIS
+    # ─────────────────────────────────────────────────────────────────────────
+    image_analysis:
+      description: "Extract information from images"
+      use_cases:
+        - "Product image analysis"
+        - "Medical image interpretation"
+        - "Scene understanding"
+      
+      template: |
+        <image>{uploaded_image}</image>
+        
+        Analyze this image and provide:
+        1. Overall description (what is shown)
+        2. Key objects/elements with locations
+        3. Any text visible (OCR)
+        4. Quality/condition assessment
+        5. Relevant insights for {your_specific_context}
+        
+        Format your response as:
+        <analysis>
+        <description>...</description>
+        <objects>...</objects>
+        <text_found>...</text_found>
+        <insights>...</insights>
+        </analysis>
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 2: DOCUMENT PROCESSING
+    # ─────────────────────────────────────────────────────────────────────────
+    document_processing:
+      description: "Extract structured data from document images"
+      use_cases:
+        - "Invoice processing"
+        - "Form filling extraction"
+        - "Receipt scanning"
+        - "Contract analysis"
+      
+      template: |
+        <document_image>{document}</document_image>
+        
+        This is a {document_type: invoice/receipt/form/contract}.
+        
+        Extract the following fields:
+        {
+          "vendor_name": "",
+          "date": "",
+          "total_amount": "",
+          "line_items": [{"description": "", "quantity": "", "price": ""}],
+          "tax": "",
+          "notes": ""
+        }
+        
+        Rules:
+        - If a field is not found, use null
+        - Amounts should be numbers without currency symbols
+        - Dates in YYYY-MM-DD format
+        
+        Return ONLY valid JSON.
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 3: VISUAL REASONING
+    # ─────────────────────────────────────────────────────────────────────────
+    visual_reasoning:
+      description: "Reason about visual content step by step"
+      use_cases:
+        - "Chart/graph analysis"
+        - "Diagram understanding"
+        - "Visual puzzles"
+        - "Scientific figures"
+      
+      template: |
+        <image>{chart_or_diagram}</image>
+        
+        Analyze this {type: chart/diagram/graph} step by step:
+        
+        Step 1: What type of visualization is this?
+        Step 2: What are the axes/labels/legend?
+        Step 3: What data is being shown?
+        Step 4: What trends or patterns do you observe?
+        Step 5: What conclusions can be drawn?
+        
+        Final summary: [Your key insights]
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 4: IMAGE COMPARISON
+    # ─────────────────────────────────────────────────────────────────────────
+    image_comparison:
+      description: "Compare and contrast multiple images"
+      use_cases:
+        - "Before/after comparison"
+        - "Spot the difference"
+        - "Product comparison"
+        - "Progress tracking"
+      
+      template: |
+        <image_1>{first_image}</image_1>
+        <image_2>{second_image}</image_2>
+        
+        Compare these two images:
+        
+        1. What elements appear in both?
+        2. What is different between them?
+        3. What changed/improved/degraded?
+        4. Which is {better/preferred/newer}? Why?
+        
+        Summary: [Key differences and conclusions]
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 5: UI/UX REVIEW
+    # ─────────────────────────────────────────────────────────────────────────
+    ui_review:
+      description: "Analyze and critique user interfaces"
+      use_cases:
+        - "Design review"
+        - "Accessibility audit"
+        - "Usability feedback"
+      
+      template: |
+        <screenshot>{ui_image}</screenshot>
+        
+        Review this user interface for:
+        
+        1. **Layout & Hierarchy**
+           - Is the visual hierarchy clear?
+           - Is the layout balanced?
+        
+        2. **Usability**
+           - Are interactive elements obvious?
+           - Is navigation intuitive?
+        
+        3. **Accessibility**
+           - Color contrast issues?
+           - Text readability?
+        
+        4. **Suggestions**
+           - What would you improve?
+           - Priority of changes?
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # PATTERN 6: MULTIMODAL COT
+    # ─────────────────────────────────────────────────────────────────────────
+    multimodal_cot:
+      description: "Chain-of-thought with visual inputs"
+      template: |
+        <image>{problem_image}</image>
+        
+        Solve this problem using step-by-step reasoning:
+        
+        <thinking>
+        1. What do I observe in the image?
+        2. What is the question/task?
+        3. What relevant information is visible?
+        4. How do I approach this?
+        5. Working through the solution...
+        </thinking>
+        
+        <answer>
+        [Final answer with confidence level]
+        </answer>
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    e_commerce:
+      scenario: "Automated product listing from photos"
+      prompt: |
+        <product_photos>
+        {front_view}
+        {side_view}
+        {detail_shot}
+        </product_photos>
+        
+        Create a complete product listing:
+        
+        1. Generate product title (SEO-optimized, max 80 chars)
+        2. Write compelling description (150-200 words)
+        3. List key features (5-7 bullet points)
+        4. Suggest categories/tags
+        5. Estimate product dimensions
+        6. Note any visible defects/conditions
+        
+        Target audience: {target_market}
+        Brand voice: {brand_guidelines}
+    
+    medical:
+      scenario: "Medical image preliminary analysis"
+      prompt: |
+        <medical_image>{xray_or_scan}</medical_image>
+        
+        DISCLAIMER: This is for educational purposes only, not medical advice.
+        
+        Describe what you observe:
+        1. Type of imaging (X-ray, CT, MRI, etc.)
+        2. Body region shown
+        3. Normal structures visible
+        4. Any abnormalities or notable findings
+        5. Image quality assessment
+        
+        Note: Always recommend professional medical review.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BEST PRACTICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  best_practices:
+    - practice: "Describe image context"
+      why: "Model may not know what type of image it's seeing"
+      example: "This is a chest X-ray of a 45-year-old patient..."
+    
+    - practice: "Be specific about what to look for"
+      why: "Focuses attention on relevant details"
+      example: "Focus on the circled area in the top-left corner"
+    
+    - practice: "Combine with other techniques"
+      why: "Multimodal works great with CoT, structured output"
+      example: "Analyze step by step, output as JSON"
+    
+    - practice: "Use multiple images when helpful"
+      why: "Different angles provide more information"
+      example: "Front, back, and side views of the product"
+    
+    - practice: "Specify output format clearly"
+      why: "Visual tasks often need structured extraction"
+      example: "Return extracted data as JSON matching this schema"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "No context about the image"
+      fix: "Tell the model what type of image and why you're showing it"
+    
+    - mistake: "Vague instructions"
+      fix: "Be specific: 'Extract invoice number' not 'analyze this'"
+    
+    - mistake: "Too many images at once"
+      fix: "Limit to 3-5 images per prompt for best quality"
+    
+    - mistake: "Ignoring OCR limitations"
+      fix: "For critical text extraction, verify with multiple attempts"
+    
+    - mistake: "Trusting visual hallucinations"
+      fix: "Always verify claims about image content when critical"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LIMITATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  limitations:
+    - "Models can hallucinate image content"
+    - "Small/low-quality text may be misread"
+    - "Complex diagrams may be misinterpreted"
+    - "Higher token cost for images"
+    - "Some fine details may be missed"
+    - "May struggle with handwriting"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLICATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  applications:
+    - "Document processing (invoices, receipts, forms)"
+    - "E-commerce product listing"
+    - "UI/UX design review"
+    - "Chart and graph analysis"
+    - "Medical image interpretation"
+    - "Real estate photo analysis"
+    - "Quality control/defect detection"
+    - "Educational content (diagrams, figures)"
+    - "Accessibility (image descriptions)"

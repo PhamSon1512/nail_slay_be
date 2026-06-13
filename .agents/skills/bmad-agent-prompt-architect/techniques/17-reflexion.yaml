@@ -1,0 +1,167 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: REFLEXION
+# Agent Self-Reflection and Learning from Mistakes
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Reflexion"
+  rank: 17
+  impact: "Major for Agentic AI"
+  era: "2023+"
+  introduced_by: "Shinn et al., 2023"
+  
+  overview:
+    definition: |
+      Reflexion enables LLM agents to learn from their mistakes through 
+      verbal self-reflection. After a failed attempt, the agent reflects
+      on what went wrong and stores this insight for future attempts.
+    
+    difference_from_self_refine: |
+      Self-Refine: Improve current output through iteration
+      Reflexion: Learn from failures to improve FUTURE attempts
+    
+    why_important:
+      - "Agents make mistakes - Reflexion helps them learn"
+      - "No gradient updates needed (unlike RL)"
+      - "Accumulates experience as text memory"
+      - "Significant performance gains on agent tasks"
+    
+    key_insight: |
+      "Failure is only useful if you learn from it."
+      
+      Reflexion converts failures into actionable verbal feedback.
+
+  mechanism:
+    loop:
+      - step: 1
+        name: "Act"
+        action: "Agent attempts the task"
+      
+      - step: 2
+        name: "Evaluate"
+        action: "Check if successful (external or self-eval)"
+      
+      - step: 3
+        name: "Reflect"
+        action: "If failed, generate reflection on what went wrong"
+      
+      - step: 4
+        name: "Store"
+        action: "Add reflection to memory"
+      
+      - step: 5
+        name: "Retry"
+        action: "Attempt again with reflections in context"
+    
+    memory_types:
+      short_term: "Current task trajectory"
+      episodic: "Past experience (reflections)"
+      semantic: "General knowledge/skills learned"
+
+  implementation:
+    reflection_prompt: |
+      You attempted a task and failed.
+      
+      Task: {task_description}
+      
+      Your actions:
+      {action_trajectory}
+      
+      Result: {outcome}
+      
+      Expected: {expected_result}
+      
+      Reflect on this failure:
+      1. What went wrong?
+      2. What should you have done differently?
+      3. What will you remember for next time?
+      
+      Write a concise lesson learned (1-2 sentences):
+    
+    retry_with_memory: |
+      Task: {task_description}
+      
+      Previous attempts and lessons learned:
+      {reflections_from_memory}
+      
+      Based on these past experiences, attempt the task again.
+      Avoid the mistakes you've reflected on.
+
+  world_class_example:
+    scenario: "Coding agent debugging"
+    
+    attempt_1: |
+      Task: Fix the bug in user authentication
+      
+      Action: Changed password validation logic
+      Result: ❌ Tests still failing - wrong function modified
+      
+      Reflection: "I modified the wrong function. The actual bug was 
+      in the session handler, not password validation. Next time, 
+      trace the error stack more carefully before changing code."
+    
+    attempt_2: |
+      Task: Fix the bug in user authentication
+      
+      Memory: "Trace the error stack more carefully before changing code"
+      
+      Action: 
+      1. Read error logs carefully
+      2. Identified session_handler.py as source
+      3. Fixed session expiry logic
+      
+      Result: ✅ Tests passing!
+
+  advanced_patterns:
+    hierarchical_reflection:
+      description: "Reflect at multiple levels of abstraction"
+      levels:
+        tactical: "What action was wrong?"
+        strategic: "Was the overall approach flawed?"
+        meta: "Are my reflection patterns helping?"
+    
+    collaborative_reflection:
+      description: "Multiple agents share reflections"
+      benefit: "Learn from others' mistakes"
+    
+    counterfactual_reflection:
+      description: "What would have happened if...?"
+      prompt: |
+        If you had done {alternative_action} instead of {actual_action},
+        what would the outcome likely have been?
+
+  comparison:
+    vs_react:
+      react: "Reason → Act → Observe (no memory across episodes)"
+      reflexion: "Adds reflection loop + persistent memory"
+    
+    vs_self_refine:
+      self_refine: "Improve within current attempt"
+      reflexion: "Learn across attempts"
+    
+    vs_rl:
+      rl: "Learn via gradient updates on reward"
+      reflexion: "Learn via text-based reflection (no training)"
+
+  applications:
+    - "Code generation and debugging"
+    - "Question answering with feedback"
+    - "Decision-making tasks"
+    - "Game playing agents"
+    - "Web navigation"
+
+  tips:
+    - "Keep reflections concise and actionable"
+    - "Limit memory size to avoid noise"
+    - "Include successful patterns, not just failures"
+    - "Periodically summarize/compress old reflections"
+
+  mistakes:
+    - mistake: "Reflections too vague"
+      fix: "Make reflections specific and actionable"
+    
+    - mistake: "Memory grows unbounded"
+      fix: "Summarize or prune old reflections"
+    
+    - mistake: "No success patterns"
+      fix: "Also reflect on what worked well"

@@ -1,0 +1,117 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 25: RECURSIVE SELF-IMPROVEMENT PROMPTING (RSIP)
+# The 2025 Standard for Iterative Quality
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Recursive Self-Improvement Prompting (RSIP)"
+  rank: 25
+  impact: "Major"
+  introduced_by: "Emerging consensus from AI research + practitioner community, 2025"
+
+  overview:
+    definition: |
+      RSIP is a structured prompting pattern where the model iteratively generates, 
+      critiques, and refines its own output across multiple rounds. Unlike Self-Refine 
+      (which is a single pass of critique+improve), RSIP defines multiple critique 
+      dimensions, applies them in sequence, and verifies convergence before terminating.
+
+    why_important: |
+      - Turns a single-pass AI into a self-editing system
+      - Each iteration targets a different quality dimension (logic, tone, accuracy, etc.)
+      - Outperforms single-pass prompting on complex structured outputs
+      - 2025 standard for tasks requiring precision: technical writing, analysis, code
+
+    key_insight: |
+      Models have metacognition — they can evaluate their own work if given 
+      the right framing. RSIP operationalizes this: generate → critique 
+      (on a specific dimension) → improve → repeat until stable.
+
+    vs_self_refine: |
+      Self-Refine (Rank 9): Single cycle — generate, critique, improve.
+      RSIP: Multiple cycles, each targeting a different dimension, 
+      with convergence check. More thorough, higher cost.
+
+  when_to_use:
+    ideal_for:
+      - "Technical documentation (specs, ADRs, RFCs)"
+      - "Business analysis with multiple stakeholders"
+      - "Complex code review and refactoring"
+      - "Persuasive writing requiring both logic and style"
+      - "Any output where quality on multiple dimensions matters"
+
+    not_ideal_for:
+      - "Simple factual outputs"
+      - "Latency-sensitive applications"
+      - "Cases where first draft is usually good enough"
+
+  implementation:
+    pattern_1_dimension_critique:
+      name: "Multi-Dimension RSIP"
+      template: |
+        Task: {task}
+        
+        Round 1 — Generate:
+        Produce an initial draft of {output_type}.
+        
+        Round 2 — Logic critique:
+        Review your draft for logical consistency.
+        Identify any gaps, contradictions, or unsupported claims.
+        Rewrite, fixing these issues.
+        
+        Round 3 — Completeness critique:
+        Does the revised draft cover all required aspects?
+        List anything missing. Add it.
+        
+        Round 4 — Clarity critique:
+        Is every sentence clear to {target_audience}?
+        Simplify any overly complex parts.
+        
+        Round 5 — Convergence check:
+        Is this materially different from Round 3?
+        If yes, run one more cycle. If no, this is the final output.
+        
+        Final output: {final_version}
+
+    pattern_2_targeted_rsip:
+      name: "Single-Dimension RSIP (Fast)"
+      template: |
+        Generate {output}.
+        
+        Now critique it for: {specific_dimension}
+        (e.g., accuracy | logical flow | tone | completeness | conciseness)
+        
+        Identify the top 3 issues. Fix them.
+        
+        Do you need another round? [Yes/No + reason]
+        If yes, repeat. If no, output the final version.
+
+    pattern_3_adversarial_rsip:
+      name: "Adversarial RSIP"
+      template: |
+        Generate {output}.
+        
+        Now argue against it. What are the 3 strongest objections?
+        
+        Revise to pre-emptively address these objections.
+        
+        Final sanity check: Is this position defensible?
+
+  combine_with:
+    - technique: "Self-Refine (Rank 9)"
+      reason: "RSIP is the multi-round extension of Self-Refine"
+    - technique: "Extended Thinking (Rank 22)"
+      reason: "Use extended thinking budget during critique rounds for deeper analysis"
+    - technique: "Chain of Verification"
+      reason: "Use chain-of-verification as one of the critique dimensions"
+
+  tips:
+    - tip: "Specify the critique dimension explicitly"
+      why: "Vague critique ('is this good?') produces vague improvements"
+      example: "Critique specifically for: logical contradictions"
+
+    - tip: "Limit rounds to 3-5"
+      why: "Diminishing returns after round 3 for most tasks"
+
+    - tip: "Use convergence check"
+      why: "Without it, RSIP can loop without meaningful improvement"

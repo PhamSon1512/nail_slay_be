@@ -1,0 +1,151 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: GRAPH OF THOUGHTS (GoT)
+# Non-Linear Reasoning Networks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Graph of Thoughts (GoT)"
+  rank: 15
+  impact: "Advanced Reasoning"
+  era: "2023+"
+  introduced_by: "ETH Zürich, August 2023"
+  
+  overview:
+    definition: |
+      Graph of Thoughts models LLM reasoning as a graph where thoughts are 
+      nodes and dependencies are edges. Unlike linear CoT or tree ToT,
+      GoT allows arbitrary connections - combining, refining, and looping.
+    
+    evolution: |
+      CoT (Chain): A → B → C → D (linear)
+      ToT (Tree):  A → [B1, B2, B3] → select best → C (branching)
+      GoT (Graph): Any thought can connect to any other (network)
+    
+    why_better_than_tot:
+      - "ToT only goes deeper, GoT can merge branches"
+      - "Can combine insights from different paths"
+      - "Supports feedback loops and refinement"
+      - "More natural for complex reasoning"
+    
+    key_insight: |
+      "Human thinking isn't a tree - it's a web of connected ideas."
+      
+      GoT allows thoughts to combine synergistically.
+
+  mechanism:
+    nodes: "Individual thoughts or reasoning units"
+    edges: "Dependencies or relationships between thoughts"
+    
+    operations:
+      generate: "Create new thought nodes"
+      aggregate: "Combine multiple thoughts into one"
+      refine: "Improve a thought based on feedback"
+      score: "Evaluate quality of thoughts"
+      backtrack: "Return to earlier nodes"
+    
+    example_graph: |
+      Problem: "Design marketing strategy"
+      
+      [Analyze Market] ─────┬──→ [Target Audience]
+            │               │
+            └──→ [Competitors] ────┬──→ [Differentiation]
+                                   │
+      [Budget] ────────────────────┴──→ [Channel Selection]
+            │                                    │
+            └────────────────────────────────────┴──→ [Final Strategy]
+      
+      Note: Multiple paths converge, insights combine
+
+  implementation:
+    pseudocode: |
+      class GraphOfThoughts:
+          def __init__(self):
+              self.nodes = {}
+              self.edges = []
+          
+          def generate(self, prompt, parent_ids=[]):
+              thought = llm.generate(prompt)
+              node_id = self.add_node(thought)
+              for parent in parent_ids:
+                  self.add_edge(parent, node_id)
+              return node_id
+          
+          def aggregate(self, node_ids, aggregation_prompt):
+              thoughts = [self.nodes[id] for id in node_ids]
+              combined = llm.generate(aggregation_prompt, thoughts)
+              return self.add_node(combined, parents=node_ids)
+          
+          def refine(self, node_id, feedback):
+              original = self.nodes[node_id]
+              refined = llm.generate(f"Improve: {original}\nFeedback: {feedback}")
+              return self.add_node(refined, parents=[node_id])
+    
+    prompt_template: |
+      You are solving a problem using Graph of Thoughts reasoning.
+      
+      Current thought nodes:
+      {nodes_with_connections}
+      
+      Your task: {next_operation}
+      
+      Available operations:
+      - GENERATE: Create new thought from existing nodes
+      - AGGREGATE: Combine multiple thoughts
+      - REFINE: Improve a thought with feedback
+      - EVALUATE: Score thought quality (1-10)
+      
+      Execute the operation and explain your reasoning.
+
+  world_class_example:
+    problem: "Design a new mobile app feature"
+    
+    execution: |
+      **Phase 1: Generate Initial Thoughts**
+      [N1] User needs: "Users want faster checkout"
+      [N2] Technical: "Can implement one-click purchase"
+      [N3] Business: "Must maintain security compliance"
+      
+      **Phase 2: Explore Connections**
+      [N4] = Aggregate(N1, N2): "One-click checkout addresses user need"
+      [N5] = Aggregate(N3, N4): "One-click with biometric auth"
+      
+      **Phase 3: Refine**
+      Feedback on N5: "What about users without biometrics?"
+      [N6] = Refine(N5): "Biometric primary, PIN fallback"
+      
+      **Phase 4: Expand**
+      [N7] = Generate from N6: "Add saved payment methods"
+      [N8] = Generate from N6: "Remember shipping address"
+      
+      **Phase 5: Final Aggregation**
+      [N9] = Aggregate(N6, N7, N8): "Complete fast checkout feature spec"
+
+  comparison:
+    vs_cot:
+      cot: "Single path, no branching"
+      got: "Multiple paths, connections between any nodes"
+    
+    vs_tot:
+      tot: "Branch and select, paths don't merge"
+      got: "Branch, merge, refine - full graph operations"
+    
+    performance: "62% better quality, 31% cost reduction vs ToT (ETH study)"
+
+  when_to_use:
+    ideal:
+      - "Complex problems with interrelated aspects"
+      - "Creative tasks needing synthesis"
+      - "Problems requiring iteration and refinement"
+      - "Multi-perspective analysis"
+    
+    not_ideal:
+      - "Simple linear tasks"
+      - "Speed-critical applications"
+      - "When ToT is already sufficient"
+
+  tips:
+    - "Start with key aspects as initial nodes"
+    - "Use aggregation to synthesize insights"
+    - "Refine nodes based on feedback"
+    - "Score and prune low-quality paths"
+    - "Visualize the graph for debugging"

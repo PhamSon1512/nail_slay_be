@@ -1,0 +1,134 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 27: SKELETON OF THOUGHTS (SoT) + PLAN AND SOLVE (PS)
+# Bundled: Outline-First Generation & Two-Phase Execution
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Skeleton of Thoughts (SoT) + Plan and Solve (PS)"
+  rank: 27
+  impact: "High"
+  introduced_by: |
+    SoT: Ning et al., 2023 (Princeton/CMU) — inference efficiency
+    Plan-and-Solve: Wang et al., 2023 — CoT improvement
+    Bundled as 2025 standard pattern for structured generation
+
+  overview:
+    definition: |
+      Two complementary techniques bundled for practical use:
+      
+      Skeleton of Thoughts (SoT): Generate a high-level skeleton/outline FIRST, 
+      then fill in each section in parallel (or sequentially). Optimizes 
+      efficiency and structure for long-form content.
+      
+      Plan and Solve (PS): Explicitly separate task planning (identify sub-goals) 
+      from task execution (solve each sub-goal). Reduces calculation errors and 
+      missed steps compared to vanilla CoT.
+
+    why_important: |
+      SoT: Prevents the model from losing structure mid-generation on long outputs.
+      Parallelizable — each section can be filled independently.
+      
+      PS: Addresses CoT weaknesses — missing steps, calculation errors, 
+      semantic misunderstanding. PS+ (enhanced) adds variable extraction 
+      and intermediate calculation steps for mathematical tasks.
+
+  variants:
+    skeleton_of_thoughts:
+      process:
+        1: "Generate skeleton: high-level structure/outline with headers"
+        2: "Fill each section independently with detail"
+        3: "Review for coherence between sections"
+      best_for: "Long-form content, structured documents, comprehensive analyses"
+
+    plan_and_solve:
+      process:
+        1: "Planning phase: identify sub-goals and sequence"
+        2: "Solving phase: execute each sub-goal in order"
+        3: "Review: verify each step contributes to the overall goal"
+      best_for: "Math, code, multi-step procedures, logical deduction"
+
+    plan_and_solve_plus:
+      description: "Enhanced PS with variable extraction for math/code"
+      process:
+        1: "State what's given: extract all variables and knowns"
+        2: "State what's needed: define the target"
+        3: "Plan: sequence of operations to get from given → needed"
+        4: "Execute: calculate/implement each step"
+        5: "Verify: check result against target"
+
+  when_to_use:
+    sot_ideal_for:
+      - "Technical documentation and reports"
+      - "Comprehensive analyses (SWOT, competitive analysis)"
+      - "Structured essays or proposals"
+      - "System design documents"
+
+    ps_ideal_for:
+      - "Mathematical problem solving"
+      - "Algorithm design"
+      - "Multi-step instructions"
+      - "Debugging (plan → isolate → fix)"
+
+  implementation:
+    pattern_sot:
+      name: "Skeleton of Thoughts"
+      template: |
+        Task: Write {comprehensive_output}
+        
+        Step 1 — Generate skeleton:
+        Create a structured outline with {N} main sections.
+        For each section, write ONE sentence describing what it will cover.
+        
+        Skeleton:
+        [Model generates high-level outline here]
+        
+        Step 2 — Fill each section:
+        Now expand each section of the skeleton with full detail.
+        Section 1: {heading} ...
+        Section 2: {heading} ...
+        [etc.]
+        
+        Step 3 — Coherence check:
+        Do all sections connect logically? Adjust transitions if needed.
+
+    pattern_ps_plus:
+      name: "Plan and Solve Plus (PS+)"
+      template: |
+        Problem: {problem}
+        
+        GIVEN:
+        - Extract all known values and variables
+        
+        FIND:
+        - State exactly what needs to be determined
+        
+        PLAN:
+        1. {operation_1}
+        2. {operation_2}
+        3. {operation_3}
+        
+        SOLVE:
+        Step 1: {calculation_with_intermediate_values}
+        Step 2: {calculation_with_intermediate_values}
+        
+        VERIFY:
+        - Does the answer satisfy the original problem?
+        - Units check / sanity check
+
+  combine_with:
+    - technique: "Chain-of-Thought (Rank 1)"
+      reason: "PS is an improved CoT; combine SoT with CoT inside each section"
+    - technique: "Context-Aware Decomposition (Rank 24)"
+      reason: "CAD decomposes the problem; SoT structures the output"
+    - technique: "Structured Output (Rank 7)"
+      reason: "SoT skeleton becomes the output schema"
+
+  tips:
+    - tip: "For SoT, critique the skeleton before filling"
+      why: "A bad skeleton produces bad final content — fix it first"
+
+    - tip: "For PS, separate the plan from the execution completely"
+      why: "Mixing planning and solving causes skipped steps"
+
+    - tip: "PS+ adds variable extraction — always do this for math/code"
+      why: "Most CoT errors happen from misidentifying what's given"

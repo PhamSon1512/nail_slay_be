@@ -1,0 +1,8 @@
+module.exports = {
+  printWidth: 132,
+  singleQuote: true,
+  trailingComma: 'all',
+  importOrder: ['<TYPES>^hono', '<TYPES>', '<TYPES>^@', '<BUILTIN_MODULES>', '^hono', '^@hono', '<THIRD_PARTY_MODULES>', '^[.]'],
+  importOrderTypeScriptVersion: '5.0.0',
+  plugins: ['@ianvs/prettier-plugin-sort-imports'],
+};

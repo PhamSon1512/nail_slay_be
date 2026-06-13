@@ -1,0 +1,285 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technique 19: Chain of Draft (CoD)
+# Token-Efficient Reasoning for LLMs
+# ═══════════════════════════════════════════════════════════════════════════════
+# Source: Road2AI Article + Research Paper (2025)
+# Paper: arXiv:2502.18600
+# URL: https://road2.ai/p/chain-of-draft-cod-ky-thuat-giup-ai-suy-nghi-nhanh-hon-bang-cach-viet-it-hon
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  id: 19
+  name: Chain of Draft (CoD)
+  category: thought_generation
+  year: 2025
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    description: |
+      Chain of Draft (CoD) is a prompting technique that enables LLMs to reason 
+      efficiently by using concise drafts (~5 words per step) instead of verbose
+      explanations like Chain-of-Thought (CoT).
+      
+      **Key Innovation**: Achieves accuracy comparable to CoT while using only 
+      about 7.6% of the tokens - significantly reducing costs and improving response speed.
+    
+    core_principles:
+      - name: "Minimal Expression 🔍"
+        description: "Generate concise, information-rich outputs instead of lengthy explanations"
+      
+      - name: "Token Efficiency ⚡"
+        description: "Achieve equivalent accuracy with only ~7.6% tokens compared to CoT"
+      
+      - name: "Human-Inspired Design 🧠"
+        description: "Mimics natural human problem-solving - only noting essential information"
+    
+    comparison_with_cot:
+      standard_prompt:
+        token_usage: "Very low"
+        response_time: "Very fast"
+        accuracy: "Lower"
+      
+      chain_of_thought:
+        token_usage: "High"
+        response_time: "Slow"
+        accuracy: "High"
+      
+      chain_of_draft:
+        token_usage: "Low (~7.6% of CoT)"
+        response_time: "Fast"
+        accuracy: "High (comparable to CoT)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TEMPLATE
+  # ═══════════════════════════════════════════════════════════════════════════
+  template:
+    basic: |
+      Think step by step, but only keep a minimum draft for each thinking step, 
+      with 5 words at most. Return the answer at the end of the response after 
+      a separator ####.
+      
+      Guidelines:
+      - Limit each step to 5 words
+      - Focus on essential calculations/transformations
+      - Maintain logical progression
+      - Mark final answer with ####
+    
+    with_word_limit_parameter: |
+      Think step by step, but only keep a minimum draft for each thinking step, 
+      with {word_limit} words at most. Return the answer at the end of the 
+      response after a separator ####.
+      
+      # Adjust word_limit based on task complexity:
+      # - Simple tasks: 3-4 words
+      # - Standard tasks: 5 words (default)
+      # - Complex tasks: 6-8 words
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  examples:
+    math_problem:
+      task: "Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?"
+      
+      approaches:
+        standard:
+          response: "A: 8"
+          token_count: 2
+          accuracy: "May be wrong without reasoning"
+        
+        chain_of_thought:
+          response: |
+            Let's think through this step by step:
+            1. Initially, Jason had 20 lollipops.
+            2. After giving some to Denny, Jason now has 12 lollipops.
+            3. To find out how many lollipops Jason gave to Denny, we need to 
+               calculate the difference between the initial number of lollipops 
+               and the remaining number.
+            4. We can set up a simple subtraction problem: 
+               Initial number - Remaining number = Lollipops given
+            5. Putting in the numbers: 20 - 12 = Lollipops given to Denny
+            6. Solving the subtraction: 20 - 12 = 8
+            
+            Therefore, Jason gave 8 lollipops to Denny.
+            #### 8
+          token_count: "~150"
+          accuracy: "High"
+        
+        chain_of_draft:
+          response: |
+            20 - x = 12
+            x = 20 - 12 = 8
+            #### 8
+          token_count: "~15"
+          accuracy: "High"
+          efficiency: "~10% of CoT tokens"
+    
+    speed_distance:
+      task: "If a train travels at 60 miles per hour, how many miles will it travel in 2.5 hours?"
+      
+      cod_solution: |
+        Speed = 60 mph
+        Time = 2.5 hours
+        Distance = speed × time
+        60 × 2.5 = 150
+        #### 150 miles
+    
+    logic_reasoning:
+      task: "All mammals are warm-blooded. No reptiles are warm-blooded. Are all reptiles mammals?"
+      
+      cod_solution: |
+        Mammals → warm-blooded
+        Reptiles → not warm-blooded
+        If reptiles → mammals
+        Then reptiles → warm-blooded
+        Contradiction with premise 2
+        Conclusion: reptiles aren't mammals
+        #### No
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # USE CASES
+  # ═══════════════════════════════════════════════════════════════════════════
+  use_cases:
+    ideal_for:
+      - "Mathematical reasoning problems"
+      - "Logic puzzles"
+      - "Step-by-step problem solving"
+      - "Cost-sensitive applications"
+      - "Resource-constrained production environments"
+      - "High-volume API calls requiring token savings"
+      - "Real-time applications needing fast responses"
+    
+    when_to_use_cod:
+      - "Efficiency and speed are priorities"
+      - "Need to minimize token usage"
+      - "Problem has clear logical steps"
+      - "Working with large models (>3B params)"
+    
+    when_to_use_cot_instead:
+      - "Need detailed reasoning for debugging"
+      - "Require transparent explanations for users"
+      - "Working with smaller models"
+      - "Educational contexts where steps matter"
+      - "Need reasoning trace for audit/compliance"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BENEFITS
+  # ═══════════════════════════════════════════════════════════════════════════
+  benefits:
+    efficiency:
+      - "🚀 Significantly reduced response generation time"
+      - "💰 API cost savings (~93% compared to CoT)"
+      - "⚡ Lower computational resource requirements"
+      - "📉 Minimal token consumption (~7.6% of CoT)"
+    
+    practical:
+      - "💼 Cost savings in production deployment"
+      - "⏱️ Faster user response times"
+      - "🔧 Reduced infrastructure requirements"
+      - "📈 Better scaling with high request volumes"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LIMITATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  limitations:
+    model_dependency:
+      - "Works best with large models (>3B parameters)"
+      - "Less effective in zero-shot scenarios"
+      - "May require fine-tuning or few-shot examples"
+    
+    application_limits:
+      - "Best suited for structured reasoning tasks"
+      - "May need few-shot examples to guide format"
+      - "Performance varies with task complexity"
+      - "Not suitable when detailed explanations are needed for end users"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED IMPLEMENTATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    word_limit_tuning:
+      description: "Adjust word limit based on task complexity"
+      guidelines:
+        simple_tasks: "3-4 words - simple arithmetic"
+        standard_tasks: "5 words (default) - most problems"
+        complex_tasks: "6-8 words - multi-step complex reasoning"
+    
+    few_shot_enhancement:
+      description: "Add 2-3 CoD examples to guide format"
+      tips:
+        - "Include 2-3 examples of CoD-style reasoning"
+        - "Ensure examples follow the minimal draft pattern"
+        - "Match examples to target problem complexity"
+    
+    task_specific_tuning:
+      math: "Focus on equations and key values"
+      logic: "Emphasize core inferences and conditions"
+      sequential: "Emphasize state transitions"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMBINATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  combinations:
+    cod_plus_few_shot:
+      name: "Few-Shot Chain of Draft"
+      description: "Add CoD examples to help model learn minimal format"
+      use_case: "When model is unfamiliar with CoD format"
+      template: |
+        [Example 1]
+        Q: Problem 1
+        A: step1 → step2 → step3 #### answer
+        
+        [Example 2]
+        Q: Problem 2  
+        A: calc1 → calc2 #### answer
+        
+        [Your question]
+        Q: {user_question}
+        Think step by step with minimum draft (5 words max per step).
+    
+    cod_plus_self_consistency:
+      name: "Self-Consistent Chain of Draft"
+      description: "Sample multiple CoD paths, vote for most common answer"
+      use_case: "When high accuracy + token savings are needed"
+      benefit: "Still more efficient than a single CoT response"
+    
+    cod_plus_verification:
+      name: "Chain of Draft with Verification"
+      description: "CoD + a brief verification step"
+      template: |
+        Think step by step with minimum draft (5 words max):
+        [reasoning steps]
+        #### [answer]
+        
+        Verify: [1-sentence check]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REFERENCES
+  # ═══════════════════════════════════════════════════════════════════════════
+  references:
+    - title: "Chain of Draft: Thinking Faster by Writing Less"
+      arxiv: "2502.18600"
+      year: 2025
+      key_findings:
+        - "CoD achieves ~92-94% of CoT accuracy"
+        - "Uses only ~7.6% of CoT tokens"
+        - "Best results with models >3B parameters"
+        - "Works across math, logic, and commonsense tasks"
+    
+    - title: "Road2AI Article on Chain of Draft"
+      url: "https://road2.ai/p/chain-of-draft-cod-ky-thuat-giup-ai-suy-nghi-nhanh-hon-bang-cach-viet-it-hon"
+      type: "Tutorial/Explainer"
+      language: "Vietnamese"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QUICK REFERENCE
+  # ═══════════════════════════════════════════════════════════════════════════
+  quick_tips:
+    - "📝 Default: 5 words per step"
+    - "🎯 Use #### as answer separator"
+    - "💡 Best for structured reasoning tasks"
+    - "⚡ ~10x more token-efficient than CoT"
+    - "🔧 Adjust word limit for task complexity"
+    - "📚 Add few-shot examples for better format adherence"

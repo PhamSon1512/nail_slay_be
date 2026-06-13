@@ -1,0 +1,286 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 6: TREE OF THOUGHTS (ToT)
+# Explore Multiple Reasoning Paths Systematically
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Tree of Thoughts (ToT)"
+  rank: 6
+  impact: "Breakthrough for Complex Problem Solving"
+  introduced_by: "Yao et al., 2023 (Princeton/DeepMind)"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Tree of Thoughts extends Chain-of-Thought by exploring MULTIPLE reasoning 
+      paths simultaneously, like branches of a tree. At each step, the model 
+      generates several possible continuations, evaluates them, and decides 
+      which branches to explore further or abandon.
+    
+    why_important: |
+      - **Handles complex planning**: Problems with multiple valid approaches
+      - **Backtracking capability**: Can explore and abandon dead ends
+      - **More human-like reasoning**: We consider alternatives, not just one path
+      - **State-of-the-art on hard puzzles**: Sudoku, Game of 24, crosswords
+    
+    key_insight: |
+      "Don't commit to one path - explore the tree of possibilities."
+      
+      For problems where the first approach might fail, ToT systematically 
+      explores alternatives until finding a working solution.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MECHANISM
+  # ═══════════════════════════════════════════════════════════════════════════
+  mechanism:
+    structure: |
+      Root: Initial problem state
+        ├── Branch A: First approach
+        │   ├── A1: Continue this way
+        │   └── A2: Or this way
+        ├── Branch B: Alternative approach  
+        │   ├── B1: Continue
+        │   └── B2: Dead end (backtrack!)
+        └── Branch C: Third approach
+            └── C1: Solution found! ✓
+    
+    components:
+      thought_generation:
+        description: "Generate multiple possible next steps"
+        methods:
+          - "Sample: Generate n independent thoughts"
+          - "Propose: Generate all thoughts at once"
+        example: |
+          Current state: Have numbers [4, 9, 10, 13], need to make 24
+          Possible operations:
+          - Thought 1: 4 + 9 = 13, leaving [13, 10, 13]
+          - Thought 2: 13 - 4 = 9, leaving [9, 9, 10]
+          - Thought 3: 10 - 9 = 1, leaving [4, 1, 13]
+      
+      state_evaluation:
+        description: "Rate how promising each branch is"
+        methods:
+          - "Value: Rate each state on scale (1-10)"
+          - "Vote: Compare states pairwise"
+        example: |
+          Evaluating Thought 1: [13, 10, 13]
+          - Can we make 24 from these? 13 + 10 + 13 = 36 (too big)
+          - 13 * 10 / 13 = 10 (not 24)
+          - Rating: 3/10 (not promising)
+          
+          Evaluating Thought 2: [9, 9, 10]
+          - 9 + 9 + 10 = 28 (close!)
+          - 10 - 9 + 9 * ? 
+          - Rating: 6/10 (worth exploring)
+      
+      search_algorithm:
+        description: "Decide which branches to explore"
+        options:
+          breadth_first:
+            description: "Explore all branches at each level before going deeper"
+            best_for: "When uncertain which direction is best"
+          
+          depth_first:
+            description: "Go deep on one branch before trying others"
+            best_for: "When good branches are likely to stay good"
+          
+          beam_search:
+            description: "Keep only top-k branches at each level"
+            best_for: "Balance between exploration and efficiency"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  implementation:
+    prompt_template_generation: |
+      Given the problem and current state, propose {n} different possible 
+      next steps. For each step, explain the reasoning.
+      
+      Problem: {problem_description}
+      Current State: {current_state}
+      Steps Taken So Far: {history}
+      
+      Propose {n} possible next moves:
+    
+    prompt_template_evaluation: |
+      Evaluate how promising this state is for solving the problem.
+      Rate from 1-10, where:
+      - 1-3: Dead end, unlikely to lead to solution
+      - 4-6: Uncertain, might work
+      - 7-9: Promising, good chance of success
+      - 10: Solution found
+      
+      Problem: {problem_description}
+      Current State: {state}
+      
+      Evaluation:
+      - Analysis: [Your analysis]
+      - Rating: [1-10]
+    
+    pseudocode: |
+      def tree_of_thoughts(problem, max_depth=5, beam_width=3):
+          root = initial_state(problem)
+          frontier = [root]
+          
+          for depth in range(max_depth):
+              candidates = []
+              
+              for state in frontier:
+                  # Generate possible next steps
+                  thoughts = generate_thoughts(state, n=5)
+                  
+                  for thought in thoughts:
+                      new_state = apply_thought(state, thought)
+                      score = evaluate_state(new_state)
+                      
+                      if is_solution(new_state):
+                          return new_state
+                      
+                      candidates.append((new_state, score))
+              
+              # Keep only best branches
+              candidates.sort(key=lambda x: x[1], reverse=True)
+              frontier = [c[0] for c in candidates[:beam_width]]
+          
+          return best_of(frontier)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_game_of_24:
+      problem: "Use 4, 9, 10, 13 with +,-,*,/ to make 24"
+      
+      world_class_prompt: |
+        Solve the Game of 24: Use all numbers [4, 9, 10, 13] exactly once with 
+        +, -, *, / to make 24.
+        
+        Explore multiple approaches systematically:
+        
+        **Branch 1: Start with addition**
+        - 4 + 9 = 13, remaining: [13, 10, 13]
+        - Evaluate: Can we make 24 from [13, 10, 13]?
+          - 13 + 10 + 13 = 36 ✗
+          - 13 * 10 / 13 = 10 ✗
+          - Rating: 2/10 (abandon this branch)
+        
+        **Branch 2: Start with larger numbers**
+        - 13 - 9 = 4, remaining: [4, 4, 10]
+        - Evaluate: Can we make 24 from [4, 4, 10]?
+          - 4 * 4 = 16, 16 + 10 = 26 ✗
+          - 10 - 4 = 6, 6 * 4 = 24 ✓ ← SOLUTION PATH!
+        
+        **Solution:** (10 - 4) × (13 - 9) = 6 × 4 = 24 
+        
+        Wait, let me verify: 13 - 9 = 4, 10 - 4 = 6, 6 × 4 = 24. 
+        Uses 4, 9, 10, 13 exactly once. ✅
+
+    example_planning:
+      problem: "Plan a dinner party for 8 with dietary restrictions"
+      
+      world_class_prompt: |
+        I need to plan a dinner party menu for 8 guests with these constraints:
+        - 2 vegetarian, 1 vegan, 1 gluten-free
+        - Budget: $150
+        - Must include appetizer, main, dessert
+        
+        Use Tree of Thoughts to explore menu options:
+        
+        **Level 1: Main Course Strategy**
+        
+        Branch A: Single main that works for everyone
+        - Must be: vegan + gluten-free (covers all restrictions)
+        - Options: Thai coconut curry with rice
+        - Score: 7/10 (safe but might feel restrictive)
+        
+        Branch B: Two mains (regular + alternative)
+        - Main 1: Roast chicken (for 5 regular guests)
+        - Main 2: Stuffed peppers (vegan/GF for 3)
+        - Score: 8/10 (variety, more work, explore further)
+        
+        Branch C: Build-your-own style
+        - Base: Rice bowls
+        - Proteins: Multiple options
+        - Score: 6/10 (casual, might not feel special)
+        
+        **Exploring Branch B (highest score):**
+        
+        Appetizer options for B:
+        - B1: Hummus platter (vegan, GF) - $20, Score: 8/10
+        - B2: Bruschetta + GF crackers - $25, Score: 7/10
+        
+        [Continue exploration...]
+        
+        **Final Menu (from best path):**
+        - Appetizer: Hummus platter with vegetables ($20)
+        - Mains: Herb roast chicken ($45) + Stuffed bell peppers ($30)
+        - Dessert: Fruit tart with GF crust option ($35)
+        - Total: $130 ✓ Under budget
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WHEN TO USE
+  # ═══════════════════════════════════════════════════════════════════════════
+  when_to_use:
+    ideal_for:
+      - "Problems with multiple valid solution paths"
+      - "Planning tasks requiring exploration"
+      - "Puzzles and games (Sudoku, riddles)"
+      - "Creative tasks with constraints"
+      - "When first approach might fail"
+    
+    not_ideal_for:
+      - "Simple, single-path problems (use CoT instead)"
+      - "Real-time applications (computationally expensive)"
+      - "Tasks with obvious solutions"
+      - "When you need speed over thoroughness"
+    
+    comparison_with_cot:
+      cot: "Single path, fast, might miss better solutions"
+      tot: "Multiple paths, thorough, finds better solutions but slower"
+      rule: "Use ToT when problem is hard enough that one path might fail"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Explicitly request multiple branches"
+      why: "Model defaults to single path"
+      example: "Generate 3 different approaches before deciding"
+    
+    - tip: "Include evaluation criteria"
+      why: "Need consistent way to compare branches"
+      example: "Rate each approach on feasibility (1-10)"
+    
+    - tip: "Allow backtracking"
+      why: "Some paths should be abandoned"
+      example: "If a branch scores below 4, stop and try another"
+    
+    - tip: "Show the exploration explicitly"
+      why: "Transparency helps reasoning"
+      example: "Show Branch A, Branch B... with scores"
+    
+    - tip: "Limit branching factor"
+      why: "Too many branches = unfocused"
+      example: "Explore top 3 most promising options"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Not evaluating branches"
+      problem: "Explores dead ends too long"
+      fix: "Rate each branch, abandon low scores"
+    
+    - mistake: "Too many branches"
+      problem: "Analysis paralysis"
+      fix: "Limit to 3-5 branches per level"
+    
+    - mistake: "Not showing tree structure"
+      problem: "Loses track of exploration"
+      fix: "Use explicit branch labels (A, A1, A2, B, B1...)"
+    
+    - mistake: "Forgetting to verify solution"
+      problem: "May choose best branch but wrong answer"
+      fix: "Always verify final answer independently"

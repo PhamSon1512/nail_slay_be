@@ -1,0 +1,406 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 7: STRUCTURED OUTPUT PROMPTING
+# Force Reliable, Parseable Outputs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Structured Output Prompting"
+  rank: 7
+  impact: "Essential for Production Systems"
+  introduced_by: "Industry best practice, formalized by Anthropic & OpenAI"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Structured Output Prompting uses explicit format instructions, delimiters, 
+      and schemas to ensure LLM outputs follow a predictable, parseable structure.
+      This includes XML tags, JSON schemas, Markdown formatting, and explicit 
+      section markers.
+    
+    why_important: |
+      - **Reliability**: Consistent outputs every time
+      - **Parseability**: Easy to extract programmatically
+      - **Clarity**: Model knows exactly what's expected
+      - **Production-ready**: Essential for real applications
+    
+    key_insight: |
+      "Structure in = Structure out"
+      
+      The format you use in your prompt heavily influences the format 
+      of the output. XML in, XML out.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FORMAT OPTIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  formats:
+    xml_tags:
+      description: "Most flexible, best for Anthropic models"
+      advantages:
+        - "Clear section boundaries"
+        - "Nested structures"
+        - "Easy regex extraction"
+        - "Natural language inside tags"
+      
+      example: |
+        <analysis>
+          <summary>Brief overview here</summary>
+          <key_points>
+            <point>First point</point>
+            <point>Second point</point>
+          </key_points>
+          <recommendation>What to do</recommendation>
+        </analysis>
+    
+    json:
+      description: "Best for API integration, strict schema"
+      advantages:
+        - "Native parsing in every language"
+        - "Strict schema validation"
+        - "Compact representation"
+      
+      caution: "LLMs sometimes produce invalid JSON - validate!"
+      
+      example: |
+        {
+          "analysis": {
+            "summary": "Brief overview",
+            "sentiment": "positive",
+            "confidence": 0.85,
+            "entities": ["Apple", "Tim Cook", "iPhone"]
+          }
+        }
+    
+    markdown:
+      description: "Best for human-readable outputs"
+      advantages:
+        - "Familiar format"
+        - "Good for documentation"
+        - "Headers create structure"
+      
+      example: |
+        # Analysis Report
+        
+        ## Summary
+        Brief overview here.
+        
+        ## Key Points
+        - First point
+        - Second point
+        
+        ## Recommendation
+        What to do next.
+    
+    yaml:
+      description: "Readable + parseable hybrid"
+      advantages:
+        - "More readable than JSON"
+        - "Still machine-parseable"
+        - "Good for configuration"
+      
+      example: |
+        analysis:
+          summary: Brief overview
+          sentiment: positive
+          confidence: 0.85
+          entities:
+            - Apple
+            - Tim Cook
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  patterns:
+    pattern_1_schema_first:
+      name: "Define Schema Upfront"
+      template: |
+        Respond in the following JSON format:
+        
+        ```json
+        {
+          "field1": "string - description of field1",
+          "field2": "number - description of field2",
+          "field3": ["array", "of", "strings"]
+        }
+        ```
+        
+        [Actual request here]
+      
+      example: |
+        Extract information from this text in the following JSON format:
+        
+        ```json
+        {
+          "company_name": "string - the company mentioned",
+          "revenue": "number - revenue in millions USD",
+          "growth_rate": "number - percentage growth",
+          "sentiment": "string - 'positive', 'negative', or 'neutral'"
+        }
+        ```
+        
+        Text: "Apple reported Q4 revenue of $89.5 billion, up 8% year-over-year,
+        exceeding analyst expectations."
+
+    pattern_2_xml_sections:
+      name: "XML Section Template"
+      template: |
+        Structure your response using these sections:
+        
+        <thinking>
+        Your step-by-step reasoning (not shown to user)
+        </thinking>
+        
+        <answer>
+        Your final answer
+        </answer>
+        
+        <confidence>
+        How confident you are (1-10)
+        </confidence>
+      
+      benefit: "Can extract thinking for debugging, show only answer to user"
+
+    pattern_3_fill_in_template:
+      name: "Fill-in-the-Blank Template"
+      template: |
+        Complete this template:
+        
+        **Subject:** [Extract subject]
+        **Action:** [What happened]
+        **Result:** [Outcome]
+        **Sentiment:** [positive/negative/neutral]
+        **Summary:** [One sentence summary]
+      
+      benefit: "Very high compliance rate"
+
+    pattern_4_json_with_validation:
+      name: "JSON with Schema Validation"
+      template: |
+        Respond with valid JSON matching this schema:
+        
+        {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "required": ["name", "age", "active"],
+          "properties": {
+            "name": {"type": "string"},
+            "age": {"type": "integer", "minimum": 0},
+            "active": {"type": "boolean"}
+          }
+        }
+        
+        IMPORTANT: Output ONLY valid JSON, no other text.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_data_extraction:
+      task: "Extract structured data from text"
+      
+      world_class_prompt: |
+        Extract information from the job posting below into structured JSON.
+        
+        **Required JSON Schema:**
+        ```json
+        {
+          "job_title": "string",
+          "company": "string",
+          "location": {
+            "city": "string",
+            "state": "string | null",
+            "remote": "boolean"
+          },
+          "salary": {
+            "min": "number | null",
+            "max": "number | null",
+            "currency": "string"
+          },
+          "requirements": {
+            "years_experience": "number",
+            "skills": ["array of strings"],
+            "education": "string | null"
+          },
+          "job_type": "full-time | part-time | contract"
+        }
+        ```
+        
+        Rules:
+        - Use null for missing information, don't guess
+        - Normalize skills to lowercase
+        - Convert salary to annual if given monthly/hourly
+        
+        Job Posting:
+        """
+        Senior Software Engineer at TechCorp
+        San Francisco, CA (Hybrid - 2 days remote)
+        
+        $180,000 - $220,000/year + equity
+        
+        We're looking for an experienced engineer with:
+        - 5+ years in Python and distributed systems
+        - Experience with Kubernetes, AWS
+        - Strong algorithms background
+        - BS in Computer Science preferred
+        
+        Full-time position with excellent benefits.
+        """
+        
+        Output the JSON only, no explanation:
+
+    example_2_analysis_report:
+      task: "Structured analysis with reasoning"
+      
+      world_class_prompt: |
+        Analyze the business proposal using this structure:
+        
+        <analysis>
+          <executive_summary>
+            2-3 sentence overview of key findings
+          </executive_summary>
+          
+          <strengths>
+            <item priority="high|medium|low">
+              Description of strength
+            </item>
+            <!-- Add 3-5 items -->
+          </strengths>
+          
+          <weaknesses>
+            <item priority="high|medium|low" risk="description">
+              Description of weakness
+            </item>
+            <!-- Add 3-5 items -->
+          </weaknesses>
+          
+          <recommendation decision="approve|reject|revise">
+            Detailed recommendation with reasoning
+          </recommendation>
+          
+          <confidence level="1-10">
+            Brief explanation of confidence level
+          </confidence>
+        </analysis>
+        
+        Proposal:
+        [Proposal content here]
+
+    example_3_multi_output:
+      task: "Generate multiple outputs in one call"
+      
+      world_class_prompt: |
+        Generate 3 email subject lines for this marketing campaign.
+        
+        Format your response as:
+        ```json
+        {
+          "subject_lines": [
+            {
+              "text": "The subject line",
+              "style": "urgent | curious | benefit | social-proof",
+              "estimated_open_rate": "percentage as string"
+            }
+          ],
+          "recommended": "index of best option (0-2)",
+          "reasoning": "Why the recommended one is best"
+        }
+        ```
+        
+        Campaign: 30% off summer sale for outdoor furniture
+        Target: Homeowners aged 35-55
+        
+        JSON output:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    nested_structures:
+      description: "Complex hierarchical data"
+      example: |
+        <document>
+          <metadata>
+            <title>...</title>
+            <author>...</author>
+          </metadata>
+          <content>
+            <section id="1">
+              <heading>...</heading>
+              <paragraphs>
+                <p>...</p>
+              </paragraphs>
+            </section>
+          </content>
+        </document>
+
+    mixed_formats:
+      description: "Combine formats for different sections"
+      example: |
+        <response>
+          <analysis>
+            Free-form analysis text here...
+          </analysis>
+          
+          <data format="json">
+            {"key": "value", "numbers": [1, 2, 3]}
+          </data>
+          
+          <visualization format="mermaid">
+            graph TD
+              A --> B
+              B --> C
+          </visualization>
+        </response>
+
+    streaming_friendly:
+      description: "Structure that works with streaming"
+      tip: "Use line-by-line or section-by-section format"
+      example: |
+        STATUS: processing
+        STEP: Analyzing input
+        STEP: Extracting entities
+        STEP: Generating response
+        STATUS: complete
+        RESULT: {"output": "..."}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Show examples of desired format"
+      why: "Examples > descriptions"
+      example: "Here's an example output: {...}"
+    
+    - tip: "Use XML for Claude, JSON for OpenAI"
+      why: "Each model has format preferences"
+    
+    - tip: "Specify what to do with missing data"
+      why: "Prevents hallucination"
+      example: "Use null for missing fields, don't guess"
+    
+    - tip: "Request 'only JSON, no explanation'"
+      why: "Prevents preamble that breaks parsing"
+    
+    - tip: "Validate outputs programmatically"
+      why: "LLMs occasionally produce invalid syntax"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "No example of format"
+      problem: "Model interprets format differently"
+      fix: "Always include example output"
+    
+    - mistake: "Ambiguous field names"
+      problem: "Inconsistent outputs"
+      fix: "Use clear, specific field names with descriptions"
+    
+    - mistake: "Not handling edge cases"
+      problem: "Null vs empty vs missing confusion"
+      fix: "Explicitly state null/empty conventions"
+    
+    - mistake: "Trusting LLM JSON blindly"
+      problem: "Application crashes on invalid JSON"
+      fix: "Always validate and have fallback parsing"

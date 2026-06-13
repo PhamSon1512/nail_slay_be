@@ -1,0 +1,314 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 3: REACT (REASONING + ACTING)
+# The Standard for Agentic AI Systems
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "ReAct (Reasoning + Acting)"
+  rank: 3
+  impact: "Transformative for Agents"
+  introduced_by: "Yao et al., 2022 (Princeton/Google)"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      ReAct is a prompting paradigm that interleaves reasoning (thinking) and 
+      acting (tool use) in a synergistic loop. The model thinks about what to 
+      do, performs an action, observes the result, and reasons again based on 
+      new information.
+    
+    why_important: |
+      - **Foundation of AI agents**: ChatGPT plugins, AutoGPT, LangChain all use ReAct
+      - **Bridges reasoning and action**: Combines CoT's thinking with tool use
+      - **Explainable**: Full trace of reasoning visible
+      - **Error recovery**: Can reason about failures and try alternatives
+    
+    key_insight: |
+      "Think → Act → Observe → Repeat"
+      
+      By explicitly separating reasoning from action, the model makes 
+      better decisions and can recover from mistakes.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # THE REACT LOOP
+  # ═══════════════════════════════════════════════════════════════════════════
+  loop:
+    structure: |
+      Thought: [What I'm thinking, what to do next]
+      Action: [Tool/action to perform]
+      Action Input: [Input for the tool]
+      Observation: [Result from the tool]
+      ... (repeat as needed)
+      Thought: [I have enough information]
+      Final Answer: [Answer to the user]
+    
+    components:
+      thought:
+        purpose: "Reasoning step - analyze situation, plan next action"
+        examples:
+          - "I need to find the current weather in Tokyo"
+          - "The search didn't return what I need, I should try a different query"
+          - "I now have all the information to answer the question"
+      
+      action:
+        purpose: "Specify which tool to use"
+        examples:
+          - "Search"
+          - "Calculator"
+          - "Wikipedia"
+          - "CodeInterpreter"
+      
+      action_input:
+        purpose: "Input to provide to the tool"
+        examples:
+          - '{"query": "Tokyo weather today"}'
+          - "25 * 4 + 10"
+          - "Python programming language"
+      
+      observation:
+        purpose: "Result returned by the tool (usually system-provided)"
+        note: "Model doesn't generate this - it's injected by the system"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  implementation:
+    system_prompt_template: |
+      You are an AI assistant with access to tools. To answer questions, you
+      will interleave Thought, Action, and Observation steps.
+      
+      Available tools:
+      {tool_descriptions}
+      
+      Use this format:
+      
+      Question: the input question you must answer
+      Thought: reason about what to do
+      Action: the tool to use (must be one of {tool_names})
+      Action Input: the input to the tool
+      Observation: the result of the action
+      ... (repeat Thought/Action/Observation as needed)
+      Thought: I now know the final answer
+      Final Answer: the final answer to the question
+      
+      Begin!
+      
+      Question: {user_question}
+      Thought:
+
+    tool_description_format: |
+      {tool_name}: {tool_description}
+        Input format: {input_format}
+        Output format: {output_format}
+        Example: {example_usage}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_research:
+      question: "What is the population of the country where the Eiffel Tower is located, and what percentage of the world population is that?"
+      
+      execution: |
+        Thought: I need to find where the Eiffel Tower is located first.
+        Action: Search
+        Action Input: {"query": "Eiffel Tower location country"}
+        Observation: The Eiffel Tower is located in Paris, France.
+        
+        Thought: Now I need to find the population of France.
+        Action: Search
+        Action Input: {"query": "France population 2024"}
+        Observation: France has a population of approximately 68 million people.
+        
+        Thought: I also need the world population to calculate the percentage.
+        Action: Search
+        Action Input: {"query": "world population 2024"}
+        Observation: The world population is approximately 8 billion people.
+        
+        Thought: Now I can calculate the percentage. 68 million / 8 billion * 100
+        Action: Calculator
+        Action Input: (68000000 / 8000000000) * 100
+        Observation: 0.85
+        
+        Thought: I now have all the information to answer the question.
+        Final Answer: The Eiffel Tower is located in France, which has a 
+        population of approximately 68 million people. This represents about 
+        0.85% of the world's population of 8 billion.
+
+    example_2_coding:
+      question: "Write a Python function to find prime numbers up to n, and test it with n=50"
+      
+      execution: |
+        Thought: I need to write a prime number function and test it. Let me 
+        write the code first.
+        Action: CodeInterpreter
+        Action Input: |
+          def find_primes(n):
+              """Find all prime numbers up to n using Sieve of Eratosthenes"""
+              if n < 2:
+                  return []
+              
+              sieve = [True] * (n + 1)
+              sieve[0] = sieve[1] = False
+              
+              for i in range(2, int(n**0.5) + 1):
+                  if sieve[i]:
+                      for j in range(i*i, n + 1, i):
+                          sieve[j] = False
+              
+              return [i for i in range(n + 1) if sieve[i]]
+          
+          # Test with n=50
+          result = find_primes(50)
+          print(f"Primes up to 50: {result}")
+          print(f"Count: {len(result)}")
+        Observation: 
+          Primes up to 50: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+          Count: 15
+        
+        Thought: The function works correctly. I should verify a few values.
+        Action: CodeInterpreter
+        Action Input: |
+          # Verify some edge cases
+          print(f"Primes up to 2: {find_primes(2)}")
+          print(f"Primes up to 10: {find_primes(10)}")
+          print(f"Primes up to 0: {find_primes(0)}")
+        Observation:
+          Primes up to 2: [2]
+          Primes up to 10: [2, 3, 5, 7]
+          Primes up to 0: []
+        
+        Thought: All edge cases work correctly. I can provide the final answer.
+        Final Answer: Here's an efficient prime number function using the 
+        Sieve of Eratosthenes algorithm:
+        
+        ```python
+        def find_primes(n):
+            if n < 2:
+                return []
+            sieve = [True] * (n + 1)
+            sieve[0] = sieve[1] = False
+            for i in range(2, int(n**0.5) + 1):
+                if sieve[i]:
+                    for j in range(i*i, n + 1, i):
+                        sieve[j] = False
+            return [i for i in range(n + 1) if sieve[i]]
+        ```
+        
+        Testing with n=50 returns 15 primes: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    react_with_memory:
+      description: "Add memory/state tracking across steps"
+      template: |
+        <memory>
+          <facts_learned>
+            - [Fact 1 from observation]
+            - [Fact 2 from observation]
+          </facts_learned>
+          <current_goal>[What we're trying to achieve]</current_goal>
+        </memory>
+        
+        Thought: Based on memory, I should...
+
+    react_with_planning:
+      description: "Plan multiple steps ahead"
+      template: |
+        Thought: Let me plan my approach first.
+        Plan:
+          1. [Step 1]
+          2. [Step 2]
+          3. [Step 3]
+        
+        Executing Step 1:
+        Action: [tool]
+        Action Input: [input]
+        ...
+
+    react_with_reflection:
+      description: "Reflect on failures and adjust"
+      template: |
+        Thought: The previous action failed. Let me reflect on why.
+        Reflection:
+          - What went wrong: [analysis]
+          - What I should try instead: [alternative]
+        
+        Action: [new approach]
+
+    multi_agent_react:
+      description: "Multiple specialized agents with ReAct"
+      architecture: |
+        Orchestrator (ReAct):
+          Thought: This requires specialized knowledge
+          Action: delegate_to_expert
+          Action Input: {"expert": "CodeExpert", "task": "..."}
+          Observation: [Result from expert agent]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TOOL DESIGN BEST PRACTICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  tool_design:
+    principles:
+      - name: "Clear naming"
+        description: "Tool name should clearly indicate function"
+        good: "SearchWikipedia, CalculateExpression"
+        bad: "Tool1, Helper"
+      
+      - name: "Specific scope"
+        description: "Each tool does one thing well"
+        good: "Separate Search and Calculator tools"
+        bad: "One mega-tool that does everything"
+      
+      - name: "Informative outputs"
+        description: "Return enough context for reasoning"
+        good: "Return full snippets, not just links"
+        bad: "Return cryptic codes or minimal info"
+      
+      - name: "Error messages"
+        description: "Clear errors help model recover"
+        good: "Error: City 'Tokyoo' not found. Did you mean 'Tokyo'?"
+        bad: "Error: Invalid input"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Always require Thought before Action"
+      why: "Prevents blind tool use, improves accuracy"
+    
+    - tip: "Provide tool usage examples"
+      why: "Shows model the correct input format"
+    
+    - tip: "Limit available tools"
+      why: "Too many tools = confusion. 3-7 is ideal."
+    
+    - tip: "Include failure recovery examples"
+      why: "Model learns to handle errors gracefully"
+    
+    - tip: "Set maximum iterations"
+      why: "Prevents infinite loops"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Skipping Thought step"
+      problem: "Model uses tools randomly without reasoning"
+      fix: "Enforce Thought before every Action"
+    
+    - mistake: "Vague tool descriptions"
+      problem: "Model doesn't know when/how to use tools"
+      fix: "Detailed descriptions with examples"
+    
+    - mistake: "Not handling tool failures"
+      problem: "Model gets stuck when tool returns error"
+      fix: "Add examples of error recovery"
+    
+    - mistake: "Using tool when not needed"
+      problem: "Wastes steps, slower response"
+      fix: "Teach model it can answer directly if it knows"

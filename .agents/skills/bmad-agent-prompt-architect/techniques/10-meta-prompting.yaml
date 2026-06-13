@@ -1,0 +1,240 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 10: META-PROMPTING
+# Prompts That Generate Prompts
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Meta-Prompting"
+  rank: 10
+  impact: "Multiplicative - Improves All Other Prompts"
+  introduced_by: "Derived from DSPy, APE, and industry practice"
+  
+  overview:
+    definition: |
+      Meta-Prompting uses LLMs to generate, optimize, or improve prompts.
+      Instead of manually crafting prompts, you prompt the model to create
+      better prompts for your specific use case.
+    
+    why_important:
+      - "Automates prompt engineering"
+      - "Often finds better prompts than humans"
+      - "Scales across many tasks"
+      - "Continuous improvement possible"
+    
+    key_insight: |
+      "Use AI to write prompts for AI."
+      The model understands its own instructions better than we do.
+
+  types:
+    prompt_generation:
+      description: "LLM creates prompts from scratch"
+      use_case: "When you don't know where to start"
+      
+    prompt_optimization:
+      description: "LLM improves existing prompts"
+      use_case: "When current prompt isn't working well"
+      
+    prompt_rewriting:
+      description: "LLM adapts prompt for different model/context"
+      use_case: "Porting prompts between models"
+
+  patterns:
+    pattern_1_generate:
+      name: "Prompt Generation"
+      template: |
+        I need a system prompt for an AI assistant that [purpose].
+        
+        The assistant should:
+        - [Capability 1]
+        - [Capability 2]
+        
+        Target users: [Audience]
+        Tone: [Desired tone]
+        Constraints: [Any limits]
+        
+        Generate a comprehensive system prompt following best practices:
+        - Clear identity section
+        - Explicit capabilities
+        - Output format guidelines
+        - Safety guardrails
+        - Examples if helpful
+
+    pattern_2_optimize:
+      name: "Prompt Optimization"  
+      template: |
+        Current prompt:
+        """
+        {current_prompt}
+        """
+        
+        Problem: [What's not working]
+        Goal: [What you want to achieve]
+        
+        Analyze this prompt and suggest improvements:
+        1. What's working well?
+        2. What could be improved?
+        3. Missing elements?
+        
+        Provide an optimized version with explanations for changes.
+
+    pattern_3_test_cases:
+      name: "Generate Test Cases"
+      template: |
+        Given this prompt:
+        """
+        {prompt}
+        """
+        
+        Generate 10 diverse test cases that would:
+        - Test normal functionality
+        - Test edge cases
+        - Try to find failure modes
+        - Cover different user types
+        
+        Format: Query | Expected behavior | Risk level
+
+    pattern_4_prompt_critique:
+      name: "Prompt Critique"
+      template: |
+        Analyze this prompt as a prompt engineering expert:
+        
+        """
+        {prompt}
+        """
+        
+        Rate (1-10) on:
+        - Clarity of instructions
+        - Completeness of context
+        - Safety considerations
+        - Likely output quality
+        
+        Top 3 improvements to make:
+
+  world_class_examples:
+    example_1_generation:
+      task: "Create customer service agent prompt"
+      
+      prompt: |
+        I'm building a customer service chatbot for an e-commerce company.
+        
+        Context:
+        - Products: Electronics (phones, laptops, accessories)
+        - Common issues: Order tracking, returns, product questions
+        - Tone: Friendly but professional
+        - Limits: Cannot process refunds directly, must escalate
+        
+        Generate a production-ready system prompt that:
+        1. Establishes clear identity
+        2. Defines capabilities and limitations
+        3. Handles escalation appropriately
+        4. Maintains brand voice
+        5. Includes example interactions
+        
+        Use XML structure for easy parsing.
+
+    example_2_optimization:
+      task: "Improve underperforming prompt"
+      
+      prompt: |
+        This prompt isn't working well:
+        
+        """
+        You are a helpful assistant. Answer questions accurately.
+        """
+        
+        Problems observed:
+        - Responses too verbose
+        - Sometimes makes up information
+        - Inconsistent tone
+        
+        Redesign this prompt to:
+        - Enforce conciseness (max 3 sentences for simple questions)
+        - Add verification requirement ("only answer if confident")
+        - Establish consistent professional tone
+        
+        Explain each change you make.
+
+    example_3_adaptation:
+      task: "Adapt prompt for different model"
+      
+      prompt: |
+        I have this prompt that works well with GPT-4:
+        
+        """
+        {original_prompt}
+        """
+        
+        Adapt it for Claude 3.5 (Anthropic), considering:
+        - Claude responds well to XML tags
+        - Claude prefers detailed role context
+        - Claude is good at following structured formats
+        
+        Maintain the same functionality while optimizing for Claude.
+
+  advanced:
+    dspy_approach:
+      description: "Programmatic prompt optimization"
+      concept: |
+        Define inputs/outputs as "signatures"
+        Let optimizer find best prompt automatically
+      
+      example: |
+        # DSPy-style signature
+        class SentimentClassifier(dspy.Signature):
+            """Classify text sentiment"""
+            text = dspy.InputField()
+            sentiment = dspy.OutputField(desc="positive, negative, or neutral")
+        
+        # Optimizer finds best prompt
+        optimizer = MIPROv2(metric=accuracy)
+        optimized = optimizer.compile(SentimentClassifier)
+
+    automatic_prompt_engineer:
+      description: "APE - Generate and evaluate prompts"
+      process:
+        - "Generate N candidate prompts"
+        - "Evaluate each on test set"
+        - "Select best performing"
+        - "Optionally iterate on winner"
+
+    prompt_breeding:
+      description: "Combine successful prompts"
+      process:
+        - "Take high-performing prompts"
+        - "Extract effective elements from each"
+        - "Combine into new variants"
+        - "Evaluate and repeat"
+
+  tips:
+    - tip: "Provide clear success criteria"
+      why: "Model needs to know what 'better' means"
+    
+    - tip: "Include examples of desired behavior"
+      why: "Concrete examples beat abstract descriptions"
+    
+    - tip: "Test generated prompts rigorously"
+      why: "LLM-generated prompts may have blind spots"
+    
+    - tip: "Iterate - first generation rarely optimal"
+      why: "Use Self-Refine on generated prompts"
+    
+    - tip: "Version control your prompts"
+      why: "Track what works and what doesn't"
+
+  mistakes:
+    - mistake: "Accepting generated prompt without testing"
+      fix: "Always test with diverse inputs before deploying"
+    
+    - mistake: "Vague optimization criteria"
+      fix: "Specify exactly what needs improvement"
+    
+    - mistake: "Optimizing for single test case"
+      fix: "Use diverse test set to avoid overfitting"
+
+  integration:
+    with_other_techniques: |
+      Meta-prompting amplifies other techniques:
+      - Generate few-shot examples automatically
+      - Optimize CoT prompts for specific domains
+      - Create role prompts for niche personas
+      - Design ReAct tool descriptions

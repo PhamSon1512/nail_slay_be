@@ -1,0 +1,923 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Technique 20: RLM Framework Templates
+# Structured Reasoning Templates for Reasoning Language Models
+# ═══════════════════════════════════════════════════════════════════════════════
+# Source: Road2AI Article (2024)
+# URL: https://road2.ai/p/10-prompt-templates-cho-rlms-su-dung-framework-thinking-reasoning
+# Best for: Claude 3.5/4, o1/o1-pro/o3, Gemini 2.0 Flash Thinking, DeepSeek R1
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  id: 20
+  name: RLM Framework Templates
+  category: reasoning
+  year: 2024
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    description: |
+      RLM Framework Templates are specialized prompt templates designed for 
+      Reasoning Language Models (RLMs) like Claude 3.5 Sonnet, Claude 4, OpenAI o1/o1-pro/o3,
+      Gemini 2.0 Flash Thinking, and DeepSeek R1. They combine 
+      AI reasoning techniques (MCTS, Beam Search, Graph-based, Ensemble) with 
+      established business frameworks (Porter's Five Forces, SWOT, etc.) to 
+      enable structured, systematic reasoning.
+      
+      **Key Innovation**: Uses explicit `<reasoning>` tags to guide the model's 
+      thinking process, combined with `<task>` tags for structured output.
+    
+    core_concepts:
+      reasoning_structures:
+        - "Chain-based: Sequential step-by-step reasoning"
+        - "Tree-based: Branching exploration (MCTS, Decision Trees)"
+        - "Graph-based: Non-linear cause-effect networks"
+        - "Ensemble: Multiple parallel analyses combined"
+      
+      reasoning_strategies:
+        - "MCTS (Monte Carlo Tree Search): Explore and backpropagate insights"
+        - "Beam Search: Maintain top-K candidates at each step"
+        - "Process-Based: Step-by-step supervision with confidence ratings"
+        - "Q-Value: Score state-action pairs for optimal selection"
+        - "Trace-Based: Document decision paths for auditability"
+        - "Test-Time Compute: Adaptive resource allocation by complexity"
+    
+    template_structure: |
+      <reasoning>
+        [Specify the reasoning approach and what the model should focus on]
+      </reasoning>
+      <task>
+        [Structured task with numbered steps and clear deliverables]
+      </task>
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 10 FRAMEWORK TEMPLATES
+  # ═══════════════════════════════════════════════════════════════════════════
+  templates:
+    # ─────────────────────────────────────────────────────────────────────────
+    # 1. MCTS-BASED STRATEGY ANALYSIS
+    # ─────────────────────────────────────────────────────────────────────────
+    mcts_porter_five_forces:
+      id: 1
+      name: "MCTS-Based Strategy Analysis Template 🌳"
+      reasoning_type: "Monte Carlo Tree Search"
+      business_framework: "Porter's Five Forces"
+      
+      description: |
+        Applies MCTS reasoning with Porter's Five Forces - creates tree structure 
+        with branches for each competitive force, explores each path and 
+        backpropagates insights for comprehensive strategy.
+      
+      template: |
+        <reasoning>
+        Apply Monte Carlo Tree Search reasoning to systematically explore 
+        business environment factors and their competitive impacts. Branch out 
+        from core industry analysis to specific forces, evaluating each path's 
+        strategic implications.
+        </reasoning>
+        
+        <task>
+        Analyze [Business Situation] using Porter's Five Forces:
+        1. Root: Current competitive landscape
+        2. Explore branches:
+           - Supplier power
+           - Buyer power
+           - Substitution threats
+           - New entrant barriers
+           - Competitive rivalry
+        3. Evaluate impact on [Business Outcome]
+        4. Develop strategic recommendations
+        </task>
+      
+      use_case: "Competitive analysis, market entry strategy, industry assessment"
+      
+    # ─────────────────────────────────────────────────────────────────────────
+    # 2. DECISION TREE + SWOT
+    # ─────────────────────────────────────────────────────────────────────────
+    decision_tree_swot:
+      id: 2
+      name: "Decision Tree with SWOT Framework Template 🌿"
+      reasoning_type: "Decision Tree"
+      business_framework: "SWOT Analysis"
+      
+      description: |
+        Combines decision tree reasoning with SWOT - generates distinct analytical 
+        branches for internal/external factors, calculates success probability 
+        for each pathway.
+      
+      template: |
+        <reasoning>
+        Employ decision tree reasoning to evaluate options systematically. 
+        Generate distinct analytical branches for internal and external factors, 
+        then calculate success probability for each pathway.
+        </reasoning>
+        
+        <task>
+        Evaluate [Decision/Opportunity] through SWOT lens:
+        1. Analyze branches for:
+           - Strengths: Internal advantages
+           - Weaknesses: Internal limitations
+           - Opportunities: External openings
+           - Threats: External challenges
+        2. Rate success probability for each path
+        3. Select optimal approach
+        4. Recommend specific actions
+        </task>
+      
+      use_case: "Strategic decisions, opportunity evaluation, risk assessment"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 3. ROOT CAUSE GRAPH
+    # ─────────────────────────────────────────────────────────────────────────
+    graph_root_cause:
+      id: 3
+      name: "Root Cause Graph-Based Analysis Template 🕸️"
+      reasoning_type: "Graph-Based Reasoning"
+      business_framework: "Root Cause Analysis"
+      
+      description: |
+        Uses graph-based reasoning to map problem networks and cause-effect 
+        relationships. Identifies critical intersection nodes where multiple 
+        causal chains converge - enables non-linear complex analysis.
+      
+      template: |
+        <reasoning>
+        Utilize graph-based reasoning to map problem networks and cause-effect 
+        relationships. Identify critical intersection nodes where multiple 
+        causal chains converge.
+        </reasoning>
+        
+        <task>
+        Diagnose [Problem] using Root Cause Analysis:
+        1. Create problem node at center
+        2. Map symptom nodes with connections
+        3. Trace causal paths for each symptom
+        4. Find intersection points
+        5. Rank root causes by impact and fixability
+        6. Recommend targeted interventions
+        </task>
+      
+      use_case: "Problem diagnosis, system debugging, issue resolution"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 4. BEAM SEARCH CHANGE MANAGEMENT
+    # ─────────────────────────────────────────────────────────────────────────
+    beam_search_kotter:
+      id: 4
+      name: "Beam Search for Change Management Template 🔍"
+      reasoning_type: "Beam Search"
+      business_framework: "Kotter's 8-Step Model"
+      
+      description: |
+        Implements beam search to maintain multiple parallel solution paths 
+        while progressively focusing on most promising approaches. Keeps 
+        top-K candidates at each stage, balancing exploration and exploitation.
+      
+      template: |
+        <reasoning>
+        Implement beam search reasoning to maintain multiple parallel solution 
+        paths while progressively focusing on most promising approaches at 
+        each stage of change process.
+        </reasoning>
+        
+        <task>
+        Plan [Change Initiative] using Kotter's 8-Step Model:
+        1. Generate approaches for each step:
+           - Creating urgency
+           - Building coalition
+           - Forming vision
+           - Enlisting volunteers
+           - Enabling action
+           - Generating wins
+           - Sustaining momentum
+           - Anchoring change
+        2. Keep top 3 approaches per step
+        3. Select best path for your context
+        4. Identify critical success factors
+        </task>
+      
+      use_case: "Organizational change, transformation initiatives, culture change"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 5. VALUE-MODEL PROJECT PLANNING
+    # ─────────────────────────────────────────────────────────────────────────
+    value_model_critical_path:
+      id: 5
+      name: "Value-Model Project Planning Template 📊"
+      reasoning_type: "Value-Based Reasoning"
+      business_framework: "Critical Path Method (CPM)"
+      
+      description: |
+        Applies value-based reasoning to quantify project components and 
+        dependencies. Calculates forward/backward passes to identify critical 
+        path and optimization opportunities with value justification.
+      
+      template: |
+        <reasoning>
+        Apply value-based reasoning to quantify project components and their 
+        relationships. Calculate forward and backward dependencies to determine 
+        critical activities and optimization opportunities.
+        </reasoning>
+        
+        <task>
+        Develop [Project Plan] using Critical Path Method:
+        1. List activities with dependencies
+        2. Assign time and value to each task
+        3. Calculate forward/backward passes
+        4. Identify critical path and slack
+        5. Optimize resource allocation
+        6. Present implementation sequence with value justification
+        </task>
+      
+      use_case: "Project planning, resource optimization, timeline management"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 6. PROCESS-BASED MARKETING
+    # ─────────────────────────────────────────────────────────────────────────
+    process_based_stp:
+      id: 6
+      name: "Process-Based Marketing Strategy Template 🎯"
+      reasoning_type: "Process-Based Supervision"
+      business_framework: "STP Model (Segmentation, Targeting, Positioning)"
+      
+      description: |
+        Executes sequential reasoning with distinct evaluation metrics for each 
+        phase. Includes confidence rating for each step, leading to well-grounded 
+        marketing strategy.
+      
+      template: |
+        <reasoning>
+        Execute sequential reasoning process with distinct evaluation metrics 
+        for each phase. Focus on systematic market analysis followed by 
+        strategic selection and positioning development.
+        </reasoning>
+        
+        <task>
+        Develop [Marketing Strategy] with STP Model:
+        1. Segmentation:
+           - Generate diverse market segments
+           - Evaluate size, growth, access metrics
+        2. Targeting:
+           - Score segments by advantage and profit
+           - Select optimal targets with rationale
+        3. Positioning:
+           - Craft positioning statements
+           - Validate against competitors
+        4. Rate confidence level for each step
+        </task>
+      
+      use_case: "Marketing strategy, market entry, product positioning"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 7. ENSEMBLE BUSINESS MODEL
+    # ─────────────────────────────────────────────────────────────────────────
+    ensemble_bmc:
+      id: 7
+      name: "Ensemble Method with Business Model Canvas Template 🧩"
+      reasoning_type: "Ensemble Method"
+      business_framework: "Business Model Canvas"
+      
+      description: |
+        Employs ensemble reasoning to analyze business components both 
+        individually and collectively. Identifies cross-component patterns 
+        and system-level emergence properties.
+      
+      template: |
+        <reasoning>
+        Employ ensemble reasoning to analyze business components both 
+        individually and collectively. Identify cross-component patterns 
+        and system-level emergence properties.
+        </reasoning>
+        
+        <task>
+        Analyze [Business Model] using Business Model Canvas:
+        1. Examine each element:
+           - Value propositions
+           - Customer segments
+           - Channels
+           - Customer relationships
+           - Revenue streams
+           - Key resources
+           - Key activities
+           - Key partnerships
+           - Cost structure
+        2. Identify cross-element patterns
+        3. Assess business model coherence
+        4. Suggest optimization opportunities
+        </task>
+      
+      use_case: "Business model design, startup validation, business analysis"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 8. TRACE-BASED INNOVATION
+    # ─────────────────────────────────────────────────────────────────────────
+    trace_based_blue_ocean:
+      id: 8
+      name: "Trace-Based Innovation Strategy Template 🔍"
+      reasoning_type: "Trace-Based Supervision"
+      business_framework: "Blue Ocean Strategy"
+      
+      description: |
+        Implements trace-based reasoning that documents decision paths and 
+        transformation logic. Creates auditable reasoning trail for 
+        strategic innovation decisions.
+      
+      template: |
+        <reasoning>
+        Implement trace-based reasoning that documents decision paths and 
+        transformation logic. Focus on explicit competitive factor evaluation 
+        followed by strategic redefinition.
+        </reasoning>
+        
+        <task>
+        Create [Innovation Strategy] using Blue Ocean Strategy:
+        1. Map current market competitive factors
+        2. Record reasoning while:
+           - Eliminating unnecessary factors
+           - Reducing overdelivered factors
+           - Raising underdelivered factors
+           - Creating new factors
+        3. Test against non-customers
+        4. Check execution feasibility
+        5. Document reasoning steps for future refinement
+        </task>
+      
+      use_case: "Innovation strategy, market disruption, new product development"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 9. Q-VALUE OPERATIONS
+    # ─────────────────────────────────────────────────────────────────────────
+    q_value_lean_six_sigma:
+      id: 9
+      name: "Q-Value Operational Efficiency Template 📈"
+      reasoning_type: "Q-Value Reasoning (RL-inspired)"
+      business_framework: "Lean Six Sigma (DMAIC)"
+      
+      description: |
+        Applies Q-value reasoning to evaluate state-action pairs for process 
+        improvement. Quantifies expected outcomes for each intervention to 
+        identify highest-value optimization targets using reinforcement 
+        learning principles.
+      
+      template: |
+        <reasoning>
+        Apply Q-value reasoning to evaluate state-action pairs for process 
+        improvement. Quantify expected outcomes for each intervention to 
+        identify highest-value optimization targets.
+        </reasoning>
+        
+        <task>
+        Optimize [Operational Process] with Lean Six Sigma:
+        1. Define problem with metrics
+        2. Measure current performance
+        3. Analyze root causes with probabilities
+        4. Generate improvements with value estimates
+        5. Select highest Q-value strategy
+        6. Create implementation plan with controls
+        </task>
+      
+      use_case: "Process optimization, operational efficiency, quality improvement"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # 10. TEST-TIME COMPUTE STRATEGY
+    # ─────────────────────────────────────────────────────────────────────────
+    test_time_compute_7s:
+      id: 10
+      name: "Test-Time Compute Strategic Planning Template ⚙️"
+      reasoning_type: "Adaptive Resource Allocation"
+      business_framework: "McKinsey 7S Framework"
+      
+      description: |
+        Allocates reasoning resources adaptively based on component complexity. 
+        Focuses computation intensity on high-complexity elements while 
+        maintaining balanced organizational assessment.
+      
+      template: |
+        <reasoning>
+        Allocate reasoning resources adaptively based on component complexity. 
+        Focus computation intensity on high-complexity elements while 
+        maintaining balanced organizational assessment.
+        </reasoning>
+        
+        <task>
+        Develop [Strategic Plan] using McKinsey 7S Framework:
+        1. Analyze with proportional resources:
+           - Strategy
+           - Structure
+           - Systems
+           - Shared values
+           - Staff
+           - Skills
+           - Style
+        2. Invest more computation in complex elements
+        3. Find alignment gaps
+        4. Prioritize interventions by system impact
+        </task>
+      
+      use_case: "Organizational strategy, alignment assessment, transformation planning"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REASONING TYPE REFERENCE
+  # ═══════════════════════════════════════════════════════════════════════════
+  reasoning_types:
+    mcts:
+      name: "Monte Carlo Tree Search (MCTS)"
+      description: "Explores decision trees by random sampling, backpropagates results"
+      best_for: "Multi-option exploration with uncertain outcomes"
+      templates: [1]
+      
+    decision_tree:
+      name: "Decision Tree Reasoning"
+      description: "Systematic branching evaluation with probability scoring"
+      best_for: "Structured decision making with clear options"
+      templates: [2]
+      
+    graph_based:
+      name: "Graph-Based Reasoning"
+      description: "Maps non-linear relationships, finds intersection nodes"
+      best_for: "Complex cause-effect analysis, system problems"
+      templates: [3]
+      
+    beam_search:
+      name: "Beam Search"
+      description: "Maintains top-K candidates at each step, progressive focusing"
+      best_for: "Multi-stage processes needing parallel exploration"
+      templates: [4]
+      
+    value_model:
+      name: "Value-Based Reasoning"
+      description: "Quantifies components, calculates dependencies and critical paths"
+      best_for: "Project planning, resource optimization"
+      templates: [5]
+      
+    process_based:
+      name: "Process-Based Supervision"
+      description: "Sequential reasoning with per-step confidence rating"
+      best_for: "Multi-phase strategies needing validation"
+      templates: [6]
+      
+    ensemble:
+      name: "Ensemble Method"
+      description: "Analyzes components individually and collectively"
+      best_for: "Holistic system analysis, pattern identification"
+      templates: [7]
+      
+    trace_based:
+      name: "Trace-Based Supervision"
+      description: "Documents decision paths for auditability"
+      best_for: "Auditable decisions, innovation with accountability"
+      templates: [8]
+      
+    q_value:
+      name: "Q-Value Reasoning"
+      description: "RL-inspired state-action pair evaluation"
+      best_for: "Optimization with quantifiable outcomes"
+      templates: [9]
+      
+    test_time_compute:
+      name: "Adaptive Resource Allocation"
+      description: "Allocates reasoning proportional to complexity"
+      best_for: "Balanced multi-component analysis"
+      templates: [10]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # USE CASES
+  # ═══════════════════════════════════════════════════════════════════════════
+  use_cases:
+    strategic_analysis:
+      templates: [1, 2, 10]
+      description: "Competitive analysis, strategic decisions, org planning"
+      
+    problem_solving:
+      templates: [3, 9]
+      description: "Root cause analysis, process optimization"
+      
+    change_innovation:
+      templates: [4, 8]
+      description: "Change management, innovation strategy"
+      
+    planning:
+      templates: [5, 6]
+      description: "Project planning, marketing strategy"
+      
+    business_design:
+      templates: [7]
+      description: "Business model design and analysis"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WHEN TO USE
+  # ═══════════════════════════════════════════════════════════════════════════
+  when_to_use:
+    ideal_for:
+      - "Reasoning Language Models (Claude 3.5+, Claude 4, o1, o1-pro, o3, Gemini 2.0 Flash Thinking, DeepSeek R1)"
+      - "Complex multi-factor business analysis"
+      - "Strategic decisions requiring structured thinking"
+      - "Problems needing auditable reasoning trails"
+      - "Situations where multiple approaches should be explored"
+    
+    not_ideal_for:
+      - "Simple factual queries"
+      - "Creative writing tasks"
+      - "Basic chatbot interactions"
+      - "Speed-critical applications (use Chain of Draft instead)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMBINATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  combinations:
+    rlm_plus_cod:
+      name: "RLM Framework + Chain of Draft"
+      description: "Use framework structure with minimal token output"
+      use_case: "When you need structured reasoning but also token efficiency"
+      
+    rlm_plus_self_consistency:
+      name: "RLM Framework + Self-Consistency"
+      description: "Run multiple framework analyses, vote for best conclusion"
+      use_case: "Critical decisions requiring high confidence"
+      
+    rlm_plus_react:
+      name: "RLM Framework + ReAct"
+      description: "Use framework for planning, ReAct for execution with tools"
+      use_case: "Agent systems with strategic planning + tool use"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QUESTION DESIGN PRINCIPLES FOR RLMs
+  # Source: https://road2.ai/p/huong-dan-thiet-ke-cau-hoi-hieu-qua-cho-rlms
+  # ═══════════════════════════════════════════════════════════════════════════
+  question_design:
+    description: |
+      Core principles for designing effective questions for RLMs.
+      Proper question design helps RLMs leverage MCTS and build balanced reasoning trees.
+      Research shows: +57% accuracy and -40% processing time vs standard prompts (AIME Benchmark).
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # 4 QUESTION TYPES CLASSIFICATION
+    # Source: https://road2.ai/p/nguyen-tac-cot-loi-thiet-ke-cau-hoi-hieu-qua-cho-reasoning-model-ai
+    # ─────────────────────────────────────────────────────────────────────────
+    question_types:
+      description: "Identify which type your question belongs to for optimal structuring"
+      
+      causal_analysis:
+        name: "🔍 Causal Analysis"
+        description: "Analyze cause-effect relationships"
+        example: "Explain the impact of a 2% interest rate increase on SMEs in the real estate sector"
+        structure: "Identify factors → Trace causal chains → Quantify impacts"
+      
+      complex_problem_solving:
+        name: "🧮 Complex Problem Solving"
+        description: "Mathematical optimization, multi-variable problems"
+        example: "Optimize the cost function with Lagrangian constraints for a logistics system"
+        structure: "Define variables → Set constraints → Apply methods → Validate"
+      
+      scenario_forecasting:
+        name: "📊 Scenario Forecasting"
+        description: "Future projections with multiple scenarios"
+        example: "Simulate 3 market expansion scenarios for ASEAN 2025-2030"
+        structure: "Define scenarios → Model variables → Project outcomes → Compare"
+      
+      multi_criteria_evaluation:
+        name: "⚖️ Multi-Criteria Evaluation"
+        description: "Compare options across multiple metrics"
+        example: "Compare 5 AI platforms across 8 performance and cost metrics"
+        structure: "Define criteria → Weight importance → Score options → Rank"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # 3-LAYER STRUCTURE PATTERN
+    # ─────────────────────────────────────────────────────────────────────────
+    three_layer_structure:
+      name: "🏗️ 3-Layer Information Structure"
+      description: |
+        Structure prompts in 3 layers for optimal reasoning model performance.
+        This pattern provides clear context, constraints, and output expectations.
+      
+      layers:
+        context:
+          description: "Background information and situation"
+          example: "EdTech startup, available capital $500K USD"
+        
+        constraints:
+          description: "Specific limitations and requirements"
+          example: "[\"ROI > 25%\", \"Risk < Medium\"]"
+        
+        output_spec:
+          description: "Expected format and structure of response"
+          example: "5-page report with: SWOT Analysis, 3-phase Roadmap, Risk Contingency Table"
+      
+      template: |
+        Context = "[Background situation and key facts]"
+        Constraints = ["Constraint 1", "Constraint 2", "Constraint 3"]
+        Output_Spec = "[Format, structure, specific deliverables]"
+        
+        [Your question here]
+      
+      example:
+        use_case: "Investment analysis for EdTech startup"
+        prompt: |
+          Context = "EdTech startup company, available capital $500K USD"
+          Constraints = ["ROI > 25%", "Risk < Medium", "Timeline < 18 months"]
+          Output_Spec = "5-page report with: SWOT Analysis, 3-phase Roadmap, Risk Contingency Table"
+          
+          Analyze investment opportunities and provide recommendations.
+      
+      best_practices:
+        - "Quantify inputs - use specific numbers instead of vague descriptions"
+        - "Standardize format - request JSON/XML/LaTeX when further processing needed"
+        - "Control depth - set max_reasoning_steps=5 to prevent rambling"
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # CORE PRINCIPLES (existing content)
+    # ─────────────────────────────────────────────────────────────────────────
+    core_principles:
+      decomposition:
+        name: "1️⃣ Decomposition - Break into Sub-Questions"
+        description: |
+          RLMs excel at complex problems by breaking them into manageable sub-questions.
+          Instead of asking directly, guide the model to decompose.
+        
+        example:
+          original: "Calculate the sum of interior angles in a 12-sided polygon"
+          sub_questions:
+            - "What is the formula for sum of interior angles of a polygon?"
+            - "In that formula, n represents the number of sides, correct?"
+            - "If the polygon has 12 sides, then n = 12, correct?"
+            - "Substituting n = 12 into (n-2)×180, what do we get?"
+          result: "(12-2)×180 = 10×180 = 1800 degrees"
+        
+        complex_example:
+          original: "Explain quantum computing in simple terms"
+          sub_questions:
+            - "What is quantum superposition?"
+            - "How do qubits differ from classical bits?"
+            - "What are practical applications of quantum computing?"
+      
+      explicit_traces:
+        name: "2️⃣ Explicit Reasoning Traces"
+        description: |
+          Guide RLM through step-by-step reasoning using structured prompts.
+          This aligns with how MCTS builds reasoning trees in RLMs.
+        
+        template: |
+          Are follow-up questions needed? Yes.
+          Follow up: [Sub-question 1] → Intermediate answer: [Answer]
+          Follow up: [Sub-question 2] → Intermediate answer: [Answer]
+          Final answer: [Synthesized response]
+      
+      external_tools:
+        name: "3️⃣ External Tools Integration"
+        description: |
+          Ground answers in verified data to reduce hallucinations.
+          Direct the model to consult external sources.
+        
+        examples:
+          - "Search for peer-reviewed studies on X before answering."
+          - "Cite reports from [Trusted Organization] when discussing Y."
+          - "Using the 2024 IPCC report, explain the impact of..."
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # REASONING DEPTH CONTROL
+    # ─────────────────────────────────────────────────────────────────────────
+    depth_control:
+      name: "⚙️ Reasoning Depth Control"
+      description: "Control how deep the model reasons to balance depth vs efficiency"
+      
+      parameter: "max_reasoning_steps"
+      
+      guidelines:
+        simple_tasks: "max_reasoning_steps=3"
+        standard_tasks: "max_reasoning_steps=5 (recommended default)"
+        complex_tasks: "max_reasoning_steps=7-10"
+      
+      example: |
+        Analyze this problem with max_reasoning_steps=5.
+        Each step should advance toward the solution without repetition.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES FOR RLMs
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced_techniques:
+    self_ask_mcts:
+      name: "🔄 Self-Ask + MCTS Combination"
+      description: |
+        Combines Self-Ask prompting with MCTS reasoning structure.
+        Creates a powerful framework balancing exploration and exploitation.
+        Reduces hallucinations by 40-60% compared to standard CoT.
+      
+      four_step_process:
+        step_1:
+          name: "Root Node"
+          description: "Define main question and initial hypotheses"
+          example: "What caused the 2008 financial crisis?"
+        
+        step_2:
+          name: "Branching"
+          description: "Create 3-5 distinct reasoning paths"
+          example_branches:
+            - "Macroeconomic factors (housing bubble, deregulation)"
+            - "Institutional failures (credit rating agencies, risk models)"
+            - "Global interdependencies (international banking links)"
+        
+        step_3:
+          name: "Sub-Query Expansion"
+          description: "For each branch, create follow-up questions"
+          examples:
+            - "How did subprime mortgages contribute to the housing bubble?"
+            - "What role did Lehman Brothers' collapse play?"
+        
+        step_4:
+          name: "Validation"
+          description: "Verify intermediate answers against trusted sources"
+      
+      template: |
+        <reasoning>
+        Apply Self-Ask with MCTS: Create reasoning tree with multiple branches,
+        expand each with sub-questions, validate against sources before synthesis.
+        </reasoning>
+        
+        <task>
+        Main Question: [Your complex question]
+        
+        1. Identify 3-5 reasoning branches
+        2. For each branch, ask 2-3 sub-questions
+        3. Validate intermediate answers
+        4. Synthesize into final answer with confidence rating
+        </task>
+    
+    square_method:
+      name: "📊 SQuARE - Sequential Question Answering Reasoning Engine"
+      description: |
+        Generate N=3-5 auxiliary questions BEFORE addressing the main question.
+        Builds comprehensive context for accurate final answer.
+      
+      process:
+        - "Generate 3-5 auxiliary questions related to the main question"
+        - "Answer each auxiliary question"
+        - "Use accumulated knowledge to answer main question"
+      
+      example:
+        main_question: "What is the most appropriate treatment for this patient with respiratory symptoms?"
+        auxiliary_questions:
+          - question: "What symptoms differentiate influenza from COVID-19?"
+            answer: "[Details about fever patterns, respiratory symptoms, onset rate]"
+          - question: "Which diagnostic tests are most reliable?"
+            answer: "[Information about PCR, rapid tests, sensitivity rates]"
+        final_answer: "[Patient-specific recommendation integrating both answers]"
+      
+      template: |
+        <reasoning>
+        Apply SQuARE method: Generate auxiliary questions to build context,
+        then synthesize into comprehensive answer.
+        </reasoning>
+        
+        <task>
+        Main Question: [Complex question requiring multiple perspectives]
+        
+        1. Generate 3-5 auxiliary questions that help answer the main question
+        2. Answer each auxiliary question with evidence
+        3. Synthesize auxiliary answers into final comprehensive answer
+        4. Rate confidence level
+        </task>
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BEST PRACTICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  best_practices:
+    clarity_over_abstraction:
+      name: "📝 Clarity Over Abstraction"
+      description: "Avoid vague or opinion-based questions"
+      bad_example: "Is democracy better?"
+      good_example: "What are the trade-offs between democratic and authoritarian systems in economic development?"
+    
+    context_anchoring:
+      name: "🔗 Context Anchoring"
+      description: "Start questions with specific foundational context"
+      example: "Using the 2024 IPCC report, explain the impact of climate change on global food security."
+    
+    error_correction:
+      name: "⚠️ Proactive Error Correction"
+      description: "Include validation and self-correction instructions"
+      template: "Verify if the statement 'X causes Y' is supported by clinical trials. If not, revise accordingly."
+    
+    technical_workflow:
+      name: "💻 Technical Question Workflow"
+      description: "Structured approach for technical questions"
+      example:
+        question: "Optimize PyTorch code for training a ResNet-50 model"
+        step_1_decompose:
+          - "What batch size maximizes GPU utilization without memory overflow?"
+          - "Which mixed-precision libraries (AMP, FSDP) are compatible with PyTorch 2.1?"
+          - "How to implement gradient checkpointing in ResNet-50?"
+        step_2_validate: "Compare against PyTorch's official documentation and recent benchmarks"
+        step_3_synthesize: "Provide optimized code snippet implementing all recommended techniques"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MCTS IN RLMs - DEEP DIVE
+  # ═══════════════════════════════════════════════════════════════════════════
+  mcts_deep_dive:
+    description: |
+      Monte Carlo Tree Search (MCTS) is a core component of modern RLMs.
+      Understanding MCTS helps design questions that leverage this capability.
+    
+    four_step_cycle:
+      selection:
+        description: "Use UCB (Upper Confidence Bound) to select promising reasoning branches"
+        key: "Balance between exploring new paths and exploiting known good paths"
+      
+      expansion:
+        description: "Grow decision tree by adding new reasoning steps"
+        key: "Well-designed questions help create balanced tree growth"
+      
+      simulation:
+        description: "Evaluate quality of reasoning steps through value model"
+        key: "Each reasoning step is scored for likelihood of leading to correct answer"
+      
+      backpropagation:
+        description: "Update values of parent nodes based on children results"
+        key: "Good sub-question answers improve the overall reasoning path score"
+    
+    key_insight: |
+      Proper question design helps RLMs build balanced reasoning trees.
+      Questions that naturally decompose enable better MCTS exploration.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # EVALUATION FRAMEWORK
+  # ═══════════════════════════════════════════════════════════════════════════
+  evaluation:
+    description: "Criteria for evaluating RLM prompt effectiveness"
+    
+    metrics:
+      hallucination_rate:
+        description: "Check for inaccurate or irrelevant information"
+        lower_is_better: true
+      
+      intermediate_step_accuracy:
+        description: "Evaluate correctness of each reasoning step"
+        importance: "Errors compound - early mistakes lead to wrong conclusions"
+      
+      synthesis_quality:
+        description: "Ability to integrate information from multiple reasoning branches"
+        key: "Final answer should coherently combine all intermediate insights"
+      
+      generalization:
+        description: "Can the model apply reasoning principles to similar problems?"
+        test: "Try variations of the same question type"
+    
+    prm_vs_orm:
+      description: |
+        Process-Based Reward Models (PRMs) evaluate each reasoning step.
+        Outcome-Based Reward Models (ORMs) only evaluate final answer.
+        PRMs significantly improve RLM reasoning quality.
+      
+      recommendation: "Design prompts that enable step-by-step evaluation (PRMs)"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # QUICK REFERENCE
+  # ═══════════════════════════════════════════════════════════════════════════
+  quick_tips:
+    - "🏷️ Always use <reasoning> tag to prime the model's thinking"
+    - "📋 Use <task> tag for structured, numbered steps"
+    - "🌳 Choose tree-based for exploration (MCTS, Decision Tree)"
+    - "🕸️ Choose graph-based for cause-effect complexity"
+    - "🔍 Choose beam search for multi-stage pruning"
+    - "📊 Choose value/Q-value for quantifiable optimization"
+    - "📝 Choose trace-based when audit trail matters"
+    - "⚙️ Choose test-time compute for adaptive depth"
+    - "🔄 Use Self-Ask + MCTS for 40-60% hallucination reduction"
+    - "📊 Use SQuARE when 3-5 auxiliary questions help build context"
+    - "✅ Always include validation step for critical decisions"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # REFERENCES
+  # ═══════════════════════════════════════════════════════════════════════════
+  references:
+    - title: "10 Prompt Templates for RLMs using Thinking/Reasoning Framework"
+      url: "https://road2.ai/p/10-prompt-templates-cho-rlms-su-dung-framework-thinking-reasoning"
+      type: "Tutorial/Templates"
+      language: "Vietnamese"
+    
+    - title: "Effective Question Design for RLMs (UPDATE 2025)"
+      url: "https://road2.ai/p/huong-dan-thiet-ke-cau-hoi-hieu-qua-cho-rlms"
+      type: "Guide/Best Practices"
+      language: "Vietnamese"
+      key_concepts:
+        - "Decomposition into sub-questions"
+        - "Self-Ask + MCTS combination"
+        - "SQuARE method"
+        - "Process-based evaluation"
+    
+    - title: "Core Principles for Effective Question Design for Reasoning AI Models"
+      url: "https://road2.ai/p/nguyen-tac-cot-loi-thiet-ke-cau-hoi-hieu-qua-cho-reasoning-model-ai"
+      type: "Guide/Principles"
+      language: "Vietnamese"
+      key_concepts:
+        - "4 Question Types (Causal, Math, Forecast, Evaluation)"
+        - "3-Layer Structure (Context/Constraints/Output_Spec)"
+        - "+57% accuracy, -40% processing time (AIME Benchmark)"
+    
+    - title: "Reasoning Language Models Overview"
+      description: "Background on explicit RLMs with extended thinking capabilities"
+      related_models:
+        - "Anthropic: Claude 3.5 Sonnet, Claude 4"
+        - "OpenAI: o1, o1-mini, o1-pro, o3, o3-mini"
+        - "Google: Gemini 2.0 Flash Thinking"
+        - "DeepSeek: DeepSeek R1"

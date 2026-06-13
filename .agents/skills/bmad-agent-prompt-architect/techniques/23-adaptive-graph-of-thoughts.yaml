@@ -1,0 +1,90 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 23: ADAPTIVE GRAPH OF THOUGHTS (AGoT)
+# Beyond Tree-of-Thoughts — DAG-Based Dynamic Reasoning
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Adaptive Graph of Thoughts (AGoT)"
+  rank: 23
+  impact: "Advanced"
+  introduced_by: "Hugging Face / Research community, 2025"
+
+  overview:
+    definition: |
+      AGoT extends Graph of Thoughts (GoT) by dynamically decomposing complex 
+      problems into a Directed Acyclic Graph (DAG) at test time. Unlike fixed 
+      CoT (linear) or ToT (balanced tree), AGoT selectively expands only the 
+      sub-problems that need deeper analysis, reducing wasted computation while 
+      allocating more reasoning to genuinely hard branches.
+
+    why_important: |
+      - More efficient than ToT — doesn't explore every branch equally
+      - More flexible than GoT — graph structure adapts to the specific problem
+      - Handles complex problems where sub-problems have interdependencies
+      - Reduces unnecessary token usage vs. brute-force ToT
+
+    key_insight: |
+      Not all parts of a problem are equally hard. AGoT treats the reasoning
+      structure as dynamic — allocate reasoning resources where they\'re needed,
+      skip where they\'re not.
+
+  comparison:
+    cot: "Linear path A→B→C (fast, works for simple reasoning)"
+    tot: "Balanced tree — explores N branches at each step (thorough, expensive)"
+    got: "Arbitrary graph — nodes can merge and branch but static"
+    agot: "Adaptive DAG — expands only branches that need it (optimal, dynamic)"
+
+  when_to_use:
+    ideal_for:
+      - "Complex problems with uneven difficulty across sub-components"
+      - "Research tasks where some parts need deep analysis, others don't"
+      - "Architectural decisions with interconnected trade-offs"
+      - "Programming tasks combining trivial and hard sub-problems"
+      - "When ToT is too expensive but CoT is too shallow"
+
+    not_ideal_for:
+      - "Simple single-step problems (overkill)"
+      - "Uniform problems where all parts are equally complex"
+      - "Time-critical tasks (adds latency)"
+
+  implementation:
+    pattern_1_agot_prompt:
+      name: "AGoT Decomposition Prompt"
+      template: |
+        Problem: {complex_problem}
+        
+        Step 1 — Decompose into sub-problems:
+        Identify the main components. For each, estimate: Simple | Medium | Complex
+        
+        Step 2 — Prioritize expansion:
+        Only expand sub-problems marked Complex into further detail.
+        Simple sub-problems can be answered directly.
+        
+        Step 3 — Identify dependencies:
+        Note which sub-problems depend on others' outputs.
+        Resolve dependencies in correct order.
+        
+        Step 4 — Integrate:
+        Combine all sub-problem solutions, respecting dependencies.
+        
+        Final answer: {integrated_solution}
+
+    pattern_2_complexity_routing:
+      name: "Dynamic Complexity Routing"
+      template: |
+        Analyze this problem: {problem}
+        
+        For each component:
+        - If it can be answered in 1-2 sentences → answer directly
+        - If it requires multiple reasoning steps → expand with CoT
+        - If it has multiple valid approaches → use ToT for that branch only
+        
+        Integrate all components into a final cohesive answer.
+
+  combine_with:
+    - technique: "Extended Thinking (Rank 22)"
+      reason: "Extended thinking provides the compute budget; AGoT structures how it's spent"
+    - technique: "Tree of Thoughts (Rank 6)"
+      reason: "Use ToT only for branches AGoT flags as complex"
+    - technique: "Context-Aware Decomposition (Rank 24)"
+      reason: "CAD handles the decomposition; AGoT handles adaptive expansion"

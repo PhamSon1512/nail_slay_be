@@ -1,0 +1,18 @@
+export const ECOMMERCE_DDL = [
+  `CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL, slug TEXT NOT NULL, code TEXT, parent_id TEXT, image_url TEXT, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS categories_slug_udx ON categories (slug)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS categories_code_udx ON categories (code)`,
+  `CREATE INDEX IF NOT EXISTS categories_parent_id_idx ON categories (parent_id)`,
+  `CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY NOT NULL, category_id TEXT NOT NULL, sku TEXT, name TEXT NOT NULL, slug TEXT NOT NULL, description TEXT, price INTEGER NOT NULL, original_price INTEGER, size_options TEXT DEFAULT '[]' NOT NULL, form_options TEXT DEFAULT '[]' NOT NULL, stock INTEGER DEFAULT 0 NOT NULL, image_urls TEXT DEFAULT '[]' NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER, deleted_at INTEGER)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS products_slug_udx ON products (slug)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS products_sku_udx ON products (sku)`,
+  `CREATE TABLE IF NOT EXISTS addresses (id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL, detail TEXT NOT NULL, is_default INTEGER DEFAULT 0 NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE TABLE IF NOT EXISTS cart_items (id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity INTEGER DEFAULT 1 NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS cart_items_user_product_udx ON cart_items (user_id, product_id)`,
+  `CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL, address_id TEXT NOT NULL, total_amount INTEGER NOT NULL, payment_method TEXT DEFAULT 'BANK_TRANSFER' NOT NULL, status TEXT DEFAULT 'PENDING_PAYMENT' NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE TABLE IF NOT EXISTS order_items (id TEXT PRIMARY KEY NOT NULL, order_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity INTEGER NOT NULL, price INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS complaints (id TEXT PRIMARY KEY NOT NULL, order_id TEXT NOT NULL, user_id TEXT NOT NULL, reason TEXT NOT NULL, image_urls TEXT DEFAULT '[]' NOT NULL, admin_response TEXT, status TEXT DEFAULT 'OPEN' NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS complaints_order_id_udx ON complaints (order_id)`,
+  `CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS settings_key_udx ON settings (key)`,
+];

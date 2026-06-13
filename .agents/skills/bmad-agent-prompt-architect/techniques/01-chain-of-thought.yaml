@@ -1,0 +1,307 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 1: CHAIN-OF-THOUGHT (CoT)
+# The Most Influential Reasoning Technique in Prompt Engineering
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Chain-of-Thought (CoT)"
+  rank: 1
+  impact: "Revolutionary"
+  introduced_by: "Wei et al., 2022 (Google)"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Chain-of-Thought is a prompting technique that encourages the LLM to 
+      generate intermediate reasoning steps before arriving at the final answer.
+      Instead of directly outputting the answer, the model "thinks aloud" 
+      step by step.
+    
+    why_important: |
+      - **Game-changer for reasoning**: Dramatically improves performance on 
+        math, logic, and multi-step problems
+      - **Emergent ability**: Only works well in large models (100B+ parameters)
+      - **Foundation for many techniques**: ToT, GoT, Self-Consistency all build on CoT
+      - **Research-validated**: Extensively proven across benchmarks
+    
+    key_insight: |
+      "The magic words are 'Let's think step by step'"
+      
+      Simply adding this phrase can improve accuracy by 10-40% on reasoning tasks.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # VARIANTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  variants:
+    zero_shot_cot:
+      description: "Add 'Let's think step by step' without examples"
+      trigger_phrases:
+        - "Let's think step by step"
+        - "Let's work through this step by step"
+        - "Let's break this down"
+        - "Let's analyze this carefully"
+      
+      example:
+        prompt: |
+          Q: A store has 45 apples. They sell 12 in the morning and receive 
+          a shipment of 30 more. How many apples do they have now?
+          
+          Let's think step by step.
+        
+        response: |
+          Let's think step by step.
+          
+          1. Initial apples: 45
+          2. Sold in morning: 45 - 12 = 33
+          3. Received shipment: 33 + 30 = 63
+          
+          The store now has 63 apples.
+
+    few_shot_cot:
+      description: "Provide examples that demonstrate the reasoning process"
+      
+      template: |
+        Q: [Example question 1]
+        A: Let's think step by step.
+        [Step 1]
+        [Step 2]
+        [Step 3]
+        Therefore, [answer].
+        
+        Q: [Example question 2]
+        A: Let's think step by step.
+        [Step 1]
+        [Step 2]
+        Therefore, [answer].
+        
+        Q: [Actual question]
+        A: Let's think step by step.
+      
+      best_for: "Complex domains where you need to demonstrate the expected reasoning style"
+
+    auto_cot:
+      description: "Let the model generate its own CoT examples"
+      process:
+        - "Cluster similar questions"
+        - "Sample representative questions from each cluster"
+        - "Generate CoT reasoning for each using Zero-Shot CoT"
+        - "Use these as few-shot examples"
+      advantage: "No manual example creation needed"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WHEN TO USE
+  # ═══════════════════════════════════════════════════════════════════════════
+  when_to_use:
+    ideal_for:
+      - "Mathematical reasoning and word problems"
+      - "Logical deduction and puzzles"
+      - "Multi-step planning"
+      - "Complex question answering"
+      - "Code debugging (trace through execution)"
+      - "Decision making with multiple factors"
+    
+    not_ideal_for:
+      - "Simple factual lookups"
+      - "Creative writing (may over-constrain)"
+      - "When speed is critical (adds tokens)"
+      - "Very simple yes/no questions"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  implementation:
+    pattern_1_basic:
+      name: "Basic CoT"
+      template: |
+        [Question/Problem]
+        
+        Let's think step by step:
+        1. [First step]
+        2. [Second step]
+        3. [Third step]
+        
+        Therefore, the answer is: [Answer]
+
+    pattern_2_structured:
+      name: "Structured CoT"
+      template: |
+        <problem>
+          [Problem description]
+        </problem>
+        
+        <reasoning>
+          <step number="1">
+            [What we know]
+          </step>
+          <step number="2">
+            [What we can derive]
+          </step>
+          <step number="3">
+            [Conclusion]
+          </step>
+        </reasoning>
+        
+        <answer>
+          [Final answer]
+        </answer>
+
+    pattern_3_scratchpad:
+      name: "Scratchpad CoT"
+      template: |
+        <scratchpad>
+        ## Understanding the problem
+        - Given: [...]
+        - Find: [...]
+        
+        ## Working through
+        Step 1: [...]
+        Step 2: [...]
+        
+        ## Verification
+        Check: [...]
+        </scratchpad>
+        
+        **Final Answer**: [Answer]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    contrastive_cot:
+      description: "Show both correct AND incorrect reasoning"
+      template: |
+        ❌ INCORRECT reasoning:
+        [Wrong approach with explanation why it's wrong]
+        
+        ✅ CORRECT reasoning:
+        [Right approach with explanation why it's right]
+      
+      benefit: "Teaches model what to avoid, not just what to do"
+
+    complexity_based_selection:
+      description: "Use more complex reasoning chains as examples"
+      insight: |
+        Research shows that using examples with MORE reasoning steps 
+        improves performance, even if simpler examples would suffice.
+
+    self_consistency_with_cot:
+      description: "Generate multiple CoT paths, vote on answer"
+      process:
+        - "Generate 5-10 different CoT reasoning paths"
+        - "Extract final answer from each"
+        - "Take majority vote"
+      improvement: "5-10% accuracy boost over single CoT"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_math:
+      problem: "If a train travels at 60 mph for 2.5 hours, then at 80 mph for 1.5 hours, what's the total distance?"
+      
+      basic_prompt: "Calculate the total distance."
+      
+      world_class_prompt: |
+        Calculate the total distance traveled by the train.
+        
+        Think through this step-by-step:
+        1. First, calculate distance for the first leg (distance = speed × time)
+        2. Then, calculate distance for the second leg
+        3. Finally, add both distances
+        
+        Show your work clearly.
+      
+      expected_output: |
+        Let me solve this step by step:
+        
+        **Step 1: First leg of journey**
+        - Speed: 60 mph
+        - Time: 2.5 hours
+        - Distance = 60 × 2.5 = 150 miles
+        
+        **Step 2: Second leg of journey**
+        - Speed: 80 mph
+        - Time: 1.5 hours
+        - Distance = 80 × 1.5 = 120 miles
+        
+        **Step 3: Total distance**
+        Total = 150 + 120 = 270 miles
+        
+        **Answer: 270 miles**
+
+    example_2_logic:
+      problem: "All roses are flowers. Some flowers fade quickly. Can we conclude that some roses fade quickly?"
+      
+      world_class_prompt: |
+        Analyze this logical argument step by step:
+        
+        Premise 1: All roses are flowers.
+        Premise 2: Some flowers fade quickly.
+        Conclusion: Some roses fade quickly.
+        
+        Is this conclusion valid? Think through the logical structure carefully.
+      
+      expected_output: |
+        Let me analyze this step by step:
+        
+        **Step 1: Understand the premises**
+        - P1: All roses ⊆ flowers (roses are a subset of flowers)
+        - P2: Some flowers fade quickly (at least one flower fades quickly)
+        
+        **Step 2: Analyze the logical relationship**
+        - P2 tells us SOME flowers fade quickly
+        - But it doesn't specify WHICH flowers
+        - The flowers that fade quickly might be tulips, not roses
+        
+        **Step 3: Draw conclusion**
+        - This is a logical fallacy called "undistributed middle"
+        - Just because some flowers fade quickly doesn't mean roses are among them
+        
+        **Answer: No, the conclusion is NOT valid.**
+        We cannot logically conclude that roses fade quickly from these premises.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Use explicit step markers"
+      example: "Step 1:, Step 2:, or 1., 2., 3."
+      why: "Helps model maintain structure and not skip steps"
+    
+    - tip: "Request verification"
+      example: "After solving, verify your answer by substituting back"
+      why: "Catches arithmetic errors"
+    
+    - tip: "Specify reasoning style"
+      example: "Think like a mathematician" or "Reason like a detective"
+      why: "Primes the model for appropriate reasoning approach"
+    
+    - tip: "Use scratchpad for hidden reasoning"
+      example: "Use <scratchpad> tags for your working, then provide final answer"
+      why: "Clean output while maintaining CoT benefits"
+    
+    - tip: "Combine with Self-Consistency"
+      example: "Generate 5 different approaches and verify they agree"
+      why: "Significant accuracy improvement"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES TO AVOID
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Using CoT for simple tasks"
+      problem: "Wastes tokens, may overcomplicate"
+      fix: "Reserve CoT for genuinely multi-step problems"
+    
+    - mistake: "Vague step instructions"
+      problem: "Model may skip or combine steps"
+      fix: "Be explicit about what each step should accomplish"
+    
+    - mistake: "Not providing example reasoning"
+      problem: "Model may reason in unexpected ways"
+      fix: "Use Few-Shot CoT for consistency"
+    
+    - mistake: "Ignoring verification"
+      problem: "Errors propagate through reasoning chain"
+      fix: "Always include verification step at end"

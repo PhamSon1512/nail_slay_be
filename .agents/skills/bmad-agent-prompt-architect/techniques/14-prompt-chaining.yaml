@@ -1,0 +1,127 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: PROMPT CHAINING
+# Break Complex Tasks into Sequential Steps
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Prompt Chaining"
+  rank: 14
+  impact: "Essential for Complex Tasks"
+  era: "2023+"
+  
+  overview:
+    definition: |
+      Prompt Chaining breaks complex tasks into a sequence of smaller prompts
+      where the output of one prompt becomes the input for the next.
+      Like a pipeline, each step focuses on one specific sub-task.
+    
+    why_important:
+      - "Complex tasks often fail in single prompts"
+      - "Each step can be optimized independently"
+      - "Easier to debug and improve"
+      - "Better control over intermediate outputs"
+      - "Reduces token usage per call"
+    
+    key_insight: |
+      "Don't ask one giant question - ask a series of focused questions."
+      
+      Multi-step thinking is more reliable than single-shot complexity.
+
+  patterns:
+    sequential:
+      description: "Output of step N → Input of step N+1"
+      example: |
+        Step 1: Extract key entities from text
+        Step 2: Research each entity
+        Step 3: Synthesize findings into report
+        Step 4: Format and polish final output
+    
+    conditional:
+      description: "Next step depends on previous output"
+      example: |
+        Step 1: Classify input type
+        If type == "question" → Step 2a: Answer question
+        If type == "request" → Step 2b: Execute request
+        If type == "complaint" → Step 2c: Handle complaint
+    
+    parallel_then_merge:
+      description: "Multiple parallel chains merged at end"
+      example: |
+        Chain A: Analyze from technical perspective
+        Chain B: Analyze from business perspective  
+        Chain C: Analyze from user perspective
+        Final: Synthesize all three perspectives
+    
+    iterative:
+      description: "Loop until condition met"
+      example: |
+        Step 1: Generate draft
+        Step 2: Evaluate quality (score 1-10)
+        If score < 8: Go to Step 1 with feedback
+        If score >= 8: Output final result
+
+  implementation:
+    basic_pattern: |
+      # Chain Step 1
+      prompt_1 = "Extract key points from: {input}"
+      result_1 = llm.call(prompt_1)
+      
+      # Chain Step 2  
+      prompt_2 = f"Expand on these points: {result_1}"
+      result_2 = llm.call(prompt_2)
+      
+      # Chain Step 3
+      prompt_3 = f"Write final article based on: {result_2}"
+      final = llm.call(prompt_3)
+    
+    with_validation: |
+      for step in chain:
+          result = llm.call(step.prompt.format(context))
+          
+          if not validate(result, step.schema):
+              result = retry_with_feedback(step, result)
+          
+          context = {**context, step.output_key: result}
+      
+      return context["final_output"]
+
+  world_class_example:
+    task: "Write comprehensive market analysis report"
+    
+    chain: |
+      **Step 1: Data Extraction**
+      Prompt: "Extract key metrics and trends from this market data: {data}"
+      Output: metrics_list
+      
+      **Step 2: Competitive Analysis**
+      Prompt: "Based on {metrics_list}, analyze competitive positioning"
+      Output: competitive_analysis
+      
+      **Step 3: Trend Identification**
+      Prompt: "Identify 3-5 major trends from {metrics_list}"
+      Output: trends
+      
+      **Step 4: Recommendations**
+      Prompt: "Given {competitive_analysis} and {trends}, recommend strategies"
+      Output: recommendations
+      
+      **Step 5: Executive Summary**
+      Prompt: "Write 1-page executive summary covering {recommendations}"
+      Output: final_report
+
+  tips:
+    - "Keep each step focused on ONE task"
+    - "Include validation between steps"
+    - "Pass only necessary context forward"
+    - "Design for failure recovery"
+    - "Log intermediate results for debugging"
+
+  mistakes:
+    - mistake: "Steps too large"
+      fix: "Break into smaller, atomic operations"
+    
+    - mistake: "No error handling"
+      fix: "Add validation and retry logic"
+    
+    - mistake: "Passing too much context"
+      fix: "Summarize or filter between steps"

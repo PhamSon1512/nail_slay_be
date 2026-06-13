@@ -1,0 +1,130 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 22: EXTENDED THINKING / INFERENCE-TIME SCALING
+# The 2025 Paradigm Shift — Reasoning Budget Control
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Extended Thinking & Inference-Time Scaling"
+  rank: 22
+  impact: "Paradigm Shift"
+  introduced_by: "Anthropic (Claude 3.7), OpenAI (o1/o3), Google (Gemini 2.0 Flash Thinking), 2024-2025"
+
+  overview:
+    definition: |
+      Extended Thinking is a capability in modern frontier models (Claude 3.7+, 
+      GPT-o1/o3, Gemini Flash Thinking) where the model allocates a variable 
+      \"thinking budget\" of internal reasoning tokens BEFORE producing the final 
+      response. Inference-Time Scaling means performance is improved by giving 
+      the model more compute at inference time rather than increasing model size.
+
+    why_important: |
+      - Replaces \"magic phrases\" — you no longer need \"Let's think step by step\" 
+        for models with native thinking; instead you control the BUDGET
+      - Enables smaller models to beat larger ones on complex tasks (s1 paper, 2025)
+      - Transparent: \"thinking blocks\" visible for debugging
+      - New form of prompt engineering: set conditions for productive thinking, 
+        not just instructions
+
+    key_insight: |
+      With thinking models, the prompt engineer's job shifts from
+      \"what words trigger reasoning\" to \"what conditions bound good reasoning\".
+      You set the problem, constraints, and success criteria — the model handles the how.
+
+  variants:
+    native_extended_thinking:
+      description: "Enable thinking mode via API parameter (Claude, Gemini)"
+      usage: |
+        # Claude API
+        thinking: { type: "enabled", budget_tokens: 10000 }
+        
+        # Or via prompt for models without API control:
+        "Before answering, think through this carefully in a <thinking> block."
+      best_for: "Complex reasoning, math, code, strategic planning"
+
+    budget_forcing:
+      description: "Control compute budget per task based on complexity"
+      principle: |
+        Match thinking budget to task complexity:
+        - Simple factual query → 0 (no thinking)
+        - Medium analysis → 2k-5k tokens
+        - Complex problem → 10k-20k tokens
+        - Research-level task → max budget
+      anti_pattern: |
+        Don't enable max thinking for simple tasks — wastes latency and cost.
+        Reserve deep reasoning for genuinely hard problems.
+
+    thinking_trace_debugging:
+      description: "Use visible thinking blocks to debug prompt failures"
+      process:
+        - "When model fails, examine the thinking trace"
+        - "Find exactly where logic drifted or assumption broke"
+        - "Add constraint or clarification to the prompt at that inflection point"
+        - "Re-run — thinking trace is your debugger"
+
+  when_to_use:
+    ideal_for:
+      - "Math problems requiring multi-step computation"
+      - "Code debugging where cause is non-obvious"
+      - "Strategic analysis with multiple trade-offs"
+      - "Legal/medical reasoning with competing factors"
+      - "Any task where CoT previously helped but felt insufficient"
+
+    not_ideal_for:
+      - "Simple factual lookups (wasteful)"
+      - "Creative writing (over-constrains imagination)"
+      - "Low-latency real-time applications"
+      - "Tasks where the first good answer is fine"
+
+  implementation:
+    pattern_1_budget_control:
+      name: "Budget-Matched Prompting"
+      template: |
+        [For API-controlled thinking models]
+        System: {standard_system_prompt}
+        Thinking budget: {budget_based_on_complexity}
+        
+        [For prompt-controlled thinking]
+        Before answering, use a <thinking> block to:
+        1. Break down the problem into components
+        2. Work through each component systematically
+        3. Check your reasoning before concluding
+        
+        <thinking>
+        [Model reasons here]
+        </thinking>
+        
+        [Final answer]
+
+    pattern_2_constraint_setting:
+      name: "Constraint-First Thinking Setup"
+      template: |
+        Problem: {problem_statement}
+        
+        Constraints:
+        - {constraint_1}
+        - {constraint_2}
+        
+        Success criteria: {what_a_correct_answer_looks_like}
+        
+        Think through this, then provide your answer.
+      benefit: "Sets productive reasoning boundaries — model spends thinking on the right space"
+
+  modern_guidance:
+    do:
+      - "Match thinking budget to actual complexity"
+      - "Use constraints + success criteria in the prompt, not reasoning steps"
+      - "Examine thinking traces when debugging failures"
+      - "Combine with Self-Consistency for critical decisions"
+    dont:
+      - "Add 'Let's think step by step' to reasoning models — they do this natively"
+      - "Enable max thinking for simple tasks"
+      - "Prescribe the reasoning path — set the goal and let the model find the path"
+      - "Ignore thinking traces when the model fails"
+
+  combine_with:
+    - technique: "Self-Consistency (Rank 4)"
+      reason: "Generate 3 thinking paths, vote on answer — high accuracy"
+    - technique: "Context Engineering (Rank 11)"
+      reason: "Structure context so the thinking starts from the right foundation"
+    - technique: "Adaptive Graph of Thoughts (Rank 25)"
+      reason: "AGoT operates at the prompt level; Extended Thinking provides the compute"

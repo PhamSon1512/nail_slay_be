@@ -1,0 +1,146 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 26: AGENTIC OPERATIONAL POLICY DESIGN
+# From Prompt to Policy — 2025 Enterprise Agent Standard
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Agentic Operational Policy Design"
+  rank: 26
+  impact: "Transformative"
+  introduced_by: "Enterprise AI community + Inflectra + Anthropic guidelines, 2025"
+
+  overview:
+    definition: |
+      Agentic Operational Policy Design treats an agent\'s system prompt as an 
+      «operational policy» rather than a set of instructions. It explicitly defines 
+      four domains: scope (what the agent handles), tool-selection criteria (when 
+      to use which tool), error-handling protocols (what to do when things break), 
+      and escalation paths (when to ask for help vs. proceed autonomously).
+
+    why_important: |
+      - Modern agents fail not from lack of capability but from unclear decision policies
+      - Without escalation paths, agents hallucinate solutions or get stuck
+      - Without tool-selection criteria, agents pick wrong tools or overuse them
+      - 2025 standard for production agentic systems
+
+    key_insight: |
+      A production agent prompt is not a list of things the agent can do.
+      It\'s a governance document specifying HOW it decides what to do,
+      WHEN to act autonomously, and WHEN to escalate.
+
+  policy_domains:
+    scope:
+      description: "What this agent handles and what it passes to others"
+      questions:
+        - "What problem space is this agent responsible for?"
+        - "What adjacent problems should it NOT handle?"
+        - "When should it redirect to a human or another agent?"
+
+    tool_selection:
+      description: "When to use which tool — not just what tools exist"
+      questions:
+        - "For task type X, which tool is preferred?"
+        - "When should the agent try multiple tools?"
+        - "What makes a tool result insufficient?"
+
+    error_handling:
+      description: "What to do when something breaks or returns unexpected results"
+      questions:
+        - "If tool call fails, retry or escalate?"
+        - "If result is ambiguous, assume or clarify?"
+        - "If conflicting signals, how to resolve?"
+
+    escalation_paths:
+      description: "Clear decision tree for when to act vs. ask"
+      questions:
+        - "What triggers autonomous action vs. confirmation request?"
+        - "At what confidence threshold does the agent proceed?"
+        - "What actions require explicit human approval?"
+
+  when_to_use:
+    ideal_for:
+      - "Production agents with tool access"
+      - "Multi-agent systems where handoff logic matters"
+      - "Agents handling sensitive operations (payments, deletions, emails)"
+      - "Long-running autonomous tasks"
+
+    not_ideal_for:
+      - "Simple single-turn chatbots"
+      - "Agents with no tools and no autonomous actions"
+
+  implementation:
+    pattern_1_full_policy:
+      name: "Complete Operational Policy Prompt"
+      template: |
+        <agent_policy>
+          <identity>
+            You are {Agent Name}, responsible for {scope}.
+          </identity>
+
+          <scope>
+            <handles>{what_this_agent_owns}</handles>
+            <does_not_handle>
+              {adjacent_tasks} → redirect to {other_agent_or_human}
+            </does_not_handle>
+          </scope>
+
+          <tool_selection_policy>
+            For {task_type_1} → use {tool_A}, prefer {tool_B} if {condition}
+            For {task_type_2} → always start with {tool_C}
+            Never use {tool_D} for {situation}
+          </tool_selection_policy>
+
+          <error_handling>
+            If tool fails → retry once, then escalate with context
+            If result is ambiguous → ask ONE clarifying question
+            If conflicting signals → report both, ask user to decide
+          </error_handling>
+
+          <escalation_policy>
+            Proceed autonomously when: {confidence threshold} + {action is reversible}
+            Request confirmation when: {high-impact action} or {confidence < 80%}
+            Hard stop and escalate when: {destructive action} or {out of scope}
+          </escalation_policy>
+
+          <safety>
+            Before any {irreversible_action}: confirm with user explicitly
+            Never: {hard_constraints}
+          </safety>
+        </agent_policy>
+
+    pattern_2_decision_tree:
+      name: "Escalation Decision Tree"
+      template: |
+        When receiving a request:
+        
+        1. Is it within my scope? → If no: redirect to {X}
+        2. Do I have the information I need? → If no: ask ONE question
+        3. Is the action reversible? → If no: request confirmation
+        4. Confidence > {threshold}? → If no: explain uncertainty, ask
+        5. Proceed → execute and report result
+        
+        On error:
+        1. Log the error context
+        2. Retry once with adjusted approach
+        3. If still failing: escalate with full context
+
+  combine_with:
+    - technique: "ReAct (Rank 3)"
+      reason: "ReAct provides the reasoning loop; Operational Policy provides the governance rules"
+    - technique: "Reflexion (Rank 17)"
+      reason: "Reflexion handles retry logic; Policy defines when to retry vs. escalate"
+    - technique: "Multi-Agent Design"
+      reason: "Operational Policy defines handoff protocols between agents in a system"
+
+  anti_patterns:
+    - problem: "Tool list without selection criteria"
+      symptom: "Agent picks wrong tool or uses brute force (tries all tools)"
+      fix: "Add explicit tool-selection policy per task type"
+
+    - problem: "No escalation path"
+      symptom: "Agent gets stuck in loop or hallucinates a solution"
+      fix: "Add hard stop conditions and escalation triggers"
+
+    - problem: "No scope definition"
+      symptom: "Agent handles everything, quality drops on edge cases"
+      fix: "Explicit handles/does_not_handle with redirect targets"

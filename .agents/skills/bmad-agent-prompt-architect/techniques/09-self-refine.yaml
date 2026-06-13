@@ -1,0 +1,113 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 9: SELF-REFINE
+# Iterative Self-Improvement of Outputs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Self-Refine"
+  rank: 9
+  impact: "Major Quality Improvement"
+  introduced_by: "Madaan et al., 2023"
+  
+  overview:
+    definition: |
+      Self-Refine: LLM generates output → critiques it → refines based on critique.
+      Cycle repeats until quality standards are met.
+    
+    why_important:
+      - "5-20% improvement across tasks"
+      - "No external feedback needed"
+      - "Works on any task"
+      - "Mirrors human draft→review→revise process"
+    
+    key_insight: "LLMs are better at critiquing than generating. Use this asymmetry."
+
+  mechanism:
+    loop:
+      - step: 1
+        name: "Generate"
+        action: "Create first draft"
+      - step: 2
+        name: "Critique"
+        action: "Identify problems"
+      - step: 3
+        name: "Refine"
+        action: "Fix identified issues"
+      - step: 4
+        name: "Repeat"
+        condition: "Until satisfactory or max iterations"
+
+  patterns:
+    basic:
+      template: |
+        Task: {task}
+        
+        === DRAFT ===
+        [Initial output]
+        
+        === CRITIQUE ===
+        What are the weaknesses?
+        1. [Issue 1]
+        2. [Issue 2]
+        
+        === REFINED ===
+        [Improved version]
+
+    structured:
+      template: |
+        <draft>[Output]</draft>
+        
+        <critique>
+          <strengths>[What works]</strengths>
+          <weaknesses>[What to fix]</weaknesses>
+          <priority>[Most important fix]</priority>
+        </critique>
+        
+        <refined>[Improved output]</refined>
+
+    rubric_based:
+      template: |
+        <draft>[Output]</draft>
+        
+        Rate on criteria (1-5):
+        - Accuracy: ?/5
+        - Clarity: ?/5
+        - Completeness: ?/5
+        
+        <refined target="15/15">[Improved output]</refined>
+
+  world_class_example:
+    task: "Write email requesting deadline extension"
+    
+    prompt: |
+      Write a professional email requesting 1-week deadline extension.
+      
+      <draft>Write first version</draft>
+      
+      <critique>
+      Review for:
+      - Professional tone
+      - Clear reasoning
+      - Proposed timeline
+      </critique>
+      
+      <refined>Improved version addressing critique</refined>
+      
+      <final_check>Ready to send?</final_check>
+
+  tips:
+    - "Provide specific critique criteria"
+    - "Request actionable feedback"
+    - "Limit to 2-3 iterations"
+    - "Include final quality check"
+    - "Map critique points to refinements"
+
+  mistakes:
+    - mistake: "Too lenient self-critique"
+      fix: "Ask to find at least 3 issues"
+    
+    - mistake: "Critique not connected to refinement"
+      fix: "Explicitly show how each issue was fixed"
+    
+    - mistake: "Infinite refinement"
+      fix: "Set max iterations or quality threshold"

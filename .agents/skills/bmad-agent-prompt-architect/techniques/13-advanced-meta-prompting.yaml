@@ -1,0 +1,343 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: ADVANCED META-PROMPTING
+# LLM Self-Optimization - Prompts That Improve Themselves
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Advanced Meta-Prompting"
+  rank: "Cutting-Edge"
+  impact: "Multiplicative"
+  era: "2024+"
+  builds_on: ["meta_prompting", "dspy", "self_refine"]
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Advanced Meta-Prompting encompasses techniques where LLMs generate,
+      evaluate, and optimize prompts automatically. The LLM becomes its own
+      prompt engineer, iteratively improving instructions based on feedback.
+    
+    techniques_covered:
+      - "APE (Automatic Prompt Engineer)"
+      - "OPRO (Optimization by PROmpting)"
+      - "Prompt Breeding/Evolution"
+      - "Self-Taught Prompt Engineering"
+      - "Contrasted Prompt Pairs"
+    
+    why_important:
+      - "Scales prompt engineering beyond human capacity"
+      - "Finds non-obvious prompt patterns"
+      - "Continuous improvement with feedback"
+      - "Reduces manual iteration time"
+    
+    key_insight: |
+      "The best prompt engineer might be an LLM itself."
+      
+      LLMs understand their own instruction-following better than any human.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE 1: APE (Automatic Prompt Engineer)
+  # ═══════════════════════════════════════════════════════════════════════════
+  ape:
+    name: "Automatic Prompt Engineer"
+    paper: "Zhou et al., 2022"
+    
+    concept: |
+      Generate multiple prompt candidates, evaluate each on test examples,
+      select the best performing prompt automatically.
+    
+    algorithm:
+      - step: 1
+        name: "Generate Candidates"
+        action: |
+          Ask LLM: "Generate 10 different ways to instruct an AI to {task}"
+      
+      - step: 2
+        name: "Evaluate Each"
+        action: "Run each prompt on validation set, measure accuracy"
+      
+      - step: 3
+        name: "Select Best"
+        action: "Choose prompt with highest score"
+      
+      - step: 4
+        name: "Iterate (Optional)"
+        action: "Use best prompt as seed, generate variations, repeat"
+    
+    template: |
+      I want an AI to perform the following task:
+      {task_description}
+      
+      Here are some examples of correct behavior:
+      {examples}
+      
+      Generate 10 different instruction prompts that would make an AI
+      perform this task correctly. Each prompt should be self-contained.
+      
+      Prompt 1: [...]
+      Prompt 2: [...]
+      ...
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE 2: OPRO (Optimization by PROmpting)
+  # ═══════════════════════════════════════════════════════════════════════════
+  opro:
+    name: "Optimization by PROmpting"
+    paper: "Yang et al., 2023 (Google DeepMind)"
+    
+    concept: |
+      Use the LLM itself as an optimizer. Show it previous prompts and their
+      scores, ask it to generate a better prompt. Repeat until convergence.
+    
+    key_innovation: |
+      Instead of random search, the LLM can REASON about what makes
+      prompts better based on score feedback.
+    
+    meta_prompt_template: |
+      Your task is to generate an instruction prompt for the following task.
+      
+      TASK: {task_description}
+      
+      Previous attempts and their scores:
+      
+      Prompt: "{prompt_1}"
+      Score: {score_1}
+      
+      Prompt: "{prompt_2}"
+      Score: {score_2}
+      
+      Prompt: "{prompt_3}"
+      Score: {score_3}
+      
+      Based on the pattern of which prompts scored higher, generate a new
+      prompt that you predict will score even higher. Explain your reasoning.
+      
+      Reasoning: [...]
+      New Prompt: [...]
+    
+    advantages:
+      - "Uses LLM reasoning to improve prompts intelligently"
+      - "Learns from mistakes explicitly"
+      - "Often finds surprising effective patterns"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE 3: PROMPT BREEDING/EVOLUTION
+  # ═══════════════════════════════════════════════════════════════════════════
+  prompt_evolution:
+    name: "Prompt Breeding/Evolution"
+    inspired_by: "Genetic algorithms"
+    
+    concept: |
+      Treat prompts as "organisms" that evolve. Use mutation, crossover,
+      and selection to breed better prompts over generations.
+    
+    operators:
+      mutation:
+        description: "Small changes to existing prompt"
+        example: |
+          Original: "You are a helpful assistant."
+          Mutated: "You are a helpful and knowledgeable assistant."
+      
+      crossover:
+        description: "Combine parts of two successful prompts"
+        example: |
+          Parent 1: "Think step by step. Be concise."
+          Parent 2: "Consider all angles. Use examples."
+          Child: "Think step by step. Consider all angles."
+      
+      selection:
+        description: "Keep only top-performing prompts"
+        method: "Evaluate on test set, keep top 20%"
+    
+    algorithm: |
+      population = generate_initial_prompts(n=50)
+      
+      for generation in range(20):
+          scores = evaluate_all(population)
+          
+          # Selection
+          survivors = top_k(population, scores, k=10)
+          
+          # Crossover
+          children = crossover_pairs(survivors)
+          
+          # Mutation
+          mutants = mutate(survivors + children)
+          
+          population = survivors + children + mutants
+      
+      return best_prompt(population)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE 4: CONTRASTED PROMPT PAIRS
+  # ═══════════════════════════════════════════════════════════════════════════
+  contrasted_prompts:
+    name: "Contrasted Prompt Pairs"
+    concept: |
+      Generate pairs of prompts - one good, one bad - to teach the model
+      what distinguishes effective from ineffective instructions.
+    
+    template: |
+      Task: {task_description}
+      
+      Generate a pair of prompts:
+      
+      EFFECTIVE PROMPT:
+      A prompt that would make an AI perform this task excellently.
+      Explain why it's effective.
+      
+      INEFFECTIVE PROMPT:
+      A prompt that would make an AI fail at this task.
+      Explain why it fails.
+      
+      KEY DIFFERENCES:
+      What specific elements make the first prompt work better?
+    
+    use_cases:
+      - "Training prompt classifiers"
+      - "Teaching prompt engineering to humans"
+      - "Identifying failure patterns"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE 5: SELF-TAUGHT PROMPTING
+  # ═══════════════════════════════════════════════════════════════════════════
+  self_taught:
+    name: "Self-Taught Prompting"
+    concept: |
+      LLM generates its own training data, evaluates itself, and improves
+      its instruction-following in a self-supervised loop.
+    
+    process:
+      - step: 1
+        action: "LLM generates diverse task examples"
+      
+      - step: 2
+        action: "LLM creates prompts for those tasks"
+      
+      - step: 3
+        action: "LLM attempts tasks with own prompts"
+      
+      - step: 4
+        action: "LLM evaluates its own performance"
+      
+      - step: 5
+        action: "LLM analyzes what prompts worked better"
+      
+      - step: 6
+        action: "LLM generates improved prompt guidelines"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS IMPLEMENTATION
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_implementation:
+    scenario: "Optimize customer service chatbot prompt"
+    
+    implementation: |
+      # Step 1: Define task and metrics
+      task = "Respond to customer complaints professionally"
+      metrics = ["resolution_rate", "customer_satisfaction", "response_quality"]
+      
+      # Step 2: Generate initial candidates (APE style)
+      candidates = generate_prompt_candidates(task, n=20)
+      
+      # Step 3: Evaluate on test conversations
+      scores = []
+      for prompt in candidates:
+          results = evaluate_on_test_set(prompt, test_conversations)
+          scores.append(compute_metrics(results))
+      
+      # Step 4: OPRO optimization loop
+      best_prompts = select_top_k(candidates, scores, k=5)
+      
+      for iteration in range(10):
+          # Show LLM the trajectory
+          meta_prompt = create_opro_prompt(best_prompts, scores)
+          new_prompt = llm.generate(meta_prompt)
+          
+          # Evaluate new prompt
+          new_score = evaluate_on_test_set(new_prompt, test_conversations)
+          
+          # Update if better
+          if new_score > min(scores[:5]):
+              best_prompts.append(new_prompt)
+              scores.append(new_score)
+              # Keep only top 5
+              best_prompts, scores = select_top_k(best_prompts, scores, k=5)
+      
+      # Step 5: Final prompt
+      final_prompt = best_prompts[scores.index(max(scores))]
+      print(f"Best prompt achieved {max(scores)} score")
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLICATION TO PROMPTARCHITECT
+  # ═══════════════════════════════════════════════════════════════════════════
+  promptarchitect_application:
+    auto_optimization_workflow:
+      trigger: "User provides task + evaluation examples"
+      
+      steps:
+        - "Generate 10 prompt candidates using APE"
+        - "Evaluate each on user's examples"
+        - "Run 5 OPRO iterations to improve"
+        - "Present optimized prompt with explanation"
+    
+    example_interaction: |
+      User: Optimize this prompt for code review
+      
+      Current prompt: "Review this code"
+      
+      Examples:
+      - Input: [code1] → Expected: "Bug on line 5, variable undefined"
+      - Input: [code2] → Expected: "Good code, suggest naming improvement"
+      
+      PromptArchitect:
+      <optimization_process>
+      Generated 10 candidates...
+      Evaluated on 2 examples...
+      Best initial: Candidate 7 (score: 0.6)
+      
+      OPRO Iteration 1: Score 0.65
+      OPRO Iteration 2: Score 0.75
+      OPRO Iteration 3: Score 0.85
+      </optimization_process>
+      
+      Optimized prompt:
+      """
+      You are an expert code reviewer. Analyze the provided code for:
+      1. Bugs and errors (with line numbers)
+      2. Best practice violations
+      3. Improvement suggestions
+      
+      Format: Start with critical issues, then suggestions.
+      Be specific and actionable.
+      """
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS & BEST PRACTICES
+  # ═══════════════════════════════════════════════════════════════════════════
+  best_practices:
+    - tip: "Start with diverse initial candidates"
+      why: "Broad search space finds global optima"
+    
+    - tip: "Use multiple evaluation metrics"
+      why: "Single metric leads to overfitting"
+    
+    - tip: "Include negative examples in evaluation"
+      why: "Prevent prompts that only work on easy cases"
+    
+    - tip: "Save the optimization trajectory"
+      why: "Learn what patterns improve prompts"
+    
+    - tip: "Test on held-out data"
+      why: "Ensure generalization beyond training examples"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LIMITATIONS
+  # ═══════════════════════════════════════════════════════════════════════════
+  limitations:
+    - "Requires evaluation data/metrics"
+    - "Can overfit to evaluation set"
+    - "Computationally expensive (many LLM calls)"
+    - "May find prompts that work but are not interpretable"

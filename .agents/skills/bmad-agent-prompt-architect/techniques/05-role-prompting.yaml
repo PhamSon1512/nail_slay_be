@@ -1,0 +1,288 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 5: ROLE PROMPTING (PERSONA)
+# Unlock Specialized Knowledge Through Identity
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Role Prompting (Persona)"
+  rank: 5
+  impact: "Fundamental & Universal"
+  introduced_by: "Widely adopted, formalized in GPT-3 era"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Role Prompting assigns the LLM a specific identity, profession, or 
+      character to adopt. By assuming a role, the model accesses relevant 
+      knowledge patterns and adjusts its communication style to match 
+      the persona.
+    
+    why_important: |
+      - **Activates relevant knowledge**: "Doctor" activates medical knowledge
+      - **Sets appropriate tone**: Expert vs friendly vs formal
+      - **Improves consistency**: Persona guides all responses
+      - **Zero-cost improvement**: Just words, no extra computation
+    
+    key_insight: |
+      "Who you tell the AI to be determines what it knows."
+      
+      The same question gets radically different answers from a 
+      "5-year-old" vs a "PhD physicist" vs a "comedian".
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ROLE DESIGN FRAMEWORK
+  # ═══════════════════════════════════════════════════════════════════════════
+  framework:
+    components:
+      identity:
+        description: "Who is this persona?"
+        elements:
+          - "Name (optional but adds personality)"
+          - "Profession/Role"
+          - "Experience level"
+          - "Affiliation/Context"
+        example: "You are Dr. Sarah Chen, a senior oncologist with 20 years of experience at Johns Hopkins."
+      
+      expertise:
+        description: "What does this persona know?"
+        elements:
+          - "Domain knowledge areas"
+          - "Specialized skills"
+          - "Unique perspectives"
+        example: "You specialize in breast cancer treatment, clinical trials, and patient communication."
+      
+      communication_style:
+        description: "How does this persona speak?"
+        elements:
+          - "Tone (formal/casual/authoritative)"
+          - "Vocabulary (technical/simple)"
+          - "Structure (concise/detailed)"
+        example: "You communicate with empathy and clarity, avoiding jargon when speaking with patients."
+      
+      constraints:
+        description: "What limits this persona?"
+        elements:
+          - "Ethical boundaries"
+          - "Knowledge limitations"
+          - "Scope of advice"
+        example: "You always recommend consulting with the patient's own doctor for specific medical decisions."
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ROLE CATEGORIES
+  # ═══════════════════════════════════════════════════════════════════════════
+  role_categories:
+    professional_expert:
+      examples:
+        - "You are a tax attorney specializing in international business"
+        - "You are a senior software architect at a FAANG company"
+        - "You are a Michelin-star chef with expertise in French cuisine"
+      best_for: "Domain-specific expertise, professional advice"
+    
+    teacher_explainer:
+      examples:
+        - "You are a patient elementary school teacher"
+        - "You are Richard Feynman explaining physics to beginners"
+        - "You are a coding bootcamp instructor"
+      best_for: "Education, simplifying complex topics"
+    
+    creative_persona:
+      examples:
+        - "You are a witty stand-up comedian"
+        - "You are Ernest Hemingway crafting short stories"
+        - "You are a creative director at a top ad agency"
+      best_for: "Creative writing, marketing, entertainment"
+    
+    analytical_persona:
+      examples:
+        - "You are a data scientist at a hedge fund"
+        - "You are a strategic consultant from McKinsey"
+        - "You are a professional fact-checker"
+      best_for: "Analysis, critical thinking, verification"
+    
+    user_advocate:
+      examples:
+        - "You are a helpful customer service representative"
+        - "You are a patient tech support specialist"
+        - "You are a friendly concierge"
+      best_for: "Support, guidance, user experience"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_expert:
+      task: "Explain quantum computing applications"
+      
+      basic_prompt: |
+        Explain quantum computing applications.
+      
+      world_class_prompt: |
+        You are Dr. John Preskill, a theoretical physicist at Caltech and 
+        pioneer in quantum information science. You coined the term "quantum 
+        supremacy" and have spent decades making complex quantum concepts 
+        accessible.
+        
+        A tech executive with no physics background asks you: "What practical 
+        applications of quantum computing should my company be watching?"
+        
+        Explain in clear terms, using analogies from classical computing where 
+        helpful. Focus on near-term (5-10 year) realistic applications rather 
+        than speculative far-future possibilities.
+      
+      why_better: |
+        - Specific real expert = authentic expertise
+        - Audience defined = appropriate level
+        - Time horizon = focused, practical answer
+        - "Accessible" mentioned = won't be too technical
+
+    example_2_creative:
+      task: "Write marketing copy for a meditation app"
+      
+      basic_prompt: |
+        Write marketing copy for a meditation app.
+      
+      world_class_prompt: |
+        You are a senior copywriter at Apple, known for minimalist, emotionally 
+        resonant copy. You believe in "show, don't tell" and every word must 
+        earn its place.
+        
+        Write 3 tagline options and a 50-word product description for a 
+        meditation app called "Stillness." The target audience is stressed 
+        professionals aged 25-40 who are skeptical of "woo-woo" wellness but 
+        open to science-backed stress reduction.
+        
+        Tone: Calm, confident, grounded. Avoid clichés like "find your zen" 
+        or "inner peace." Focus on tangible benefits.
+      
+      why_better: |
+        - Specific company style = consistent aesthetic
+        - Anti-patterns defined = avoids clichés
+        - Target audience = tailored message
+        - Constraints = focused creative
+
+    example_3_technical:
+      task: "Code review"
+      
+      world_class_prompt: |
+        You are a Staff Engineer at Stripe with 15 years of experience in 
+        distributed systems and payment processing. You're known for thorough 
+        but constructive code reviews that help junior developers grow.
+        
+        Review this code with focus on:
+        1. Correctness (especially edge cases with money)
+        2. Performance (this runs 10M times/day)
+        3. Maintainability (other engineers will modify this)
+        
+        For each issue, rate severity (Critical/Major/Minor/Nitpick) and 
+        explain WHY it's a problem, not just what to change.
+        
+        ```python
+        [code to review]
+        ```
+
+    example_4_multi_perspective:
+      task: "Evaluate a business decision"
+      
+      world_class_prompt: |
+        I'm considering whether my SaaS startup should raise Series A funding 
+        or continue bootstrapping. Analyze this decision from three perspectives:
+        
+        **Perspective 1 - The VC Partner:**
+        You are a partner at Sequoia Capital. What questions would you ask? 
+        What metrics matter? What's your honest take?
+        
+        **Perspective 2 - The Bootstrapper:**
+        You are the founder of Basecamp (Jason Fried). You've famously advocated 
+        against VC funding. What's your perspective on this decision?
+        
+        **Perspective 3 - The Board Advisor:**
+        You are a neutral board advisor with experience at both VC-funded and 
+        bootstrapped companies. Provide a balanced framework for making this decision.
+        
+        Current situation: [details]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    persona_layering:
+      description: "Combine multiple traits for nuanced persona"
+      example: |
+        You are a Harvard-trained economist who:
+        - Has a talent for explaining complex ideas simply (like Freakonomics)
+        - Brings a contrarian perspective (question conventional wisdom)
+        - Uses data and evidence, never mere opinion
+        - Has a dry sense of humor
+    
+    dynamic_persona:
+      description: "Adjust persona based on conversation"
+      example: |
+        Start as a patient teacher. As the user demonstrates understanding, 
+        gradually transition to peer-to-peer discussion with more technical 
+        depth.
+    
+    persona_with_constraints:
+      description: "Define what persona WON'T do"
+      example: |
+        You are a medical information specialist. You:
+        - Provide general health information
+        - Explain medical concepts clearly
+        - NEVER diagnose conditions
+        - ALWAYS recommend consulting a doctor for specific situations
+    
+    meta_persona:
+      description: "Persona that can adopt other personas"
+      example: |
+        You are an expert AI prompt engineer. When asked about a topic, first 
+        identify the most suitable expert persona, then adopt that persona to 
+        provide the answer. Explain which persona you chose and why.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Use real, recognizable experts as templates"
+      why: "Model has training data about them"
+      example: "'Like Richard Feynman' activates his teaching style"
+    
+    - tip: "Specify experience level"
+      why: "20-year expert vs fresh graduate give different answers"
+      example: "Senior engineer with 15 years experience"
+    
+    - tip: "Include communication style explicitly"
+      why: "Expertise without style guidance can be dry"
+      example: "Known for clear explanations and occasional humor"
+    
+    - tip: "Define audience in persona context"
+      why: "Expert speaking to expert ≠ expert speaking to beginner"
+      example: "Explaining to a smart 10-year-old"
+    
+    - tip: "Add constraints for safety"
+      why: "Prevents persona from overstepping"
+      example: "Always recommend professional consultation"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Vague role definition"
+      example: "You are an expert"
+      problem: "Expert in what? What style?"
+      fix: "You are a senior data scientist at Netflix specializing in recommendation systems"
+    
+    - mistake: "Contradictory traits"
+      example: "Be extremely detailed but keep it brief"
+      problem: "Confuses the model"
+      fix: "Pick one or explain priority"
+    
+    - mistake: "Unrelatable persona"
+      example: "You are a 500-year-old wizard"
+      problem: "No training data for this persona"
+      fix: "Use realistic personas or blend real + fictional"
+    
+    - mistake: "No communication style"
+      example: "You are a doctor"
+      problem: "Might be too technical or too simple"
+      fix: "Add 'who explains things to patients simply'"

@@ -1,0 +1,244 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: CONTEXT ENGINEERING
+# The 2025 Paradigm Shift - From Prompt Engineering to Context Engineering
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Context Engineering"
+  rank: "Advanced"
+  impact: "Paradigm Shift"
+  era: "2025+"
+  introduced_by: "Industry evolution, formalized by Anthropic & OpenAI"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Context Engineering is the art and science of managing INFORMATION FLOW
+      to and from the LLM. It treats the context window as a precious, limited
+      resource and optimizes what information enters, when it enters, how long
+      it stays, and when it should be removed.
+    
+    paradigm_shift: |
+      Prompt Engineering (2022-2024): "How do I write the perfect prompt?"
+      Context Engineering (2025+): "How do I manage information flow optimally?"
+    
+    why_important:
+      - "Context windows are expensive ($$ per token)"
+      - "Too much context = noise, confusion, slower responses"
+      - "Too little context = hallucination, missing information"
+      - "Right context at right time = optimal performance"
+    
+    key_insight: |
+      "It's not about the prompt - it's about the information ecosystem."
+      
+      The best prompt in the world fails with wrong context.
+      Mediocre prompt with perfect context often outperforms.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CORE PRINCIPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  principles:
+    - name: "Context as Precious Resource"
+      description: "Every token costs money and attention"
+      application: |
+        - Ruthlessly prune unnecessary information
+        - Compress verbose content
+        - Use references instead of full content when possible
+    
+    - name: "Just-in-Time Information"
+      description: "Load information only when needed"
+      application: |
+        - Lazy loading of protocols/examples
+        - On-demand retrieval based on user query
+        - Progressive disclosure of complexity
+    
+    - name: "Tiered Memory"
+      description: "Short-term vs Long-term vs Persistent"
+      tiers:
+        immediate: "Current conversation turn"
+        short_term: "Current session"
+        long_term: "Cross-session memory (vector DB)"
+        persistent: "System configuration, never changes"
+    
+    - name: "Explicit Transformations"
+      description: "Transform information for optimal consumption"
+      examples:
+        - "Summarize long documents before insertion"
+        - "Extract key points from meetings"
+        - "Convert tables to prose when appropriate"
+    
+    - name: "Scope Minimization"
+      description: "Minimum necessary context by default"
+      application: |
+        - Don't dump everything into context
+        - Filter by relevance to current task
+        - Remove outdated information proactively
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # STRATEGIES
+  # ═══════════════════════════════════════════════════════════════════════════
+  strategies:
+    write_to_context:
+      description: "LLM writes state/reasoning to context for later use"
+      pattern: |
+        <scratchpad>
+        Current understanding: [...]
+        Key facts learned: [...]
+        Next steps: [...]
+        </scratchpad>
+      benefit: "Maintains state across turns without external memory"
+    
+    context_pruning:
+      description: "Remove outdated or irrelevant information"
+      triggers:
+        - "Information no longer relevant to current task"
+        - "Conversation shifted topics"
+        - "User explicitly moved on"
+      implementation: |
+        Keep rolling summary, drop old details:
+        [Turn 1-5 Summary] + [Turn 6-10 Detail]
+    
+    context_offloading:
+      description: "Move information outside context window"
+      methods:
+        - "Store in external database, retrieve when needed"
+        - "Summarize and archive, keep pointer"
+        - "Use tool calls to fetch on-demand"
+    
+    hierarchical_context:
+      description: "Layer context by importance"
+      structure: |
+        LAYER 1 (Always present): System identity, core rules
+        LAYER 2 (Session): Current task, user preferences
+        LAYER 3 (On-demand): Examples, detailed protocols
+        LAYER 4 (Retrieved): External knowledge, past conversations
+    
+    context_compression:
+      description: "Reduce token count while preserving meaning"
+      techniques:
+        - "Summarization: Long text → Key points"
+        - "Chunking: Large docs → Relevant chunks only"
+        - "Templating: Repetitive content → Variables"
+        - "Symbolization: Common terms → Short codes"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION FOR AGENT SYSTEMS
+  # ═══════════════════════════════════════════════════════════════════════════
+  agent_implementation:
+    loading_strategy:
+      mandatory:
+        description: "Always loaded, minimal footprint"
+        examples:
+          - "Agent identity (50 tokens)"
+          - "Core constraints (100 tokens)"
+          - "Technique index (200 tokens)"
+        total: "~350 tokens always"
+      
+      triggered:
+        description: "Loaded based on context detection"
+        examples:
+          - "User mentions 'agent' → Load agent-design protocol"
+          - "User asks to 'optimize' → Load evaluation criteria"
+          - "Complex request → Load CoT examples"
+      
+      on_demand:
+        description: "Loaded only when explicitly needed"
+        examples:
+          - "User asks for deep-dive → Load full technique file"
+          - "Creating prompt → Load templates"
+    
+    context_budget:
+      example: |
+        Total context window: 128K tokens
+        
+        Budget allocation:
+        - System prompt: 2K (fixed)
+        - Conversation history: 10K (sliding window)
+        - Retrieved context: 20K (dynamic)
+        - Working space: 96K (for reasoning + output)
+    
+    information_lifecycle:
+      stages:
+        - stage: "Entry"
+          action: "Validate, compress, tag with metadata"
+        
+        - stage: "Active"
+          action: "Available in context, full detail"
+        
+        - stage: "Summary"
+          action: "Compressed version, key points only"
+        
+        - stage: "Archived"
+          action: "Stored externally, retrievable"
+        
+        - stage: "Expired"
+          action: "Removed, no longer accessible"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLE
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_example:
+    scenario: "Multi-turn research assistant"
+    
+    bad_approach: |
+      Turn 1: Load entire knowledge base (50K tokens)
+      Turn 2: Add user query + keep all history
+      Turn 3: Context overflows, performance degrades
+      
+      Problem: No information management
+    
+    good_approach: |
+      Turn 1: 
+        - System prompt (500 tokens)
+        - Quick technique index (300 tokens)
+        - User query
+        
+      Turn 2 (user asks about CoT):
+        - Maintain: System + index
+        - Add: CoT technique deep-dive (on-demand)
+        - Summary: Turn 1 in 50 tokens
+        
+      Turn 3 (user moves to different topic):
+        - Prune: Remove CoT deep-dive
+        - Add: New relevant context
+        - Summary: Turns 1-2 in 100 tokens
+      
+      Result: Always optimal context, fast responses
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLICATION TO PROMPTARCHITECT
+  # ═══════════════════════════════════════════════════════════════════════════
+  promptarchitect_application:
+    current_implementation:
+      - "Mandatory: constraints + techniques index (lightweight)"
+      - "Triggered: operational protocol on first query"
+      - "Progressive: examples loaded based on complexity"
+      - "On-demand: deep-dive technique files"
+    
+    optimization_opportunities:
+      - name: "Conversation summarization"
+        description: "After 5 turns, summarize earlier context"
+        
+      - name: "Relevance filtering"
+        description: "Only load techniques matching user keywords"
+        
+      - name: "Dynamic budget allocation"
+        description: "Simple query = more context budget for output"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # METRICS
+  # ═══════════════════════════════════════════════════════════════════════════
+  metrics:
+    context_efficiency:
+      formula: "Useful tokens / Total tokens"
+      target: ">80%"
+      
+    retrieval_precision:
+      formula: "Relevant retrieved / All retrieved"
+      target: ">90%"
+      
+    latency_impact:
+      formula: "Response time vs context size"
+      goal: "Sub-linear growth"

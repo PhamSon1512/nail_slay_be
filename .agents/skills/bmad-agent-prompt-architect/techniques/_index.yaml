@@ -1,0 +1,1285 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUES INDEX - Central Registry for All Prompting Techniques
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# DESIGN PRINCIPLES:
+# 1. Single source of truth - add new techniques here only
+# 2. Lightweight - contains metadata, not full content
+# 3. Smart matching - keywords enable auto-recommendation
+# 4. Scalable - just add entries, no other files to update
+#
+# USAGE:
+# - Load this file as core knowledge base (mandatory)
+# - Use keywords to match user requirements → recommend techniques
+# - Load detailed file ONLY when user asks for deep-dive/examples
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+index:
+  version: "2.0.0"
+  total_techniques: 29  # Added 6 new 2025-2026 techniques
+  base_path: "./"  # Relative path within skill directory
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # HOW TO USE THIS INDEX
+  # ═══════════════════════════════════════════════════════════════════════════
+  usage:
+    for_recommendation: |
+      1. Analyze user's task description
+      2. Match against 'keywords' and 'triggers' fields
+      3. Return matching techniques sorted by 'rank'
+      4. Show 'quick_tip' for immediate help
+      
+    for_deep_dive: |
+      1. User asks for detailed explanation
+      2. Load the 'file' for that technique
+      3. Present full content including world-class examples
+      
+    for_prompt_creation: |
+      1. During ARCHITECT phase, scan all techniques
+      2. Auto-suggest based on requirements gathered in DISCOVERY
+      3. Include selected techniques' patterns in final prompt
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TECHNIQUE CATALOG
+  # ═══════════════════════════════════════════════════════════════════════════
+  techniques:
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 1: CHAIN-OF-THOUGHT
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: chain_of_thought
+      name: "Chain-of-Thought (CoT)"
+      rank: 1
+      impact: "Revolutionary"
+      category: "reasoning"
+      file: "01-chain-of-thought.yaml"
+      
+      keywords:
+        - "reasoning"
+        - "step by step"
+        - "logic"
+        - "math"
+        - "analysis"
+        - "problem solving"
+        - "multi-step"
+        - "calculation"
+        - "deduction"
+      
+      triggers:
+        - "cần suy luận"
+        - "giải thích cách nghĩ"
+        - "phân tích từng bước"
+        - "bài toán phức tạp"
+      
+      quick_tip: "Add 'Let's think step by step' to enable reasoning"
+      
+      when_to_use: "Task requires reasoning, math, logic, multi-step thinking"
+      when_not_to_use: "Simple factual lookups, creative writing"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 2: FEW-SHOT PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: few_shot
+      name: "Few-Shot Prompting"
+      rank: 2
+      impact: "Foundational"
+      category: "learning"
+      file: "02-few-shot-prompting.yaml"
+      
+      keywords:
+        - "examples"
+        - "demonstration"
+        - "format"
+        - "pattern"
+        - "style"
+        - "in-context learning"
+        - "show"
+        - "template"
+      
+      triggers:
+        - "cho ví dụ"
+        - "định dạng output"
+        - "theo mẫu"
+        - "học từ examples"
+      
+      quick_tip: "Show 3-5 examples of desired input→output pairs"
+      
+      when_to_use: "Need to demonstrate format, style, or expected behavior"
+      when_not_to_use: "Task is straightforward with clear instructions"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 3: REACT
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: react
+      name: "ReAct (Reasoning + Acting)"
+      rank: 3
+      impact: "Transformative"
+      category: "agents"
+      file: "03-react.yaml"
+      
+      keywords:
+        - "agent"
+        - "tool"
+        - "action"
+        - "external"
+        - "api"
+        - "search"
+        - "execute"
+        - "interact"
+        - "workflow"
+      
+      triggers:
+        - "sử dụng tool"
+        - "gọi API"
+        - "agent làm nhiều bước"
+        - "tương tác với hệ thống"
+      
+      quick_tip: "Interleave Thought → Action → Observation → repeat"
+      
+      when_to_use: "Agent design, tool use, external actions needed"
+      when_not_to_use: "Pure text generation without external interaction"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 4: SELF-CONSISTENCY
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: self_consistency
+      name: "Self-Consistency"
+      rank: 4
+      impact: "Significant"
+      category: "accuracy"
+      file: "04-self-consistency.yaml"
+      
+      keywords:
+        - "accuracy"
+        - "reliable"
+        - "verify"
+        - "multiple"
+        - "vote"
+        - "ensemble"
+        - "confidence"
+        - "critical"
+      
+      triggers:
+        - "cần độ chính xác cao"
+        - "quyết định quan trọng"
+        - "kiểm tra nhiều lần"
+        - "giảm sai sót"
+      
+      quick_tip: "Generate 5+ solutions, vote for most common answer"
+      
+      when_to_use: "Accuracy critical, want to reduce variance"
+      when_not_to_use: "Speed matters more than perfection, creative tasks"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 5: ROLE PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: role_prompting
+      name: "Role/Persona Prompting"
+      rank: 5
+      impact: "Fundamental"
+      category: "identity"
+      file: "05-role-prompting.yaml"
+      
+      keywords:
+        - "role"
+        - "persona"
+        - "expert"
+        - "character"
+        - "identity"
+        - "act as"
+        - "professional"
+        - "specialist"
+      
+      triggers:
+        - "đóng vai"
+        - "chuyên gia"
+        - "có kinh nghiệm"
+        - "phong cách chuyên nghiệp"
+      
+      quick_tip: "Define specific role with expertise, experience, and communication style"
+      
+      when_to_use: "Need specialized expertise, specific tone, or character"
+      when_not_to_use: "Generic assistant tasks"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 6: TREE OF THOUGHTS
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: tree_of_thoughts
+      name: "Tree of Thoughts (ToT)"
+      rank: 6
+      impact: "Breakthrough"
+      category: "reasoning"
+      file: "06-tree-of-thoughts.yaml"
+      
+      keywords:
+        - "complex"
+        - "explore"
+        - "alternatives"
+        - "branches"
+        - "planning"
+        - "puzzle"
+        - "backtrack"
+        - "multiple paths"
+      
+      triggers:
+        - "bài toán phức tạp"
+        - "cần thử nhiều hướng"
+        - "planning"
+        - "có thể cần quay lui"
+      
+      quick_tip: "Generate multiple approaches, evaluate each, explore best branches"
+      
+      when_to_use: "Complex problems with multiple solution paths"
+      when_not_to_use: "Simple problems, speed critical"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 7: STRUCTURED OUTPUT
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: structured_output
+      name: "Structured Output Prompting"
+      rank: 7
+      impact: "Essential"
+      category: "format"
+      file: "07-structured-output.yaml"
+      
+      keywords:
+        - "json"
+        - "xml"
+        - "format"
+        - "schema"
+        - "parse"
+        - "structured"
+        - "api"
+        - "extract"
+        - "template"
+      
+      triggers:
+        - "output JSON"
+        - "định dạng chuẩn"
+        - "dễ parse"
+        - "tích hợp API"
+      
+      quick_tip: "Use XML tags for Claude, JSON schema for OpenAI"
+      
+      when_to_use: "Need parseable output, API integration"
+      when_not_to_use: "Free-form creative content"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 8: GENERATED KNOWLEDGE
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: generated_knowledge
+      name: "Generated Knowledge Prompting"
+      rank: 8
+      impact: "Significant"
+      category: "knowledge"
+      file: "08-generated-knowledge.yaml"
+      
+      keywords:
+        - "knowledge"
+        - "facts"
+        - "context"
+        - "background"
+        - "research"
+        - "information"
+        - "detailed"
+        - "comprehensive"
+      
+      triggers:
+        - "cần thông tin nền"
+        - "giải thích chi tiết"
+        - "dựa trên kiến thức"
+        - "research trước"
+      
+      quick_tip: "Ask model to generate relevant facts BEFORE answering"
+      
+      when_to_use: "Knowledge-intensive questions, reduce hallucination"
+      when_not_to_use: "Simple factual lookups, speed critical"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 9: SELF-REFINE
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: self_refine
+      name: "Self-Refine"
+      rank: 9
+      impact: "Major"
+      category: "quality"
+      file: "09-self-refine.yaml"
+      
+      keywords:
+        - "improve"
+        - "refine"
+        - "critique"
+        - "iterate"
+        - "draft"
+        - "polish"
+        - "edit"
+        - "better"
+        - "quality"
+      
+      triggers:
+        - "cải thiện kết quả"
+        - "tự review"
+        - "chỉnh sửa"
+        - "nâng cao chất lượng"
+      
+      quick_tip: "Generate → Critique → Refine → Repeat until satisfied"
+      
+      when_to_use: "Want iterative quality improvement"
+      when_not_to_use: "Simple tasks, first-try is good enough"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 10: META-PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: meta_prompting
+      name: "Meta-Prompting"
+      rank: 10
+      impact: "Multiplicative"
+      category: "automation"
+      file: "10-meta-prompting.yaml"
+      
+      keywords:
+        - "generate prompt"
+        - "optimize prompt"
+        - "dspy"
+        - "automatic"
+        - "prompt engineering"
+        - "improve prompt"
+        - "create prompt"
+      
+      triggers:
+        - "tạo prompt tự động"
+        - "optimize prompt"
+        - "prompt engineering"
+        - "cải thiện prompt"
+      
+      quick_tip: "Use LLM to generate/optimize prompts for other tasks"
+      
+      when_to_use: "Need to auto-generate or optimize prompts"
+      when_not_to_use: "Single-use prompts, simple tasks"
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # CUTTING-EDGE TECHNIQUES (2024-2025)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 11: CONTEXT ENGINEERING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: context_engineering
+      name: "Context Engineering"
+      rank: 11
+      impact: "Paradigm Shift"
+      category: "advanced"
+      era: "2025+"
+      file: "11-context-engineering.yaml"
+      
+      keywords:
+        - "context"
+        - "information flow"
+        - "memory"
+        - "loading"
+        - "efficiency"
+        - "token"
+        - "optimize"
+        - "management"
+        - "tiered"
+        - "lazy loading"
+      
+      triggers:
+        - "quản lý context"
+        - "tối ưu token"
+        - "memory management"
+        - "information flow"
+        - "context quá dài"
+      
+      quick_tip: "Treat context as precious resource - load just-in-time, prune regularly"
+      
+      when_to_use: "Building production systems, managing long conversations, optimizing costs"
+      when_not_to_use: "Simple one-shot prompts"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 12: DSPy FRAMEWORK
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: dspy_framework
+      name: "DSPy Framework"
+      rank: 12
+      impact: "Revolutionary"
+      category: "advanced"
+      era: "2024+"
+      file: "12-dspy-framework.yaml"
+      
+      keywords:
+        - "dspy"
+        - "programming"
+        - "signature"
+        - "module"
+        - "optimizer"
+        - "compile"
+        - "automatic"
+        - "framework"
+        - "stanford"
+      
+      triggers:
+        - "dspy"
+        - "programming not prompting"
+        - "automatic optimization"
+        - "compile prompt"
+        - "signature"
+      
+      quick_tip: "Define signatures (what), let optimizer find prompts (how)"
+      
+      when_to_use: "Production systems needing systematic optimization, large-scale prompt management"
+      when_not_to_use: "Quick experiments, one-off prompts"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 13: ADVANCED META-PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: advanced_meta_prompting
+      name: "Advanced Meta-Prompting"
+      rank: 13
+      impact: "Multiplicative"
+      category: "advanced"
+      era: "2024+"
+      file: "13-advanced-meta-prompting.yaml"
+      
+      keywords:
+        - "ape"
+        - "opro"
+        - "evolution"
+        - "breeding"
+        - "self-optimization"
+        - "automatic"
+        - "improve"
+        - "generate"
+        - "candidates"
+      
+      triggers:
+        - "tự tối ưu prompt"
+        - "APE"
+        - "OPRO"
+        - "prompt evolution"
+        - "self-improvement"
+      
+      quick_tip: "Generate candidates → Evaluate → Use LLM to propose better ones → Repeat"
+      
+      when_to_use: "Have evaluation data, want systematic prompt improvement"
+      when_not_to_use: "No way to measure prompt quality"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 14: PROMPT CHAINING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: prompt_chaining
+      name: "Prompt Chaining"
+      rank: 14
+      impact: "Essential"
+      category: "workflow"
+      era: "2023+"
+      file: "14-prompt-chaining.yaml"
+      
+      keywords:
+        - "chain"
+        - "pipeline"
+        - "sequence"
+        - "multi-step"
+        - "workflow"
+        - "break down"
+        - "complex task"
+      
+      triggers:
+        - "task phức tạp nhiều bước"
+        - "pipeline xử lý"
+        - "chia nhỏ task"
+        - "sequence of prompts"
+      
+      quick_tip: "Break complex task into steps, output of step N → input of step N+1"
+      
+      when_to_use: "Complex multi-step tasks, need control over intermediate outputs"
+      when_not_to_use: "Simple single-step tasks"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 15: GRAPH OF THOUGHTS
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: graph_of_thoughts
+      name: "Graph of Thoughts (GoT)"
+      rank: 15
+      impact: "Advanced"
+      category: "reasoning"
+      era: "2023+"
+      file: "15-graph-of-thoughts.yaml"
+      
+      keywords:
+        - "graph"
+        - "network"
+        - "non-linear"
+        - "merge"
+        - "combine"
+        - "complex reasoning"
+        - "interconnected"
+      
+      triggers:
+        - "reasoning phức tạp"
+        - "kết hợp nhiều ý tưởng"
+        - "non-linear thinking"
+        - "merge insights"
+      
+      quick_tip: "Model reasoning as graph - nodes (thoughts) + edges (connections), can merge paths"
+      
+      when_to_use: "Complex problems where insights need to be combined from multiple paths"
+      when_not_to_use: "Linear problems, when ToT is sufficient"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 16: RAG PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: rag_prompting
+      name: "RAG Prompting"
+      rank: 16
+      impact: "Critical"
+      category: "knowledge"
+      era: "2023+"
+      file: "16-rag-prompting.yaml"
+      
+      keywords:
+        - "rag"
+        - "retrieval"
+        - "knowledge base"
+        - "documents"
+        - "search"
+        - "citations"
+        - "grounded"
+        - "vector"
+      
+      triggers:
+        - "knowledge base"
+        - "tìm kiếm tài liệu"
+        - "cần citations"
+        - "retrieval augmented"
+        - "reduce hallucination"
+      
+      quick_tip: "Retrieve relevant docs → Include in context → Generate grounded answer"
+      
+      when_to_use: "Need current info, reduce hallucination, provide citations"
+      when_not_to_use: "General knowledge tasks within training data"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 17: REFLEXION
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: reflexion
+      name: "Reflexion"
+      rank: 17
+      impact: "Major"
+      category: "agents"
+      era: "2023+"
+      file: "17-reflexion.yaml"
+      
+      keywords:
+        - "reflection"
+        - "learn"
+        - "mistake"
+        - "memory"
+        - "agent"
+        - "retry"
+        - "improve"
+        - "failure"
+      
+      triggers:
+        - "agent học từ lỗi"
+        - "reflect on failure"
+        - "remember mistakes"
+        - "self-improvement agent"
+      
+      quick_tip: "On failure: Reflect on what went wrong → Store lesson → Retry with memory"
+      
+      when_to_use: "Agents that need to learn from failures across attempts"
+      when_not_to_use: "Single-shot tasks, no retry opportunity"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 18: MULTIMODAL PROMPTING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: multimodal_prompting
+      name: "Multimodal Prompting"
+      rank: 18
+      impact: "High"
+      category: "multimodal"
+      era: "2024+"
+      file: "18-multimodal-prompting.yaml"
+      
+      keywords:
+        - "image"
+        - "vision"
+        - "multimodal"
+        - "picture"
+        - "photo"
+        - "screenshot"
+        - "document"
+        - "ocr"
+        - "visual"
+      
+      triggers:
+        - "phân tích hình ảnh"
+        - "image input"
+        - "vision model"
+        - "OCR"
+        - "screenshot analysis"
+      
+      quick_tip: "Show image + give specific instructions about what to extract/analyze"
+      
+      when_to_use: "Tasks with visual input, document processing, image analysis"
+      when_not_to_use: "Text-only tasks, models without vision capability"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 19: OUTPUT PRIMERS (ATLAS Principle 20)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: output_primers
+      name: "Output Primers"
+      rank: 19
+      impact: "Moderate"
+      category: "format"
+      era: "2023+"
+      file: null  # Lightweight - no deep-dive file needed
+      
+      keywords:
+        - "primer"
+        - "start output"
+        - "begin with"
+        - "format"
+        - "prefix"
+      
+      triggers:
+        - "bắt đầu output"
+        - "format output"
+        - "guide format"
+      
+      quick_tip: "End prompt with the beginning of desired output: 'Explanation:' or '{'"
+      
+      when_to_use: "Need specific output format, JSON/code generation"
+      when_not_to_use: "Open-ended creative tasks"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 20: CHAIN OF DRAFT (NEW 2025)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: chain_of_draft
+      name: "Chain of Draft (CoD)"
+      rank: 20
+      impact: "Major"
+      category: "reasoning"
+      era: "2025+"
+      file: "19-chain-of-draft.yaml"
+      
+      keywords:
+        - "efficient"
+        - "token"
+        - "minimal"
+        - "draft"
+        - "short"
+        - "fast"
+        - "cost"
+        - "reasoning"
+        - "step by step"
+        - "cod"
+      
+      triggers:
+        - "tiết kiệm token"
+        - "suy luận nhanh"
+        - "giảm chi phí"
+        - "token efficient"
+        - "fast reasoning"
+        - "minimal steps"
+      
+      quick_tip: "Think step by step with max 5 words per step, use #### separator"
+      
+      core_benefit: "~7.6% tokens of CoT while maintaining same accuracy"
+      
+      when_to_use: "Token-sensitive production, high-volume APIs, fast reasoning tasks"
+      when_not_to_use: "Need detailed explanations for users, small models (<3B), educational contexts"
+      
+      template: |
+        Think step by step, but only keep a minimum draft for each thinking step,
+        with 5 words at most. Return the answer at the end of the response after
+        a separator ####.
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 21: RLM FRAMEWORK TEMPLATES (NEW 2024)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: rlm_framework_templates
+      name: "RLM Framework Templates"
+      rank: 21
+      impact: "High"
+      category: "reasoning"
+      era: "2024+"
+      file: "20-rlm-framework-templates.yaml"
+      
+      keywords:
+        - "rlm"
+        - "reasoning model"
+        - "mcts"
+        - "beam search"
+        - "swot"
+        - "porter"
+        - "business model"
+        - "strategy"
+        - "framework"
+        - "blue ocean"
+        - "kotter"
+        - "lean six sigma"
+        - "7s"
+        - "stp"
+      
+      triggers:
+        - "phân tích chiến lược"
+        - "business framework"
+        - "structured reasoning"
+        - "reasoning language model"
+        - "monte carlo"
+        - "decision tree"
+      
+      quick_tip: "Use <reasoning> + <task> tags with business frameworks for RLMs"
+      
+      core_benefit: "10 templates combining AI reasoning with business frameworks"
+      
+      when_to_use: "Complex business analysis, strategic decisions with RLMs (Claude 3.5+, o1, o3, DeepSeek R1)"
+      when_not_to_use: "Simple queries, speed-critical tasks, creative writing"
+      
+      included_templates:
+        - "MCTS + Porter's Five Forces"
+        - "Decision Tree + SWOT"
+        - "Graph-Based + Root Cause Analysis"
+        - "Beam Search + Kotter's 8-Step"
+        - "Value Model + Critical Path Method"
+        - "Process-Based + STP Marketing"
+        - "Ensemble + Business Model Canvas"
+        - "Trace-Based + Blue Ocean Strategy"
+        - "Q-Value + Lean Six Sigma"
+        - "Test-Time Compute + McKinsey 7S"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 22: LONG CHAIN-OF-THOUGHT (NEW 2024)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: long_chain_of_thought
+      name: "Long Chain-of-Thought (Long CoT)"
+      rank: 22
+      impact: "High"
+      category: "reasoning"
+      era: "2024+"
+      file: "21-long-chain-of-thought.yaml"
+      
+      keywords:
+        - "long cot"
+        - "extended reasoning"
+        - "multi-step"
+        - "backtracking"
+        - "error correction"
+        - "complex problem"
+        - "structured reasoning"
+        - "domain scaffolding"
+        - "validation"
+      
+      triggers:
+        - "vấn đề phức tạp"
+        - "nhiều bước"
+        - "cần kiểm tra"
+        - "complex problem"
+        - "multi-step reasoning"
+        - "need validation"
+        - "detailed analysis"
+      
+      quick_tip: "Use numbered steps, contextual anchoring, backtracking, and validation"
+      
+      core_benefit: "Structured extended reasoning with error correction for complex problems"
+      
+      when_to_use: "Complex multi-step problems, critical decisions needing audit trail"
+      when_not_to_use: "Simple problems, speed-critical tasks (use CoD instead)"
+      
+      six_principles:
+        - "1. Structured Reasoning - Step-by-step breakdown"
+        - "2. Depth-Efficiency Balance - Concise but thorough"
+        - "3. Contextual Anchoring - Stay on topic"
+        - "4. Error Correction & Backtracking - Self-correct"
+        - "5. Hybrid Prompting - Combine with RAG/tools"
+        - "6. Optimization - Control length, explore paths"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 23: GUIDED LEARNING (NEW 2024 - Gemini LearnLM)
+    # Source: https://baoyu.io/blog/gemini-guided-learning-system-prompt
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: guided_learning
+      name: "Guided Learning (Constructivist Tutoring)"
+      rank: 23
+      impact: "High"
+      category: "interaction"
+      era: "2024+"
+      file: null  # Protocol file: protocols/guided-learning.protocol.yaml
+      source: "Gemini Guided Learning System Prompt (Google DeepMind LearnLM)"
+      
+      keywords:
+        - "teach"
+        - "tutor"
+        - "guide"
+        - "learn"
+        - "coach"
+        - "explain"
+        - "education"
+        - "socratic"
+        - "constructivist"
+        - "help understand"
+        - "mentor"
+        - "training"
+      
+      triggers:
+        - "dạy tôi"
+        - "giải thích cho tôi"
+        - "hướng dẫn"
+        - "teach me"
+        - "help me understand"
+        - "explain how"
+        - "coach me"
+        - "I want to learn"
+      
+      quick_tip: "Guide, don't tell - Use questions to lead user to understanding"
+      
+      core_principle: "Constructivist Tutor - Facilitate learning through dialogue, not answers"
+      
+      core_benefit: "Deeper user understanding and retention through guided discovery"
+      
+      when_to_use: "Teaching, coaching, tutoring, knowledge transfer, skill development"
+      when_not_to_use: "User explicitly wants quick answer, task completion priority"
+      
+      five_principles:
+        - "1. Guide, Don't Tell - Ask questions instead of giving answers"
+        - "2. Adapt to User - Follow their lead, adjust difficulty"
+        - "3. Progress Over Purity - Provide answer if stuck 2-3 times"
+        - "4. Maintain Context - Build on what's already discussed"
+        - "5. Spark Curiosity - Engage through content, not hype"
+      
+      query_classification:
+        convergent:
+          description: "Single correct answer (math, optimization, problem-solving)"
+          strategy: "Step-by-step guidance with questions about each step"
+        divergent:
+          description: "Broad exploration (concepts, how-to, explanations)"
+          strategy: "Overview + 2-3 numbered entry points to choose"
+        simple_recall:
+          description: "Fact-based lookup (definitions, dates, translations)"
+          strategy: "Quick answer + compelling invitation to explore deeper"
+        other:
+          description: "Brainstorming, feedback, practice, custom learning"
+          strategy: "Flexible approach based on core principles"
+      
+      response_guidelines:
+        first_turn:
+          - "NO filler: Avoid 'Great question!', 'That's fascinating!'"
+          - "Engage immediately - go straight to substance"
+          - "Set expectation of guided dialogue"
+          - "End with question (convergent) or options (divergent)"
+        ongoing:
+          - "Don't repeat - find new way forward"
+          - "Succinct responses (<300 words typical)"
+          - "After question, STOP and wait for response"
+        feedback:
+          - "Praise EFFORT only, not questions"
+          - "Acknowledge correct parts first"
+          - "Clear, actionable correction for mistakes"
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # 2025-2026 TECHNIQUES (Paradigm Shift era)
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 24: EXTENDED THINKING & INFERENCE-TIME SCALING
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: extended_thinking
+      name: "Extended Thinking & Inference-Time Scaling"
+      rank: 24
+      impact: "Paradigm Shift"
+      category: "reasoning"
+      era: "2025+"
+      file: "22-extended-thinking.yaml"
+
+      keywords:
+        - "thinking"
+        - "extended thinking"
+        - "reasoning model"
+        - "budget"
+        - "inference time"
+        - "o1"
+        - "o3"
+        - "claude thinking"
+        - "deep reasoning"
+        - "thinking tokens"
+
+      triggers:
+        - "model có thinking"
+        - "extended thinking"
+        - "budget forcing"
+        - "inference scaling"
+        - "reasoning tokens"
+
+      quick_tip: "Set conditions + success criteria, not steps. Let the model find the path."
+
+      when_to_use: "Complex math, code debugging, strategic analysis with thinking-capable models"
+      when_not_to_use: "Simple queries, latency-critical apps, creative writing"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 25: ADAPTIVE GRAPH OF THOUGHTS (AGoT)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: adaptive_graph_of_thoughts
+      name: "Adaptive Graph of Thoughts (AGoT)"
+      rank: 25
+      impact: "Advanced"
+      category: "reasoning"
+      era: "2025+"
+      file: "23-adaptive-graph-of-thoughts.yaml"
+
+      keywords:
+        - "agot"
+        - "adaptive"
+        - "dag"
+        - "graph"
+        - "dynamic decomposition"
+        - "selective expansion"
+        - "uneven complexity"
+
+      triggers:
+        - "complex problem uneven parts"
+        - "adaptive reasoning"
+        - "dynamic graph"
+        - "AGoT"
+
+      quick_tip: "Decompose into components, rate complexity, expand only Complex ones"
+
+      when_to_use: "Problems where some parts need deep analysis, others are trivial"
+      when_not_to_use: "Uniform problems, speed-critical tasks"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 26: CONTEXT-AWARE DECOMPOSITION (CAD)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: context_aware_decomposition
+      name: "Context-Aware Decomposition (CAD)"
+      rank: 26
+      impact: "High"
+      category: "reasoning"
+      era: "2025+"
+      file: "24-context-aware-decomposition.yaml"
+
+      keywords:
+        - "decomposition"
+        - "systems thinking"
+        - "interdependencies"
+        - "global context"
+        - "integration"
+        - "architecture"
+        - "dependencies"
+
+      triggers:
+        - "design system"
+        - "interconnected parts"
+        - "CAD"
+        - "context-aware decomposition"
+        - "avoid tunnel vision"
+
+      quick_tip: "For each component: role in system → solve → interactions → constraints on others"
+
+      when_to_use: "Architecture design, business strategy, systems with cross-dependencies"
+      when_not_to_use: "Independent sub-tasks, simple linear problems"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 27: RECURSIVE SELF-IMPROVEMENT PROMPTING (RSIP)
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: recursive_self_improvement
+      name: "Recursive Self-Improvement Prompting (RSIP)"
+      rank: 27
+      impact: "Major"
+      category: "quality"
+      era: "2025+"
+      file: "25-recursive-self-improvement.yaml"
+
+      keywords:
+        - "rsip"
+        - "recursive"
+        - "multi-round"
+        - "iterative critique"
+        - "dimensions"
+        - "convergence"
+        - "self-improvement"
+        - "metacognition"
+
+      triggers:
+        - "RSIP"
+        - "multi-round critique"
+        - "iterative improvement"
+        - "critique dimensions"
+        - "convergence check"
+
+      quick_tip: "Each critique round targets ONE dimension: logic → completeness → clarity → converge"
+
+      when_to_use: "Technical docs, analysis needing quality on multiple dimensions"
+      when_not_to_use: "Simple outputs, latency-sensitive, first-draft is sufficient"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 28: AGENTIC OPERATIONAL POLICY DESIGN
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: agentic_operational_policy
+      name: "Agentic Operational Policy Design"
+      rank: 28
+      impact: "Transformative"
+      category: "agents"
+      era: "2025+"
+      file: "26-agentic-operational-policy.yaml"
+
+      keywords:
+        - "agentic policy"
+        - "escalation"
+        - "tool selection"
+        - "scope definition"
+        - "error handling"
+        - "production agent"
+        - "governance"
+        - "autonomous"
+
+      triggers:
+        - "production agent"
+        - "operational policy"
+        - "when to escalate"
+        - "tool selection criteria"
+        - "agent governance"
+
+      quick_tip: "Define 4 domains: Scope / Tool Selection / Error Handling / Escalation Paths"
+
+      when_to_use: "Production agents with tools, multi-agent systems, high-stakes autonomous tasks"
+      when_not_to_use: "Simple chatbots, no tools, no autonomous actions"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # RANK 29: SKELETON OF THOUGHTS + PLAN AND SOLVE
+    # ─────────────────────────────────────────────────────────────────────────
+    - id: skeleton_plan_and_solve
+      name: "Skeleton of Thoughts (SoT) + Plan and Solve (PS)"
+      rank: 29
+      impact: "High"
+      category: "reasoning"
+      era: "2025+"
+      file: "27-skeleton-plan-and-solve.yaml"
+
+      keywords:
+        - "skeleton"
+        - "outline"
+        - "plan"
+        - "solve"
+        - "two-phase"
+        - "structured generation"
+        - "plan and solve"
+        - "sot"
+        - "long form"
+        - "ps+"
+
+      triggers:
+        - "outline first"
+        - "skeleton of thoughts"
+        - "plan and solve"
+        - "SoT"
+        - "PS+"
+
+      quick_tip: "SoT: outline → fill per section. PS: plan (sub-goals) → solve (execute each)."
+
+      when_to_use: "SoT=long-form structured content. PS=math/multi-step procedures."
+      when_not_to_use: "Short outputs, speed-critical, when first draft quality is acceptable"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CATEGORY GROUPINGS (For quick filtering)
+  # ═══════════════════════════════════════════════════════════════════════════
+  categories:
+    reasoning:
+      techniques: ["chain_of_thought", "tree_of_thoughts", "graph_of_thoughts", "chain_of_draft", "rlm_framework_templates", "long_chain_of_thought"]
+      description: "Techniques for logical thinking and problem-solving"
+    
+    efficiency:
+      techniques: ["chain_of_draft", "context_engineering"]
+    
+    rlm_frameworks:
+      techniques: ["rlm_framework_templates"]
+      description: "Structured reasoning templates for Reasoning Language Models (Claude 3.5+, o1, o3, DeepSeek R1)"
+    
+    business_analysis:
+      techniques: ["rlm_framework_templates", "graph_of_thoughts"]
+      description: "Business strategy and analysis frameworks"
+      description: "Token-efficient techniques for production systems"
+      
+    learning:
+      techniques: ["few_shot"]
+      description: "Techniques for in-context learning from examples"
+      
+    agents:
+      techniques: ["react", "reflexion"]
+      description: "Techniques for agentic AI with tool use and learning"
+      
+    multimodal:
+      techniques: ["multimodal_prompting"]
+      description: "Techniques for image, audio, video inputs"
+      
+    accuracy:
+      techniques: ["self_consistency"]
+      description: "Techniques to improve reliability and reduce errors"
+      
+    identity:
+      techniques: ["role_prompting"]
+      description: "Techniques for persona and expertise activation"
+      
+    format:
+      techniques: ["structured_output"]
+      description: "Techniques for parseable, consistent outputs"
+      
+    knowledge:
+      techniques: ["generated_knowledge", "rag_prompting"]
+      description: "Techniques for knowledge-intensive tasks"
+      
+    quality:
+      techniques: ["self_refine"]
+      description: "Techniques for iterative improvement"
+      
+    automation:
+      techniques: ["meta_prompting", "advanced_meta_prompting"]
+      description: "Techniques for prompt automation and self-optimization"
+    
+    workflow:
+      techniques: ["prompt_chaining"]
+      description: "Techniques for multi-step task orchestration"
+    
+    advanced:
+      techniques: ["context_engineering", "dspy_framework", "advanced_meta_prompting", "graph_of_thoughts"]
+      description: "Cutting-edge 2024-2026 techniques for production systems"
+
+    # 2025-2026 techniques
+    inference_time:
+      techniques: ["extended_thinking", "adaptive_graph_of_thoughts"]
+      description: "Techniques leveraging inference-time compute scaling"
+
+    agentic_production:
+      techniques: ["agentic_operational_policy", "recursive_self_improvement"]
+      description: "Production-grade agentic and quality engineering techniques"
+
+    structured_generation:
+      techniques: ["skeleton_plan_and_solve", "context_aware_decomposition"]
+      description: "Techniques for structured decomposition and generation"
+
+    interaction:
+      techniques: ["guided_learning"]
+      description: "Techniques for interactive dialogue and user engagement"
+
+    education:
+      techniques: ["guided_learning"]
+      description: "Techniques for teaching, coaching, and knowledge transfer"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMBINATION PATTERNS (Common technique combos)
+  # ═══════════════════════════════════════════════════════════════════════════
+  combinations:
+    - name: "High-Accuracy Reasoning"
+      techniques: ["chain_of_thought", "self_consistency"]
+      use_case: "Critical decisions requiring reliable logic"
+      
+    - name: "Expert Assistant"
+      techniques: ["role_prompting", "few_shot", "structured_output"]
+      use_case: "Domain-specific assistant with consistent format"
+      
+    - name: "AI Agent"
+      techniques: ["react", "role_prompting", "structured_output"]
+      use_case: "Autonomous agent with tools"
+      
+    - name: "Learning Agent"
+      techniques: ["react", "reflexion", "prompt_chaining"]
+      use_case: "Agent that learns from mistakes and improves"
+      
+    - name: "Quality Writer"
+      techniques: ["role_prompting", "self_refine", "few_shot"]
+      use_case: "High-quality content generation"
+      
+    - name: "Complex Problem Solver"
+      techniques: ["graph_of_thoughts", "chain_of_thought", "self_consistency"]
+      use_case: "Difficult multi-step problems with interconnected aspects"
+    
+    - name: "Knowledge Assistant"
+      techniques: ["rag_prompting", "role_prompting", "structured_output"]
+      use_case: "Grounded answers with citations from knowledge base"
+    
+    - name: "Production-Ready System"
+      techniques: ["context_engineering", "structured_output", "dspy_framework"]
+      use_case: "Scalable, efficient production deployment"
+    
+    - name: "Self-Improving System"
+      techniques: ["advanced_meta_prompting", "self_refine", "dspy_framework"]
+      use_case: "Continuous prompt optimization with feedback"
+    
+    - name: "Complex Pipeline"
+      techniques: ["prompt_chaining", "structured_output", "context_engineering"]
+      use_case: "Multi-step workflows with controlled information flow"
+    
+    # NEW 2025: Chain of Draft Combinations
+    - name: "Token-Efficient Reasoning"
+      techniques: ["chain_of_draft", "structured_output"]
+      use_case: "Cost-effective reasoning with parseable output"
+      benefit: "~10x cheaper than CoT + better speed"
+    
+    - name: "High-Volume Production"
+      techniques: ["chain_of_draft", "context_engineering", "structured_output"]
+      use_case: "Production systems with high API volume"
+      benefit: "Maximum token savings + fast response"
+    
+    - name: "Accurate & Efficient"
+      techniques: ["chain_of_draft", "self_consistency"]
+      use_case: "Need accuracy but also token efficiency"
+      benefit: "Multiple CoD samples still cheaper than single CoT"
+    
+    # NEW 2024: RLM Framework Combinations
+    - name: "Strategic Business Analysis"
+      techniques: ["rlm_framework_templates", "structured_output"]
+      use_case: "Comprehensive business analysis with structured output"
+      benefit: "Combines AI reasoning with proven business frameworks"
+    
+    - name: "RLM Agent System"
+      techniques: ["rlm_framework_templates", "react", "role_prompting"]
+      use_case: "Strategic planning agent with tool use"
+      benefit: "Framework-based planning + execution capability"
+    
+    - name: "Efficient Strategic Reasoning"
+      techniques: ["rlm_framework_templates", "chain_of_draft"]
+      use_case: "Business analysis with token efficiency"
+      benefit: "Framework structure + minimal token usage"
+    
+    # NEW 2024: Guided Learning Combinations (Gemini LearnLM)
+    - name: "Expert Tutor"
+      techniques: ["guided_learning", "role_prompting", "few_shot"]
+      use_case: "Teaching/coaching with subject expertise"
+      benefit: "Deep domain knowledge + guided discovery approach"
+    
+    - name: "Interactive Learning Agent"
+      techniques: ["guided_learning", "react", "reflexion"]
+      use_case: "Agent that teaches through interaction and learns from feedback"
+      benefit: "Adaptive tutoring with tool use capability"
+    
+    - name: "Knowledge Coach"
+      techniques: ["guided_learning", "generated_knowledge", "structured_output"]
+      use_case: "Comprehensive knowledge transfer with structure"
+      benefit: "Deep understanding through curated content + guided questions"
+    
+    - name: "Prompt Engineering Coach"
+      techniques: ["guided_learning", "meta_prompting", "self_refine"]
+      use_case: "Teaching prompt engineering through practice"
+      benefit: "Learn by doing with guided feedback loops"
+
+    # NEW 2025-2026 Combinations
+    - name: "Deep Reasoning Pipeline"
+      techniques: ["extended_thinking", "self_consistency"]
+      use_case: "Complex problems requiring reliable high-accuracy reasoning"
+      benefit: "Thinking budget + majority vote = best accuracy for hard problems"
+
+    - name: "Adaptive Complex Solver"
+      techniques: ["adaptive_graph_of_thoughts", "extended_thinking", "context_aware_decomposition"]
+      use_case: "Multi-dimensional problems with uneven complexity across components"
+      benefit: "Efficient compute allocation + holistic integration"
+
+    - name: "Production Agent System"
+      techniques: ["agentic_operational_policy", "react", "reflexion"]
+      use_case: "Enterprise-grade autonomous agent with governance and retry logic"
+      benefit: "Policy-governed, self-healing, escalation-aware agent"
+
+    - name: "Multi-Dimension Quality"
+      techniques: ["recursive_self_improvement", "skeleton_plan_and_solve"]
+      use_case: "Long-form technical documents requiring precision across multiple criteria"
+      benefit: "Outline-first structure + iterative multi-dimension refinement"

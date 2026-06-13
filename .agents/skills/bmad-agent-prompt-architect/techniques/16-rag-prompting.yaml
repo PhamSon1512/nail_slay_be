@@ -1,0 +1,208 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: RAG PROMPTING
+# Retrieval-Augmented Generation Patterns
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "RAG Prompting"
+  rank: 16
+  impact: "Critical for Knowledge Systems"
+  era: "2023+"
+  
+  overview:
+    definition: |
+      RAG (Retrieval-Augmented Generation) combines information retrieval
+      with LLM generation. Instead of relying solely on the model's training,
+      RAG fetches relevant documents and includes them in the prompt.
+    
+    why_important:
+      - "Access to current information (beyond training cutoff)"
+      - "Grounded responses with citations"
+      - "Reduced hallucination"
+      - "Domain-specific knowledge without fine-tuning"
+    
+    key_insight: |
+      "The LLM doesn't need to know everything - just how to use what you give it."
+      
+      RAG extends the model's knowledge dynamically at inference time.
+
+  architecture:
+    basic_flow: |
+      User Query
+          ↓
+      [Retriever] → Search vector DB / documents
+          ↓
+      Retrieved Context (top-k relevant chunks)
+          ↓
+      [Prompt Construction] → Combine query + context
+          ↓
+      [LLM] → Generate answer
+          ↓
+      Response with citations
+
+    components:
+      retriever:
+        options:
+          - "Dense retrieval (embeddings)"
+          - "Sparse retrieval (BM25)"
+          - "Hybrid (dense + sparse)"
+        
+      chunking:
+        strategies:
+          - "Fixed size (512 tokens)"
+          - "Semantic chunking"
+          - "Document structure aware"
+      
+      reranking:
+        purpose: "Improve retrieval quality before generation"
+        methods:
+          - "Cross-encoder reranking"
+          - "LLM-based reranking"
+
+  prompting_patterns:
+    basic_rag:
+      template: |
+        Use the following context to answer the question.
+        If the answer is not in the context, say "I don't have that information."
+        
+        Context:
+        {retrieved_documents}
+        
+        Question: {user_query}
+        
+        Answer:
+    
+    rag_with_citations:
+      template: |
+        Answer the question using ONLY the provided sources.
+        Cite your sources using [1], [2], etc.
+        
+        Sources:
+        [1] {doc_1}
+        [2] {doc_2}
+        [3] {doc_3}
+        
+        Question: {user_query}
+        
+        Answer (with citations):
+    
+    rag_with_reasoning:
+      template: |
+        <context>
+        {retrieved_documents}
+        </context>
+        
+        <question>
+        {user_query}
+        </question>
+        
+        <instructions>
+        1. First, identify which parts of the context are relevant
+        2. Think through how to answer using the context
+        3. Provide your answer with specific citations
+        4. If context is insufficient, state what's missing
+        </instructions>
+        
+        <thinking>
+        [Your reasoning]
+        </thinking>
+        
+        <answer>
+        [Your answer with citations]
+        </answer>
+    
+    multi_step_rag:
+      description: "Query → Retrieve → Analyze → Retrieve more → Answer"
+      template: |
+        Step 1: What information do I need to answer this?
+        Step 2: [Retrieval based on Step 1]
+        Step 3: Is this sufficient? What else do I need?
+        Step 4: [Additional retrieval if needed]
+        Step 5: Synthesize and answer
+
+  advanced_patterns:
+    self_rag:
+      description: "LLM decides when to retrieve"
+      process: |
+        1. LLM begins answering
+        2. If uncertain → trigger retrieval
+        3. Continue with retrieved context
+        4. Repeat as needed
+    
+    corrective_rag:
+      description: "Verify and correct retrieved info"
+      process: |
+        1. Retrieve documents
+        2. LLM evaluates relevance
+        3. Filter or re-retrieve if low quality
+        4. Generate answer from verified context
+    
+    hypothetical_document_embeddings:
+      description: "Generate hypothetical answer, use it for retrieval"
+      process: |
+        1. Generate hypothetical ideal answer
+        2. Embed the hypothetical answer
+        3. Retrieve documents similar to ideal answer
+        4. Generate final answer with retrieved context
+
+  world_class_example:
+    scenario: "Customer support knowledge base"
+    
+    implementation: |
+      def answer_support_question(query):
+          # Step 1: Retrieve relevant docs
+          docs = retriever.search(query, top_k=5)
+          
+          # Step 2: Rerank for quality
+          docs = reranker.rerank(query, docs, top_k=3)
+          
+          # Step 3: Format context
+          context = format_docs_with_metadata(docs)
+          
+          # Step 4: Generate with RAG prompt
+          prompt = f"""
+          You are a customer support agent. Answer using ONLY the provided 
+          knowledge base articles. If the answer isn't in the articles, 
+          say you'll escalate to a human agent.
+          
+          <knowledge_base>
+          {context}
+          </knowledge_base>
+          
+          Customer question: {query}
+          
+          Provide:
+          1. Direct answer
+          2. Relevant article links
+          3. Next steps if applicable
+          """
+          
+          return llm.generate(prompt)
+
+  tips:
+    - "Always include 'if not in context, say so' instruction"
+    - "Format retrieved docs clearly with metadata"
+    - "Use reranking for better retrieval quality"
+    - "Consider chunk overlap to preserve context"
+    - "Test retrieval quality separately from generation"
+
+  mistakes:
+    - mistake: "Including too much retrieved content"
+      fix: "Limit to 3-5 most relevant chunks"
+    
+    - mistake: "No instruction for missing info"
+      fix: "Explicitly instruct what to do when context insufficient"
+    
+    - mistake: "Ignoring retrieval failures"
+      fix: "Handle cases where retrieval returns nothing relevant"
+
+  comparison_with_fine_tuning:
+    rag:
+      pros: "No training, easily updated, traceable"
+      cons: "Retrieval latency, context window limits"
+    
+    fine_tuning:
+      pros: "Faster inference, knowledge baked in"
+      cons: "Expensive, hard to update, no citations"
+    
+    recommendation: "Start with RAG, fine-tune only if needed"

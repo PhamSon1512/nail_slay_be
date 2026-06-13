@@ -1,0 +1,394 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE 8: GENERATED KNOWLEDGE PROMPTING
+# Pre-Generate Context Before Answering
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "Generated Knowledge Prompting"
+  rank: 8
+  impact: "Significant for Knowledge-Intensive Tasks"
+  introduced_by: "Liu et al., 2022"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      Generated Knowledge Prompting asks the LLM to first generate relevant 
+      background knowledge or facts about a topic BEFORE attempting to answer 
+      the actual question. This self-generated context primes the model with 
+      relevant information.
+    
+    why_important: |
+      - **Self-RAG without retrieval**: No external database needed
+      - **Activates latent knowledge**: Model has knowledge but needs prompting
+      - **Reduces hallucination**: Facts first, answer second
+      - **Works for any domain**: Model generates domain-specific context
+    
+    key_insight: |
+      "The model knows more than it shows - help it remember."
+      
+      By first generating facts, the model retrieves relevant knowledge 
+      from its training before committing to an answer.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MECHANISM
+  # ═══════════════════════════════════════════════════════════════════════════
+  mechanism:
+    two_step_process:
+      step_1_generate:
+        name: "Knowledge Generation"
+        action: "Generate relevant facts about the topic"
+        prompt: "Generate 5 facts about [topic] that would be relevant to answering questions about [specific aspect]"
+      
+      step_2_answer:
+        name: "Knowledge-Conditioned Answer"
+        action: "Answer using the generated knowledge"
+        prompt: "Using the facts above, answer: [question]"
+    
+    why_it_works: |
+      - LLMs have vast knowledge but struggle to access it on demand
+      - Generating facts first "warms up" relevant neural pathways
+      - The generated context becomes part of the prompt
+      - Model can reference its own generated facts
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  patterns:
+    pattern_1_basic:
+      name: "Simple Two-Step"
+      template: |
+        Step 1: Generate knowledge
+        ---
+        Generate 5 relevant facts about [topic].
+        
+        Facts:
+        1. [Model generates]
+        2. [Model generates]
+        ...
+        
+        Step 2: Answer with knowledge
+        ---
+        Using the facts above, answer: [question]
+
+    pattern_2_single_prompt:
+      name: "Single-Pass with Knowledge Section"
+      template: |
+        Question: [question]
+        
+        Before answering, let me recall relevant facts:
+        
+        <knowledge>
+        - [Fact 1]
+        - [Fact 2]
+        - [Fact 3]
+        </knowledge>
+        
+        Based on these facts:
+        
+        <answer>
+        [Answer]
+        </answer>
+
+    pattern_3_multi_perspective:
+      name: "Knowledge from Multiple Angles"
+      template: |
+        Topic: [topic]
+        Question: [question]
+        
+        Generate relevant knowledge from multiple perspectives:
+        
+        <scientific_facts>
+        - [Scientific perspective]
+        </scientific_facts>
+        
+        <historical_context>
+        - [Historical perspective]
+        </historical_context>
+        
+        <practical_implications>
+        - [Practical perspective]
+        </practical_implications>
+        
+        Synthesizing this knowledge:
+        <answer>
+        [Comprehensive answer]
+        </answer>
+
+    pattern_4_iterative:
+      name: "Iterative Knowledge Expansion"
+      template: |
+        Question: [complex question]
+        
+        Round 1 - Initial facts:
+        - [Basic facts]
+        
+        Round 2 - Based on initial facts, what else is relevant?
+        - [Deeper facts]
+        
+        Round 3 - Any edge cases or exceptions?
+        - [Nuanced facts]
+        
+        Final answer considering all knowledge:
+        [Comprehensive answer]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WORLD-CLASS EXAMPLES
+  # ═══════════════════════════════════════════════════════════════════════════
+  world_class_examples:
+    example_1_medical:
+      question: "Is coffee good or bad for heart health?"
+      
+      basic_prompt: "Is coffee good or bad for heart health?"
+      
+      world_class_prompt: |
+        Question: Is coffee good or bad for heart health?
+        
+        Before answering, generate relevant medical knowledge:
+        
+        <cardiology_facts>
+        - What does research say about coffee and cardiovascular disease?
+        - What are the active compounds in coffee affecting the heart?
+        - What do major health organizations recommend?
+        </cardiology_facts>
+        
+        <confounding_factors>
+        - What other factors influence coffee's health effects?
+        - How do preparation methods matter?
+        - What about individual variation?
+        </confounding_factors>
+        
+        <recent_research>
+        - What do recent meta-analyses conclude?
+        - Any contradictory findings to explain?
+        </recent_research>
+        
+        Now, synthesize this knowledge into a nuanced answer:
+        
+        <answer>
+        [Balanced answer with caveats]
+        </answer>
+        
+        <confidence_and_limitations>
+        [How confident in this answer? What don't we know?]
+        </confidence_and_limitations>
+
+    example_2_technical:
+      question: "Should I use microservices or monolith for my startup?"
+      
+      world_class_prompt: |
+        Question: For a 5-person startup building a B2B SaaS product, should 
+        we use microservices or monolithic architecture?
+        
+        First, generate relevant architectural knowledge:
+        
+        <microservices_knowledge>
+        Pros:
+        - [Generate advantages]
+        Cons:
+        - [Generate disadvantages]
+        Best suited for:
+        - [Generate ideal scenarios]
+        </microservices_knowledge>
+        
+        <monolith_knowledge>
+        Pros:
+        - [Generate advantages]
+        Cons:
+        - [Generate disadvantages]
+        Best suited for:
+        - [Generate ideal scenarios]
+        </monolith_knowledge>
+        
+        <startup_specific_factors>
+        - Team size considerations
+        - Speed to market needs
+        - Technical debt implications
+        - Scaling timeline
+        </startup_specific_factors>
+        
+        <industry_wisdom>
+        What do experienced architects recommend for startups?
+        </industry_wisdom>
+        
+        Based on all this knowledge, provide a recommendation:
+        
+        <recommendation>
+        [Clear recommendation with reasoning]
+        </recommendation>
+
+    example_3_historical:
+      question: "What caused the fall of the Roman Empire?"
+      
+      world_class_prompt: |
+        Historical Question: What caused the fall of the Western Roman Empire?
+        
+        Generate knowledge from multiple historiographical perspectives:
+        
+        <gibbon_thesis>
+        Edward Gibbon's classic argument:
+        - [Generate key points]
+        </gibbon_thesis>
+        
+        <economic_factors>
+        Economic historians emphasize:
+        - [Generate economic factors]
+        </economic_factors>
+        
+        <military_factors>
+        Military historians highlight:
+        - [Generate military factors]
+        </military_factors>
+        
+        <climate_disease_factors>
+        Recent research on climate/disease:
+        - [Generate environmental factors]
+        </climate_disease_factors>
+        
+        <political_factors>
+        Political/administrative causes:
+        - [Generate political factors]
+        </political_factors>
+        
+        <modern_consensus>
+        What do contemporary historians generally agree on?
+        - [Generate consensus view]
+        </modern_consensus>
+        
+        Synthesize into a comprehensive answer:
+        
+        <answer>
+        [Multi-causal explanation acknowledging historiographical debate]
+        </answer>
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ADVANCED TECHNIQUES
+  # ═══════════════════════════════════════════════════════════════════════════
+  advanced:
+    knowledge_verification:
+      description: "Verify generated knowledge before using"
+      template: |
+        <generated_knowledge>
+        [Facts]
+        </generated_knowledge>
+        
+        <verification>
+        For each fact above, rate confidence:
+        - Fact 1: [High/Medium/Low] - [reasoning]
+        - Fact 2: [High/Medium/Low] - [reasoning]
+        </verification>
+        
+        <answer using="high confidence facts only">
+        [Answer]
+        </answer>
+
+    contrastive_knowledge:
+      description: "Generate supporting AND contradicting knowledge"
+      template: |
+        Question: [Question]
+        
+        <supporting_evidence>
+        Facts that support one answer:
+        </supporting_evidence>
+        
+        <contradicting_evidence>
+        Facts that support a different answer:
+        </contradicting_evidence>
+        
+        <reconciliation>
+        How to reconcile these perspectives:
+        </reconciliation>
+        
+        <balanced_answer>
+        [Nuanced answer]
+        </balanced_answer>
+
+    domain_specific_knowledge:
+      description: "Generate knowledge for specific domain"
+      template: |
+        Domain: {domain}
+        Question: {question}
+        
+        As a {domain} expert, what facts are relevant?
+        
+        <foundational_concepts>
+        Basic principles:
+        </foundational_concepts>
+        
+        <domain_specific_facts>
+        Specialized knowledge:
+        </domain_specific_facts>
+        
+        <current_best_practices>
+        State of the art:
+        </current_best_practices>
+        
+        <answer>
+        [Domain-informed answer]
+        </answer>
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # WHEN TO USE
+  # ═══════════════════════════════════════════════════════════════════════════
+  when_to_use:
+    ideal_for:
+      - "Knowledge-intensive questions"
+      - "Topics requiring multiple facts"
+      - "Nuanced answers needing context"
+      - "When you want to reduce hallucination"
+      - "Complex topics with multiple perspectives"
+    
+    not_ideal_for:
+      - "Simple factual lookups"
+      - "When speed is critical"
+      - "Tasks not requiring background knowledge"
+      - "Creative tasks"
+    
+    comparison_with_rag:
+      generated_knowledge: "Uses model's internal knowledge"
+      rag: "Uses external documents"
+      when_to_use_each: |
+        - Use Generated Knowledge when topic is likely in training data
+        - Use RAG when you need current or proprietary information
+        - Combine both for best results
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # TIPS FOR WORLD-CLASS PROMPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  tips:
+    - tip: "Be specific about what knowledge to generate"
+      why: "Vague = irrelevant facts"
+      example: "Generate facts about coffee's effect on CARDIOVASCULAR health specifically"
+    
+    - tip: "Request multiple perspectives"
+      why: "Single perspective may be biased"
+      example: "Generate facts from proponents AND critics"
+    
+    - tip: "Include verification step"
+      why: "Generated facts may be wrong"
+      example: "Rate your confidence in each fact"
+    
+    - tip: "Separate knowledge from answer"
+      why: "Clarity and transparency"
+      example: "Use <knowledge> and <answer> tags"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMMON MISTAKES
+  # ═══════════════════════════════════════════════════════════════════════════
+  mistakes:
+    - mistake: "Generating too much knowledge"
+      problem: "Fills context, loses focus"
+      fix: "Limit to 5-10 most relevant facts"
+    
+    - mistake: "Not using the generated knowledge"
+      problem: "Generates facts then ignores them"
+      fix: "Explicitly reference: 'Based on the facts above...'"
+    
+    - mistake: "Treating generated facts as truth"
+      problem: "Hallucinated facts lead to wrong answers"
+      fix: "Include verification or confidence ratings"
+    
+    - mistake: "Generic knowledge generation"
+      problem: "Facts not specific to question"
+      fix: "Tailor knowledge prompt to specific question"

@@ -1,0 +1,314 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TECHNIQUE: DSPy FRAMEWORK
+# Programming, Not Prompting - The Future of LLM Development
+# ═══════════════════════════════════════════════════════════════════════════════
+
+technique:
+  name: "DSPy Framework"
+  rank: "Cutting-Edge"
+  impact: "Revolutionary"
+  era: "2024+"
+  introduced_by: "Stanford NLP (Omar Khattab et al.)"
+  repository: "https://github.com/stanfordnlp/dspy"
+  
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OVERVIEW
+  # ═══════════════════════════════════════════════════════════════════════════
+  overview:
+    definition: |
+      DSPy is a framework for programming—not prompting—language models.
+      Instead of manually writing prompts, you define what you want (signatures)
+      and DSPy automatically optimizes HOW to get it (prompts, examples, etc.)
+    
+    paradigm_shift: |
+      Traditional: Write prompt → Test → Manually improve → Repeat
+      DSPy: Define signature → Compile with optimizer → Automatic improvement
+    
+    why_important:
+      - "Eliminates manual prompt engineering"
+      - "Prompts improve automatically with data"
+      - "Portable across models (GPT-4 → Claude → Llama)"
+      - "Reproducible, testable, version-controllable"
+    
+    key_insight: |
+      "Don't write prompts. Write programs. Let the optimizer write prompts."
+      
+      DSPy treats prompts as compiled artifacts, not hand-written text.
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # CORE CONCEPTS
+  # ═══════════════════════════════════════════════════════════════════════════
+  concepts:
+    signatures:
+      description: "Define input/output contract, not implementation"
+      example: |
+        # Traditional prompt
+        prompt = "Given a question, provide a detailed answer..."
+        
+        # DSPy signature
+        class QuestionAnswer(dspy.Signature):
+            """Answer questions with detailed explanations."""
+            question = dspy.InputField()
+            answer = dspy.OutputField(desc="detailed answer with reasoning")
+      
+      benefit: "Declarative - say WHAT, not HOW"
+    
+    modules:
+      description: "Composable building blocks for LLM programs"
+      types:
+        predict:
+          description: "Basic LLM call"
+          code: "dspy.Predict(QuestionAnswer)"
+        
+        chain_of_thought:
+          description: "Adds reasoning before answer"
+          code: "dspy.ChainOfThought(QuestionAnswer)"
+        
+        react:
+          description: "ReAct-style agent"
+          code: "dspy.ReAct(QuestionAnswer, tools=[...])"
+        
+        program_of_thought:
+          description: "Generate and execute code"
+          code: "dspy.ProgramOfThought(QuestionAnswer)"
+      
+      composability: |
+        class RAGPipeline(dspy.Module):
+            def __init__(self):
+                self.retrieve = dspy.Retrieve(k=5)
+                self.generate = dspy.ChainOfThought(AnswerWithContext)
+            
+            def forward(self, question):
+                context = self.retrieve(question)
+                return self.generate(question=question, context=context)
+    
+    optimizers:
+      description: "Automatically improve prompts/examples"
+      types:
+        bootstrap_few_shot:
+          description: "Generate and select best examples"
+          use_case: "Need few-shot examples automatically"
+          
+        mipro_v2:
+          description: "Multi-stage instruction/example optimization"
+          use_case: "Comprehensive prompt optimization"
+          
+        copro:
+          description: "Coordinate prompt optimization"
+          use_case: "Multi-step pipelines"
+          
+        signature_optimizer:
+          description: "Optimize the signature description itself"
+          use_case: "Improve task definition"
+    
+    teleprompters:
+      description: "Orchestrate the optimization process"
+      process:
+        - "Take your program (modules + signatures)"
+        - "Take training data"
+        - "Automatically find best prompts"
+        - "Output optimized program"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # IMPLEMENTATION PATTERNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  patterns:
+    basic_qa:
+      name: "Simple Question Answering"
+      code: |
+        import dspy
+        
+        # Configure LM
+        lm = dspy.OpenAI(model="gpt-4")
+        dspy.configure(lm=lm)
+        
+        # Define signature
+        class BasicQA(dspy.Signature):
+            """Answer questions accurately and concisely."""
+            question = dspy.InputField()
+            answer = dspy.OutputField()
+        
+        # Create predictor
+        qa = dspy.Predict(BasicQA)
+        
+        # Use
+        result = qa(question="What is the capital of France?")
+        print(result.answer)  # "Paris"
+    
+    chain_of_thought:
+      name: "With Reasoning"
+      code: |
+        class MathProblem(dspy.Signature):
+            """Solve math problems step by step."""
+            problem = dspy.InputField()
+            reasoning = dspy.OutputField(desc="step-by-step solution")
+            answer = dspy.OutputField(desc="final numerical answer")
+        
+        # Automatic CoT
+        solver = dspy.ChainOfThought(MathProblem)
+        
+        result = solver(problem="If x + 5 = 12, what is x?")
+        print(result.reasoning)  # Shows steps
+        print(result.answer)     # "7"
+    
+    rag_pipeline:
+      name: "Retrieval-Augmented Generation"
+      code: |
+        class RAG(dspy.Module):
+            def __init__(self, num_docs=3):
+                self.retrieve = dspy.Retrieve(k=num_docs)
+                self.generate = dspy.ChainOfThought("context, question -> answer")
+            
+            def forward(self, question):
+                docs = self.retrieve(question).passages
+                return self.generate(context=docs, question=question)
+        
+        # Use
+        rag = RAG()
+        result = rag("What did the company announce yesterday?")
+    
+    classification:
+      name: "Text Classification"
+      code: |
+        class Classifier(dspy.Signature):
+            """Classify text into categories."""
+            text = dspy.InputField()
+            category = dspy.OutputField(desc="one of: positive, negative, neutral")
+        
+        classifier = dspy.Predict(Classifier)
+        
+        # Optimize with examples
+        from dspy.teleprompt import BootstrapFewShot
+        
+        optimizer = BootstrapFewShot(metric=accuracy)
+        optimized = optimizer.compile(classifier, trainset=examples)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OPTIMIZATION WORKFLOW
+  # ═══════════════════════════════════════════════════════════════════════════
+  optimization:
+    workflow:
+      - step: 1
+        name: "Define Program"
+        action: "Create signatures and modules"
+      
+      - step: 2
+        name: "Prepare Data"
+        action: "Collect examples with expected outputs"
+      
+      - step: 3
+        name: "Define Metric"
+        action: "How to measure success"
+      
+      - step: 4
+        name: "Choose Optimizer"
+        action: "BootstrapFewShot, MIPROv2, etc."
+      
+      - step: 5
+        name: "Compile"
+        action: "optimizer.compile(program, trainset)"
+      
+      - step: 6
+        name: "Evaluate"
+        action: "Test on held-out data"
+      
+      - step: 7
+        name: "Deploy"
+        action: "Use optimized program"
+    
+    example_optimization: |
+      import dspy
+      from dspy.teleprompt import MIPROv2
+      
+      # Define metric
+      def accuracy(example, pred):
+          return example.answer == pred.answer
+      
+      # Load data
+      trainset = load_examples("train.json")
+      devset = load_examples("dev.json")
+      
+      # Optimize
+      optimizer = MIPROv2(
+          metric=accuracy,
+          num_candidates=10,
+          init_temperature=1.0
+      )
+      
+      optimized_program = optimizer.compile(
+          my_program,
+          trainset=trainset,
+          eval_kwargs={"devset": devset}
+      )
+      
+      # Save
+      optimized_program.save("optimized_v1.json")
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # COMPARISON WITH TRADITIONAL PROMPTING
+  # ═══════════════════════════════════════════════════════════════════════════
+  comparison:
+    traditional:
+      workflow: "Write prompt → Test → Manual iteration"
+      brittleness: "High - changes break easily"
+      portability: "Low - prompts are model-specific"
+      optimization: "Human intuition"
+      testing: "Ad-hoc"
+    
+    dspy:
+      workflow: "Define signature → Automatic optimization"
+      brittleness: "Low - adapts automatically"
+      portability: "High - same code, different LM"
+      optimization: "Algorithmic, data-driven"
+      testing: "Systematic with metrics"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # APPLICATION TO PROMPTARCHITECT
+  # ═══════════════════════════════════════════════════════════════════════════
+  promptarchitect_integration:
+    concept: |
+      PromptArchitect can use DSPy principles to:
+      1. Define signatures for prompt generation tasks
+      2. Use optimizers to find best few-shot examples
+      3. Auto-generate system prompts from requirements
+    
+    example_signature: |
+      class GenerateSystemPrompt(dspy.Signature):
+          """Generate a system prompt from requirements."""
+          
+          purpose = dspy.InputField(desc="What the AI should do")
+          audience = dspy.InputField(desc="Who will use it")
+          constraints = dspy.InputField(desc="What it should NOT do")
+          
+          system_prompt = dspy.OutputField(desc="Complete system prompt")
+          reasoning = dspy.OutputField(desc="Why this structure")
+    
+    benefits:
+      - "Auto-optimize prompt templates with user feedback"
+      - "Generate few-shot examples automatically"
+      - "Test prompt quality with metrics"
+      - "Version control optimized prompts"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # GETTING STARTED
+  # ═══════════════════════════════════════════════════════════════════════════
+  getting_started:
+    install: "pip install dspy-ai"
+    
+    minimal_example: |
+      import dspy
+      
+      # Configure
+      dspy.configure(lm=dspy.OpenAI(model="gpt-4"))
+      
+      # Define
+      qa = dspy.ChainOfThought("question -> answer")
+      
+      # Use
+      result = qa(question="What is 2+2?")
+      print(result.answer)
+    
+    resources:
+      - "GitHub: github.com/stanfordnlp/dspy"
+      - "Docs: dspy-docs.vercel.app"
+      - "Paper: arxiv.org/abs/2310.03714"

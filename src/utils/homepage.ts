@@ -1,0 +1,104 @@
+import type { DrizzleDb } from '../db';
+import { createId } from '@paralleldrive/cuid2';
+import { SETTING_KEYS } from '../models/setting';
+import { getSettingValue, upsertSetting } from './settings';
+
+export type HomepageBanner = {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  link?: string;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+export type HomepageFeature = {
+  id: string;
+  icon: 'truck' | 'shield' | 'bag';
+  title: string;
+  description: string;
+};
+
+export type HomepageConfig = {
+  banners: HomepageBanner[];
+  features: HomepageFeature[];
+  featuredProductIds: string[];
+};
+
+export const DEFAULT_HOMEPAGE_FEATURES: HomepageFeature[] = [
+  {
+    id: 'feat-1',
+    icon: 'truck',
+    title: 'Giao nhanh toàn quốc',
+    description: 'Nhận hàng sau 2–3 ngày làm việc.',
+  },
+  {
+    id: 'feat-2',
+    icon: 'shield',
+    title: 'An toàn cho móng',
+    description: 'Chất liệu đã qua kiểm định, dễ sử dụng tại nhà.',
+  },
+  {
+    id: 'feat-3',
+    icon: 'bag',
+    title: 'Nail box theo style',
+    description: 'Đa dạng bộ sưu tập: Y2K, tiểu thư, công sở.',
+  },
+];
+
+export const EMPTY_HOMEPAGE_CONFIG: HomepageConfig = {
+  banners: [],
+  features: DEFAULT_HOMEPAGE_FEATURES,
+  featuredProductIds: [],
+};
+
+function normalizeBanner(raw: unknown): HomepageBanner | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const item = raw as Record<string, unknown>;
+  const imageUrl = typeof item.imageUrl === 'string' ? item.imageUrl : '';
+  if (!imageUrl) return null;
+  return {
+    id: typeof item.id === 'string' ? item.id : createId(),
+    imageUrl,
+    title: typeof item.title === 'string' ? item.title : undefined,
+    subtitle: typeof item.subtitle === 'string' ? item.subtitle : undefined,
+    link: typeof item.link === 'string' ? item.link : undefined,
+    isActive: item.isActive !== false,
+    sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : 0,
+  };
+}
+
+export function normalizeHomepageConfig(raw: unknown): HomepageConfig {
+  if (!raw || typeof raw !== 'object') return { ...EMPTY_HOMEPAGE_CONFIG };
+
+  const data = raw as Record<string, unknown>;
+  const banners = Array.isArray(data.banners)
+    ? data.banners.map(normalizeBanner).filter((b): b is HomepageBanner => Boolean(b))
+    : [];
+
+  const features = Array.isArray(data.features)
+    ? (data.features as HomepageFeature[]).filter((f) => f?.id && f?.title)
+    : DEFAULT_HOMEPAGE_FEATURES;
+
+  const featuredProductIds = Array.isArray(data.featuredProductIds)
+    ? data.featuredProductIds.filter((id): id is string => typeof id === 'string')
+    : [];
+
+  return {
+    banners: banners.sort((a, b) => a.sortOrder - b.sortOrder),
+    features: features.length ? features : DEFAULT_HOMEPAGE_FEATURES,
+    featuredProductIds: featuredProductIds.slice(0, 6),
+  };
+}
+
+export async function getHomepageConfig(db: DrizzleDb): Promise<HomepageConfig> {
+  const stored = await getSettingValue<unknown>(db, SETTING_KEYS.HOMEPAGE);
+  return normalizeHomepageConfig(stored);
+}
+
+export async function saveHomepageConfig(db: DrizzleDb, config: HomepageConfig) {
+  const normalized = normalizeHomepageConfig(config);
+  await upsertSetting(db, SETTING_KEYS.HOMEPAGE, normalized);
+  return normalized;
+}

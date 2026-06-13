@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Opt into Node.js 24 runtime for all actions (checkout, setup-node, etc.)
+  # Required before GitHub enforces it by default on June 2nd, 2026.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  # ── Job 1: Integration tests (Cloudflare Workers pool / workerd) ──────────────
+  test:
+    name: Integration Tests (CF Workers)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          # Prevent husky from running git hooks in CI
+          HUSKY: '0'
+
+      - name: Create .dev.vars for wrangler
+        # wrangler auto-loads .dev.vars and exposes vars to env in CF Workers pool.
+        # This is the ONLY way to inject secrets into env.JWT_SECRET in workerd tests
+        # (.dev.vars is gitignored; it must be recreated on CI).
+        # Using a fixed test-only value — not a production secret.
+        run: |
+          echo "JWT_SECRET=ci-test-jwt-secret-not-used-in-production!!" > .dev.vars
+
+      - name: Run integration tests
+        run: npm test
+
+  # ── Job 2: Coverage (Node forks pool + SQLite D1 shim) ───────────────────────
+  coverage:
+    name: Coverage (Node)
+    runs-on: ubuntu-latest
+    # Run after integration tests pass
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: '0'
+
+      - name: Run coverage
+        # Coverage uses Node forks pool (vitest.coverage.config.mts).
+        # cloudflare:test is mocked by cloudflare-test.node.ts which has
+        # a hardcoded JWT_SECRET — no .dev.vars needed for this job.
+        run: npm run test:coverage
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: coverage/
+          retention-days: 14
+
+      - name: Coverage summary comment (PR only)
+        if: github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: coverage/coverage-summary.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

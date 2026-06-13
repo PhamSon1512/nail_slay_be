@@ -1,0 +1,73 @@
+{
+  "name": "nail-slay-be",
+  "version": "1.4.0",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "deploy": "wrangler deploy --minify",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --config vitest.coverage.config.mts",
+    "test:watch": "vitest",
+    "prepare": "husky && npx gitnexus analyze",
+    "release": "commit-and-tag-version",
+    "format": "prettier --write .",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "db:generate": "drizzle-kit generate && for dir in migrations/*/; do [ -f \"$dir/migration.sql\" ] && cp -n \"$dir/migration.sql\" \"migrations/$(basename $dir).sql\" 2>/dev/null; done",
+    "db:apply:local": "wrangler d1 migrations apply nail_slay_be",
+    "db:apply:remote": "wrangler d1 migrations apply nail_slay_be --remote",
+    "seed:admin": "node scripts/seed-admin.mjs",
+    "seed:admin:remote": "node scripts/seed-admin.mjs --remote",
+    "seed:ecommerce": "node scripts/seed-ecommerce.mjs",
+    "seed:ecommerce:remote": "node scripts/seed-ecommerce.mjs --remote",
+    "setup:wrangler": "node scripts/setup-wrangler.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "smoke:ci": "node scripts/smoke-ci.mjs",
+    "smoke:coverage": "node scripts/smoke-coverage.mjs",
+    "smoke:remote": "node scripts/smoke-test.mjs --url https://$(npx wrangler whoami 2>/dev/null | grep -o '[a-z0-9-]*\\.workers\\.dev' | head -1)",
+    "security": "node scripts/security-test.mjs",
+    "load": "k6 run scripts/load-test.js",
+    "load:cloud": "k6 cloud scripts/load-test.js",
+    "bench": "vitest bench --config vitest.bench.config.mts",
+    "mutate": "stryker run"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "0.6.1",
+    "@hono/zod-openapi": "1.2.2",
+    "@paralleldrive/cuid2": "3.3.0",
+    "@scalar/hono-api-reference": "0.10.4",
+    "currency.js": "^2.0.4",
+    "dayjs": "1.11.20",
+    "drizzle-orm": "^1.0.0-beta.18-7eb39f0",
+    "hono": "4.12.8",
+    "ramda": "0.32.0",
+    "ramda-adjunct": "6.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.13.2",
+    "@cloudflare/workers-types": "4.20260317.1",
+    "@ianvs/prettier-plugin-sort-imports": "4.7.1",
+    "@inquirer/prompts": "^8.3.2",
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.9.1",
+    "@types/ramda": "0.31.1",
+    "@vitest/coverage-istanbul": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "better-sqlite3": "^12.8.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "commit-and-tag-version": "^12.7.1",
+    "drizzle-kit": "^1.0.0-beta.18-7eb39f0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "3.7.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0",
+    "wrangler": "4.75.0"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx}": [
+      "prettier --write"
+    ]
+  }
+}
