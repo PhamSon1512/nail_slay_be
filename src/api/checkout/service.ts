@@ -3,13 +3,24 @@ import type { CheckoutBodySchema } from './openapi';
 import type { z } from 'zod';
 import { createId } from '@paralleldrive/cuid2';
 import { and, eq, isNull } from 'drizzle-orm';
-import { addresses, cartItems, orderItems, orders, products } from '../../models';
+import { addresses, cartItems, orderItems, orders, products, users } from '../../models';
 import { SETTING_KEYS } from '../../models/setting';
 import { throwError } from '../../utils';
 import { getSettingValue } from '../../utils/settings';
 
 export async function checkout(c: HonoCtx, input: z.infer<typeof CheckoutBodySchema>) {
   const userId = c.var.jwtPayload.id!;
+
+  const user = await c.var.db
+    .select({ accountStatus: users.accountStatus, blockReason: users.blockReason })
+    .from(users)
+    .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+    .get();
+  if (user?.accountStatus === 'blocked') {
+    return throwError.forbidden('Tài khoản đã bị chặn', {
+      reason: user.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
+    });
+  }
 
   const address = await c.var.db
     .select()

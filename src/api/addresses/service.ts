@@ -13,17 +13,22 @@ export async function listAddresses(c: HonoCtx) {
 export async function createAddress(c: HonoCtx, input: z.infer<typeof CreateAddressSchema>) {
   const userId = c.var.jwtPayload.id!;
 
-  return c.var.db.transaction(async (tx) => {
-    if (input.isDefault) {
-      await tx.update(addresses).set({ isDefault: false, updatedAt: new Date() }).where(eq(addresses.userId, userId));
-    }
+  if (input.isDefault) {
+    await c.var.db.update(addresses).set({ isDefault: false, updatedAt: new Date() }).where(eq(addresses.userId, userId));
+  }
 
-    const [created] = await tx
-      .insert(addresses)
-      .values({ userId, detail: input.detail, isDefault: input.isDefault ?? false })
-      .returning();
-    return created;
-  });
+  const created = await c.var.db
+    .insert(addresses)
+    .values({
+      userId,
+      detail: input.detail,
+      isDefault: input.isDefault ?? false,
+    })
+    .returning()
+    .get();
+
+  if (!created) return throwError.internal('Failed to create address');
+  return created;
 }
 
 export async function updateAddress(c: HonoCtx, id: string, input: z.infer<typeof UpdateAddressSchema>) {

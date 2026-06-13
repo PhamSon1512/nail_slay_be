@@ -1,7 +1,7 @@
 import type { HonoCtx } from '../../@types';
 import type { OrderStatus } from '../../utils/orderStatus';
 import { and, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
-import { addresses, orderItems, orders, products, productVariants, users } from '../../models';
+import { addresses, complaints, orderItems, orders, products, productVariants, users } from '../../models';
 import { throwError } from '../../utils';
 import { collectImageFiles, optionalString, parseIntField, parseJsonField, requiredString } from '../../utils/formParse';
 import { canAdminTransition } from '../../utils/orderStatus';
@@ -274,11 +274,14 @@ export async function adminGetOrder(c: HonoCtx, id: string) {
     .where(eq(orderItems.orderId, id))
     .all();
 
+  const complaint = await c.var.db.select().from(complaints).where(eq(complaints.orderId, id)).get();
+
   return {
     ...order,
     user: user ?? null,
     address: address ?? null,
     items,
+    complaint: complaint ?? null,
   };
 }
 

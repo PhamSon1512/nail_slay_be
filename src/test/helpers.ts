@@ -45,7 +45,7 @@ export function makeTestApp(
 // ─── DDL ──────────────────────────────────────────────────────────────────────
 
 // No FK to roles table — role is a plain text field validated by casbinPolicies at runtime.
-export const USERS_DDL = `CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL, first_name TEXT, last_name TEXT, full_name TEXT, phone TEXT, role TEXT DEFAULT 'user', refresh_token TEXT, created_at INTEGER NOT NULL, updated_at INTEGER, deleted_at INTEGER)`;
+export const USERS_DDL = `CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL, first_name TEXT, last_name TEXT, full_name TEXT, phone TEXT, role TEXT DEFAULT 'user', account_status TEXT DEFAULT 'active', block_reason TEXT, blocked_at INTEGER, refresh_token TEXT, created_at INTEGER NOT NULL, updated_at INTEGER, deleted_at INTEGER)`;
 export const USERS_IDX = [
   `CREATE INDEX IF NOT EXISTS user_deleted_at_idx ON users (deleted_at)`,
   `CREATE UNIQUE INDEX IF NOT EXISTS users_email_active_udx ON users (email) WHERE deleted_at IS NULL`,

@@ -39,6 +39,17 @@ export const auth = createMiddleware<{ Bindings: Bindings; Variables: Variables 
 
   try {
     const payload = await verify(token, c.env.JWT_SECRET, 'HS256');
+    const userId = payload.id as string;
+    const user = await c.var.db
+      .select({ accountStatus: users.accountStatus, blockReason: users.blockReason })
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .get();
+    if (user?.accountStatus === 'blocked') {
+      return throwError.forbidden('Tài khoản đã bị chặn', {
+        reason: user.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
+      });
+    }
     c.set('jwtPayload', payload as unknown as Variables['jwtPayload']);
     await next();
   } catch (error) {
@@ -59,6 +70,12 @@ export const auth = createMiddleware<{ Bindings: Bindings; Variables: Variables 
 
       if (!user?.refreshToken) {
         return throwError.unauthorized('Session expired, please log in again', { userId, operation: 'token_refresh' });
+      }
+
+      if (user.accountStatus === 'blocked') {
+        return throwError.forbidden('Tài khoản đã bị chặn', {
+          reason: user.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
+        });
       }
 
       const oldJti = oldPayload?.jti;

@@ -82,14 +82,25 @@ const settingsData = [
         },
       ],
       featuredProductIds: [],
+      thankYou: {
+        title: 'Cam on ban da tin chon Nail Slay!',
+        content:
+          'Hang ngan khach hang da trai nghiem va hai long voi Nail Slay. Chung toi tu hao mang den nhung thiet ke nail box thu cong tinh xao, chuan form, ben dep nhu ngoai tiem. Tu tin toa sang moi luc moi noi!',
+        stats: [
+          { id: 'stat-1', value: '10k+', label: 'Khach hang' },
+          { id: 'stat-2', value: '500+', label: 'Mau thiet ke' },
+          { id: 'stat-3', value: '100%', label: 'Lam thu cong' },
+          { id: 'stat-4', value: '5★', label: 'Danh gia tot' },
+        ],
+      },
     }),
   ],
   [
     'contact_info',
     JSON.stringify({
-      phone: '0901234567',
-      email: 'hello@nailslay.vn',
-      address: 'TP. Ho Chi Minh, Viet Nam',
+      phone: '0123456789',
+      email: 'norely@nailslay.com',
+      address: 'TP. Hà Nội, Việt Nam',
     }),
   ],
   ['qr_code_url', JSON.stringify('')],

@@ -3,7 +3,7 @@ import type { OrderStatus } from '../../utils/orderStatus';
 import type { UpdateOrderStatusSchema } from './openapi';
 import type { z } from 'zod';
 import { and, desc, eq } from 'drizzle-orm';
-import { complaints, orderItems, orders, products } from '../../models';
+import { addresses, complaints, orderItems, orders, products } from '../../models';
 import { throwError } from '../../utils';
 import { canUserTransition } from '../../utils/orderStatus';
 
@@ -39,9 +39,10 @@ export async function getOrderById(c: HonoCtx, id: string) {
     .where(eq(orderItems.orderId, id))
     .all();
 
+  const address = await c.var.db.select().from(addresses).where(eq(addresses.id, order.addressId)).get();
   const complaint = await c.var.db.select().from(complaints).where(eq(complaints.orderId, id)).get();
 
-  return { ...order, items, complaint: complaint ?? null };
+  return { ...order, address: address ?? null, items, complaint: complaint ?? null };
 }
 
 export async function updateOrderStatus(c: HonoCtx, id: string, input: z.infer<typeof UpdateOrderStatusSchema>) {

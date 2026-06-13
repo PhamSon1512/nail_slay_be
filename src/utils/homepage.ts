@@ -20,10 +20,23 @@ export type HomepageFeature = {
   description: string;
 };
 
+export type HomepageThankYouStat = {
+  id: string;
+  value: string;
+  label: string;
+};
+
+export type HomepageThankYou = {
+  title: string;
+  content: string;
+  stats: HomepageThankYouStat[];
+};
+
 export type HomepageConfig = {
   banners: HomepageBanner[];
   features: HomepageFeature[];
   featuredProductIds: string[];
+  thankYou: HomepageThankYou;
 };
 
 export const DEFAULT_HOMEPAGE_FEATURES: HomepageFeature[] = [
@@ -47,11 +60,54 @@ export const DEFAULT_HOMEPAGE_FEATURES: HomepageFeature[] = [
   },
 ];
 
+export const DEFAULT_HOMEPAGE_THANK_YOU: HomepageThankYou = {
+  title: 'Cảm ơn bạn đã tin chọn Nail Slay!',
+  content:
+    'Hàng ngàn khách hàng đã trải nghiệm và hài lòng với Nail Slay. Chúng tôi tự hào mang đến những thiết kế nail box thủ công tinh xảo, chuẩn form, bền đẹp như ngoài tiệm. Tự tin tỏa sáng mọi lúc mọi nơi!',
+  stats: [
+    { id: 'stat-1', value: '10k+', label: 'Khách hàng' },
+    { id: 'stat-2', value: '500+', label: 'Mẫu thiết kế' },
+    { id: 'stat-3', value: '100%', label: 'Làm thủ công' },
+    { id: 'stat-4', value: '5★', label: 'Đánh giá tốt' },
+  ],
+};
+
 export const EMPTY_HOMEPAGE_CONFIG: HomepageConfig = {
   banners: [],
   features: DEFAULT_HOMEPAGE_FEATURES,
   featuredProductIds: [],
+  thankYou: DEFAULT_HOMEPAGE_THANK_YOU,
 };
+
+function normalizeThankYouStat(raw: unknown): HomepageThankYouStat | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const item = raw as Record<string, unknown>;
+  const value = typeof item.value === 'string' ? item.value.trim() : '';
+  const label = typeof item.label === 'string' ? item.label.trim() : '';
+  if (!value || !label) return null;
+  return {
+    id: typeof item.id === 'string' ? item.id : createId(),
+    value,
+    label,
+  };
+}
+
+function normalizeThankYou(raw: unknown): HomepageThankYou {
+  if (!raw || typeof raw !== 'object') return { ...DEFAULT_HOMEPAGE_THANK_YOU };
+
+  const data = raw as Record<string, unknown>;
+  const title = typeof data.title === 'string' ? data.title.trim() : '';
+  const content = typeof data.content === 'string' ? data.content.trim() : '';
+  const stats = Array.isArray(data.stats)
+    ? data.stats.map(normalizeThankYouStat).filter((s): s is HomepageThankYouStat => Boolean(s))
+    : [];
+
+  return {
+    title: title || DEFAULT_HOMEPAGE_THANK_YOU.title,
+    content: content || DEFAULT_HOMEPAGE_THANK_YOU.content,
+    stats: stats.length ? stats.slice(0, 6) : DEFAULT_HOMEPAGE_THANK_YOU.stats,
+  };
+}
 
 function normalizeBanner(raw: unknown): HomepageBanner | null {
   if (!raw || typeof raw !== 'object') return null;
@@ -89,6 +145,7 @@ export function normalizeHomepageConfig(raw: unknown): HomepageConfig {
     banners: banners.sort((a, b) => a.sortOrder - b.sortOrder),
     features: features.length ? features : DEFAULT_HOMEPAGE_FEATURES,
     featuredProductIds: featuredProductIds.slice(0, 6),
+    thankYou: normalizeThankYou(data.thankYou),
   };
 }
 

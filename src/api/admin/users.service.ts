@@ -47,10 +47,36 @@ export async function adminGetUser(c: HonoCtx, id: string) {
   return omit(USER_SENSITIVE_FIELDS, user);
 }
 
-export async function adminUpdateUser(c: HonoCtx, id: string, input: { role?: string; fullName?: string; phone?: string }) {
+export async function adminUpdateUser(
+  c: HonoCtx,
+  id: string,
+  input: {
+    role?: string;
+    fullName?: string;
+    phone?: string;
+    accountStatus?: 'active' | 'blocked';
+    blockReason?: string;
+  },
+) {
+  if (input.accountStatus === 'blocked' && !input.blockReason?.trim()) {
+    return throwError.validation('Block reason is required when blocking a user');
+  }
+
+  const patch: Record<string, unknown> = {
+    updatedAt: new Date(),
+  };
+  if (input.role !== undefined) patch.role = input.role;
+  if (input.fullName !== undefined) patch.fullName = input.fullName;
+  if (input.phone !== undefined) patch.phone = input.phone;
+  if (input.accountStatus !== undefined) {
+    patch.accountStatus = input.accountStatus;
+    patch.blockReason = input.accountStatus === 'blocked' ? (input.blockReason?.trim() ?? null) : null;
+    patch.blockedAt = input.accountStatus === 'blocked' ? new Date() : null;
+  }
+
   const [updated] = await c.var.db
     .update(users)
-    .set({ ...input, updatedAt: new Date() })
+    .set(patch)
     .where(and(eq(users.id, id), isNull(users.deletedAt)))
     .returning();
   if (!updated) return throwError.notFound('User not found', { id });

@@ -17,6 +17,9 @@ export const users = table(
     // Role is a plain text string — validated against casbinPolicies.ts at auth time.
     // No FK to a roles table; role names are defined in src/utils/casbinPolicies.ts.
     role: text('role').default('user'),
+    accountStatus: text('account_status').default('active'),
+    blockReason: text('block_reason'),
+    blockedAt: integer('blocked_at', { mode: 'timestamp' }),
     // Stores SHA-256(refreshJWT), NOT the plain JWT. Direct DB inserts MUST also hash.
     refreshToken: text('refresh_token'),
     createdAt: integer('created_at', { mode: 'timestamp' })

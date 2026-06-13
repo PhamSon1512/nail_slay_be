@@ -20,6 +20,7 @@ export async function adminUpdateHomepageSettings(
   input: {
     features?: HomepageConfig['features'];
     featuredProductIds?: string[];
+    thankYou?: HomepageConfig['thankYou'];
     contact_info?: unknown;
   },
 ) {
@@ -30,6 +31,9 @@ export async function adminUpdateHomepageSettings(
   }
   if (input.featuredProductIds !== undefined) {
     homepage.featuredProductIds = input.featuredProductIds.slice(0, 6);
+  }
+  if (input.thankYou !== undefined) {
+    homepage.thankYou = input.thankYou;
   }
 
   await saveHomepageConfig(c.var.db, homepage);

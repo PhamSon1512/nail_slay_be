@@ -42,6 +42,8 @@ export const AdminUpdateUserSchema = z.object({
   role: z.enum(['user', 'admin']).optional(),
   fullName: z.string().optional(),
   phone: z.string().optional(),
+  accountStatus: z.enum(['active', 'blocked']).optional(),
+  blockReason: z.string().optional(),
 });
 
 export const AdminUpdateOrderStatusSchema = z.object({
@@ -65,9 +67,22 @@ const HomepageFeatureSchema = z.object({
   description: z.string(),
 });
 
+const HomepageThankYouStatSchema = z.object({
+  id: z.string(),
+  value: z.string(),
+  label: z.string(),
+});
+
+const HomepageThankYouSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  stats: z.array(HomepageThankYouStatSchema).max(6),
+});
+
 export const AdminUpdateHomepageSettingsSchema = z.object({
   features: z.array(HomepageFeatureSchema).optional(),
   featuredProductIds: z.array(z.string()).max(6).optional(),
+  thankYou: HomepageThankYouSchema.optional(),
   contact_info: z.unknown().optional(),
 });
 

@@ -88,6 +88,12 @@ export async function login(c: HonoCtx, input: z.infer<typeof LoginBodySchema>) 
     return throwError.badRequest('Tài khoản hoặc mật khẩu không đúng', { email });
   }
 
+  if (candidate.accountStatus === 'blocked') {
+    return throwError.forbidden('Tài khoản đã bị chặn', {
+      reason: candidate.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
+    });
+  }
+
   const { token, exp } = await issueTokenPair(c, candidate, rememberMe ?? false);
 
   Logger.info(`User "${candidate.email}" login successful`, { userId: candidate.id, email: candidate.email }, c);

@@ -51,6 +51,7 @@ export async function listProducts(c: HonoCtx, query: z.infer<typeof ProductList
     .select({
       id: products.id,
       categoryId: products.categoryId,
+      sku: products.sku,
       name: products.name,
       slug: products.slug,
       description: products.description,
@@ -78,6 +79,7 @@ export async function getProductBySlug(c: HonoCtx, slug: string) {
     .select({
       id: products.id,
       categoryId: products.categoryId,
+      sku: products.sku,
       name: products.name,
       slug: products.slug,
       description: products.description,
