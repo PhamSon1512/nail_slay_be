@@ -8,7 +8,7 @@ export function optionalString(value: unknown): string | undefined {
 
 export function requiredString(value: unknown, field: string): string {
   const trimmed = optionalString(value);
-  if (!trimmed) return throwError.badRequest(`${field} is required`);
+  if (!trimmed) return throwError.badRequest(`Vui lòng nhập đầy đủ thông tin: ${field}`);
   return trimmed;
 }
 

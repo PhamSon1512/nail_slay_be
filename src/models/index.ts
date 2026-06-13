@@ -4,6 +4,7 @@ export * from './auditLog';
 export * from './address';
 export * from './category';
 export * from './product';
+export * from './productVariant';
 export * from './cartItem';
 export * from './order';
 export * from './orderItem';

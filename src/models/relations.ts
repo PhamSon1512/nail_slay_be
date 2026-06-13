@@ -8,11 +8,25 @@ import { media } from './media';
 import { orders } from './order';
 import { orderItems } from './orderItem';
 import { products } from './product';
+import { productVariants } from './productVariant';
 import { settings } from './setting';
 import { users } from './user';
 
 export const schemaRelations = defineRelations(
-  { users, media, auditLogs, addresses, categories, products, cartItems, orders, orderItems, complaints, settings },
+  {
+    users,
+    media,
+    auditLogs,
+    addresses,
+    categories,
+    products,
+    productVariants,
+    cartItems,
+    orders,
+    orderItems,
+    complaints,
+    settings,
+  },
   (helpers) => ({
     users: {
       media: helpers.many.media({ alias: 'media_uploader' }),
@@ -55,8 +69,12 @@ export const schemaRelations = defineRelations(
     },
     products: {
       category: helpers.one.categories({ from: helpers.products.categoryId, to: helpers.categories.id }),
+      variants: helpers.many.productVariants(),
       cartItems: helpers.many.cartItems(),
       orderItems: helpers.many.orderItems(),
+    },
+    productVariants: {
+      product: helpers.one.products({ from: helpers.productVariants.productId, to: helpers.products.id }),
     },
     cartItems: {
       user: helpers.one.users({ from: helpers.cartItems.userId, to: helpers.users.id }),

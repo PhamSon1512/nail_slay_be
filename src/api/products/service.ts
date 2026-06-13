@@ -2,7 +2,7 @@ import type { HonoCtx } from '../../@types';
 import type { ProductListQuerySchema } from './openapi';
 import type { z } from 'zod';
 import { and, asc, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
-import { categories, products } from '../../models';
+import { categories, products, productVariants } from '../../models';
 import { throwError } from '../../utils';
 
 export async function listProducts(c: HonoCtx, query: z.infer<typeof ProductListQuerySchema>) {
@@ -10,7 +10,7 @@ export async function listProducts(c: HonoCtx, query: z.infer<typeof ProductList
   const limit = Math.min(100, Math.max(1, Number(query.limit ?? 20)));
   const offset = (page - 1) * limit;
 
-  const conditions = [isNull(products.deletedAt)];
+  const conditions = [isNull(products.deletedAt), eq(products.status, 'active')];
 
   if (query.category_slug) {
     const category = await c.var.db.select().from(categories).where(eq(categories.slug, query.category_slug)).get();
@@ -55,6 +55,7 @@ export async function listProducts(c: HonoCtx, query: z.infer<typeof ProductList
       slug: products.slug,
       description: products.description,
       price: products.price,
+      originalPrice: products.originalPrice,
       stock: products.stock,
       imageUrls: products.imageUrls,
       createdAt: products.createdAt,
@@ -81,6 +82,8 @@ export async function getProductBySlug(c: HonoCtx, slug: string) {
       slug: products.slug,
       description: products.description,
       price: products.price,
+      originalPrice: products.originalPrice,
+      status: products.status,
       stock: products.stock,
       imageUrls: products.imageUrls,
       createdAt: products.createdAt,
@@ -96,5 +99,13 @@ export async function getProductBySlug(c: HonoCtx, slug: string) {
     .get();
 
   if (!product) return throwError.notFound('Product not found', { slug });
-  return product;
+
+  const variants = await c.var.db
+    .select()
+    .from(productVariants)
+    .where(eq(productVariants.productId, product.id))
+    .orderBy(productVariants.sortOrder)
+    .all();
+
+  return { ...product, variants };
 }

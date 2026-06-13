@@ -1,17 +1,11 @@
 import type { HonoCtx } from '../../@types';
 import type { OrderStatus } from '../../utils/orderStatus';
 import { and, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
-import { addresses, orderItems, orders, products, users } from '../../models';
+import { addresses, orderItems, orders, products, productVariants, users } from '../../models';
 import { throwError } from '../../utils';
 import { collectImageFiles, optionalString, parseIntField, parseJsonField, requiredString } from '../../utils/formParse';
 import { canAdminTransition } from '../../utils/orderStatus';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
-
-function parseStringArrayField(value: unknown, fallback: string[] = []) {
-  const parsed = parseJsonField<unknown>(value, fallback);
-  if (!Array.isArray(parsed)) return fallback;
-  return parsed.map((item) => (typeof item === 'string' ? item.trim() : '')).filter((item) => item.length > 0);
-}
 
 export async function adminListProducts(c: HonoCtx, query: { page?: string; limit?: string; search?: string }) {
   const page = Math.max(1, Number(query.page ?? 1));
@@ -62,42 +56,61 @@ export async function adminCreateProduct(c: HonoCtx, body: Record<string, unknow
   const sku = requiredString(body['sku'], 'sku');
   const name = requiredString(body['name'], 'name');
   const slug = requiredString(body['slug'], 'slug');
-  const description = optionalString(body['description']);
+  const description = requiredString(body['description'], 'description');
+  const status = optionalString(body['status']) || 'active';
   const price = parseIntField(body['price']);
   const originalPrice = parseIntField(body['originalPrice']);
   const stock = parseIntField(body['stock']);
-  const sizeOptions = parseStringArrayField(body['sizeOptions'], []);
-  const formOptions = parseStringArrayField(body['formOptions'], []);
+  const variantsStr = optionalString(body['variants']);
+  const variants = variantsStr ? parseJsonField<any[]>(variantsStr, []) : [];
 
-  if (price === undefined || price <= 0) return throwError.validation('Price must be greater than 0');
+  if (price === undefined || price <= 0) return throwError.validation('Giá sản phẩm phải lớn hơn 0');
   if (originalPrice !== undefined && originalPrice < price) {
-    return throwError.validation('Original price must be greater than or equal to price');
+    return throwError.validation('Giá gốc phải lớn hơn hoặc bằng giá bán');
   }
-  if (stock === undefined || stock < 0) return throwError.validation('Stock cannot be negative');
+  if (stock === undefined || stock < 0) return throwError.validation('Số lượng tồn kho không được âm');
 
   const imageUrls = await uploadProductImages(c, body);
 
   try {
-    const [created] = await c.var.db
-      .insert(products)
-      .values({
-        categoryId,
-        sku,
-        name,
-        slug,
-        description,
-        price,
-        originalPrice: originalPrice ?? price,
-        sizeOptions,
-        formOptions,
-        stock,
-        imageUrls,
-      })
-      .returning();
+    const created = await c.var.db.transaction(async (tx) => {
+      const [product] = await tx
+        .insert(products)
+        .values({
+          categoryId,
+          sku,
+          name,
+          slug,
+          description,
+          status,
+          price,
+          originalPrice: originalPrice ?? price,
+          stock,
+          imageUrls,
+        })
+        .returning();
+
+      if (variants && variants.length > 0) {
+        await tx.insert(productVariants).values(
+          variants.map((v: any, index: number) => ({
+            productId: product.id,
+            sku: v.sku || null,
+            name: v.name || name,
+            color: v.color || null,
+            size: v.size || null,
+            price: Number(v.price) || price,
+            stock: Number(v.stock) || 0,
+            imageUrl: v.imageUrl || null,
+            sortOrder: index,
+          })),
+        );
+      }
+      return product;
+    });
     return created;
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes('UNIQUE')) {
-      return throwError.conflict('Product SKU or slug already exists');
+      return throwError.conflict('Mã SKU hoặc đường dẫn (slug) đã tồn tại');
     }
     throw err;
   }
@@ -109,47 +122,68 @@ export async function adminUpdateProduct(c: HonoCtx, id: string, body: Record<st
     .from(products)
     .where(and(eq(products.id, id), isNull(products.deletedAt)))
     .get();
-  if (!existing) return throwError.notFound('Product not found', { id });
+  if (!existing) return throwError.notFound('Không tìm thấy sản phẩm', { id });
 
   const price = 'price' in body ? parseIntField(body['price']) : existing.price;
   const originalPrice = 'originalPrice' in body ? parseIntField(body['originalPrice']) : (existing.originalPrice ?? undefined);
   const stock = 'stock' in body ? parseIntField(body['stock']) : existing.stock;
-  const sizeOptions =
-    'sizeOptions' in body ? parseStringArrayField(body['sizeOptions'], existing.sizeOptions ?? []) : existing.sizeOptions;
-  const formOptions =
-    'formOptions' in body ? parseStringArrayField(body['formOptions'], existing.formOptions ?? []) : existing.formOptions;
-  if (price !== undefined && price <= 0) return throwError.validation('Price must be greater than 0');
+  const status = 'status' in body ? optionalString(body['status']) : existing.status;
+  const variantsStr = optionalString(body['variants']);
+  const variants = variantsStr ? parseJsonField<any[]>(variantsStr, []) : undefined;
+
+  if (price !== undefined && price <= 0) return throwError.validation('Giá sản phẩm phải lớn hơn 0');
   if (originalPrice !== undefined && price !== undefined && originalPrice < price) {
-    return throwError.validation('Original price must be greater than or equal to price');
+    return throwError.validation('Giá gốc phải lớn hơn hoặc bằng giá bán');
   }
-  if (stock !== undefined && stock < 0) return throwError.validation('Stock cannot be negative');
+  if (stock !== undefined && stock < 0) return throwError.validation('Số lượng tồn kho không được âm');
 
   const hasImageChanges = 'images' in body || 'existingImages' in body;
   const imageUrls = hasImageChanges ? await uploadProductImages(c, body, existing.imageUrls ?? []) : existing.imageUrls;
 
   try {
-    const [updated] = await c.var.db
-      .update(products)
-      .set({
-        categoryId: optionalString(body['categoryId']) ?? existing.categoryId,
-        sku: optionalString(body['sku']) ?? existing.sku,
-        name: optionalString(body['name']) ?? existing.name,
-        slug: optionalString(body['slug']) ?? existing.slug,
-        description: 'description' in body ? (optionalString(body['description']) ?? null) : existing.description,
-        price: price ?? existing.price,
-        originalPrice: originalPrice ?? existing.originalPrice ?? existing.price,
-        sizeOptions,
-        formOptions,
-        stock: stock ?? existing.stock,
-        imageUrls,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(products.id, id), isNull(products.deletedAt)))
-      .returning();
+    const updated = await c.var.db.transaction(async (tx) => {
+      const [updatedProduct] = await tx
+        .update(products)
+        .set({
+          categoryId: optionalString(body['categoryId']) ?? existing.categoryId,
+          sku: optionalString(body['sku']) ?? existing.sku,
+          name: optionalString(body['name']) ?? existing.name,
+          slug: optionalString(body['slug']) ?? existing.slug,
+          description: 'description' in body ? requiredString(body['description'], 'description') : existing.description,
+          status: status ?? existing.status,
+          price: price ?? existing.price,
+          originalPrice: originalPrice ?? existing.originalPrice ?? existing.price,
+          stock: stock ?? existing.stock,
+          imageUrls,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(products.id, id), isNull(products.deletedAt)))
+        .returning();
+
+      if (variants !== undefined && updatedProduct) {
+        await tx.delete(productVariants).where(eq(productVariants.productId, id));
+        if (variants.length > 0) {
+          await tx.insert(productVariants).values(
+            variants.map((v: any, index: number) => ({
+              productId: id,
+              sku: v.sku || null,
+              name: v.name || updatedProduct.name,
+              color: v.color || null,
+              size: v.size || null,
+              price: Number(v.price) || updatedProduct.price,
+              stock: Number(v.stock) || 0,
+              imageUrl: v.imageUrl || null,
+              sortOrder: index,
+            })),
+          );
+        }
+      }
+      return updatedProduct;
+    });
     return updated;
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes('UNIQUE')) {
-      return throwError.conflict('Product SKU or slug already exists');
+      return throwError.conflict('Mã SKU hoặc đường dẫn (slug) đã tồn tại');
     }
     throw err;
   }
@@ -161,7 +195,7 @@ export async function adminDeleteProduct(c: HonoCtx, id: string) {
     .set({ deletedAt: new Date(), updatedAt: new Date() })
     .where(and(eq(products.id, id), isNull(products.deletedAt)))
     .returning({ id: products.id });
-  if (!updated) return throwError.notFound('Product not found', { id });
+  if (!updated) return throwError.notFound('Không tìm thấy sản phẩm', { id });
   return { success: true };
 }
 

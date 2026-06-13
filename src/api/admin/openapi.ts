@@ -25,11 +25,11 @@ export const AdminProductMultipartSchema = z.object({
   sku: z.string().openapi({ description: 'SKU sản phẩm (bắt buộc khi tạo mới), ví dụ: NS-Y2K-001' }),
   name: z.string().min(1).openapi({ description: 'Tên sản phẩm (bắt buộc khi tạo mới)' }),
   slug: z.string().min(1).openapi({ description: 'Slug URL (bắt buộc khi tạo mới)' }),
-  description: z.string().optional().openapi({ description: 'Mô tả sản phẩm' }),
+  description: z.string().min(1).openapi({ description: 'Mô tả sản phẩm (bắt buộc)' }),
   price: z.string().openapi({ description: 'Giá VND (số nguyên dạng text, bắt buộc khi tạo mới)' }),
   originalPrice: z.string().optional().openapi({ description: 'Giá gốc VND (số nguyên dạng text, tuỳ chọn)' }),
-  sizeOptions: z.string().optional().openapi({ description: 'JSON array size, ví dụ: ["XS","S","M","L"]' }),
-  formOptions: z.string().optional().openapi({ description: 'JSON array form móng, ví dụ: ["Nhon","Thang"]' }),
+  status: z.enum(['active', 'hidden', 'draft']).optional().openapi({ description: 'Trạng thái hiển thị' }),
+  variants: z.string().optional().openapi({ description: 'JSON array các biến thể (Product Variant)' }),
   stock: z.string().openapi({ description: 'Tồn kho (số nguyên dạng text, bắt buộc khi tạo mới)' }),
   existingImages: z
     .string()

@@ -85,7 +85,7 @@ export async function login(c: HonoCtx, input: z.infer<typeof LoginBodySchema>) 
       oldValue: { email } as Record<string, unknown>,
       actor: null,
     });
-    return throwError.badRequest('Invalid credentials', { email });
+    return throwError.badRequest('Tài khoản hoặc mật khẩu không đúng', { email });
   }
 
   const { token, exp } = await issueTokenPair(c, candidate, rememberMe ?? false);
@@ -154,7 +154,7 @@ export async function signup(c: HonoCtx, input: z.infer<typeof SignupBodySchema>
     .where(and(eq(users.email, email), isNull(users.deletedAt)))
     .get();
 
-  if (userExist) return throwError.conflict('Signup failed - Email already in use', { email, operation: 'signup' });
+  if (userExist) return throwError.conflict('Đăng ký thất bại - Email này đã được sử dụng', { email, operation: 'signup' });
 
   const hashedPassword = await hashPassword(password);
 
@@ -175,7 +175,7 @@ export async function signup(c: HonoCtx, input: z.infer<typeof SignupBodySchema>
     return { id: user.id };
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
-      return throwError.conflict('Signup failed - Email already in use', { email, operation: 'signup' });
+      return throwError.conflict('Đăng ký thất bại - Email này đã được sử dụng', { email, operation: 'signup' });
     }
     throw err;
   }
