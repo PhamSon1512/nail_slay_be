@@ -65,6 +65,14 @@ async function issueTokenPair(
   const refreshTokenHash = await sha256Hex(refreshToken);
   await c.var.db.update(users).set({ refreshToken: refreshTokenHash, updatedAt: new Date() }).where(eq(users.id, user.id));
 
+  setCookie(c, 'refresh_token', refreshToken, {
+    sameSite: 'Lax',
+    maxAge: dayjs().add(90, 'day').unix() - dayjs().unix(),
+    path: '/',
+    httpOnly: true,
+    secure: true,
+  });
+
   return { token, userId: user.id, exp: tokenExpiration };
 }
 
@@ -109,42 +117,39 @@ export async function login(c: HonoCtx, input: z.infer<typeof LoginBodySchema>) 
 }
 
 export async function refreshToken(c: HonoCtx) {
-  const authorization = c.req.header('Authorization');
-  const oldToken = getCookie(c, 'token') || authorization?.replace('Bearer ', '');
+  const refreshCookie = getCookie(c, 'refresh_token');
+  if (!refreshCookie) return throwError.unauthorized('No refresh token provided', { operation: 'token_refresh' });
 
-  if (!oldToken) return throwError.unauthorized('No token provided', { operation: 'token_refresh' });
-
+  let refreshPayload: { jti?: string; exp?: number };
   try {
-    await verify(oldToken, c.env.JWT_SECRET, 'HS256');
-  } catch (err) {
-    if ((err as Error).name !== 'JwtTokenExpired') {
-      return throwError.unauthorized('Invalid token', { operation: 'token_refresh' });
-    }
+    refreshPayload = (await verify(refreshCookie, c.env.JWT_SECRET, 'HS256')) as { jti?: string; exp?: number };
+  } catch {
+    return throwError.unauthorized('Invalid refresh token', { operation: 'token_refresh' });
   }
 
-  const { payload: oldTokenPayload } = decode(oldToken);
-  const userId = oldTokenPayload.id as string;
-
+  const refreshHash = await sha256Hex(refreshCookie);
   const user = await c.var.db
     .select()
     .from(users)
-    .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+    .where(and(eq(users.refreshToken, refreshHash), isNull(users.deletedAt)))
     .get();
 
-  if (!user?.refreshToken) return throwError.unauthorized('Token expired', { userId, operation: 'token_refresh' });
+  if (!user) return throwError.unauthorized('Token expired', { operation: 'token_refresh' });
 
-  if (!oldTokenPayload?.jti) {
-    return throwError.unauthorized('Token expired', { userId, operation: 'token_refresh', reason: 'missing_jti' });
+  if (user.accountStatus === 'blocked') {
+    return throwError.forbidden('Tài khoản đã bị chặn', {
+      reason: user.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
+    });
   }
 
   const { token, exp } = await issueTokenPair(c, user);
 
-  Logger.info(`Token generation successful for user "${user.email}"`, { userId, operation: 'token_refresh' }, c);
+  Logger.info(`Token generation successful for user "${user.email}"`, { userId: user.id, operation: 'token_refresh' }, c);
 
   void writeAudit(c, {
     action: AuditAction.USER_TOKEN_REFRESH,
     entityType: 'user',
-    entityId: userId,
+    entityId: user.id,
     actor: { id: user.id, email: user.email },
   });
 
@@ -223,6 +228,7 @@ export async function logout(c: HonoCtx) {
     await c.var.db.update(users).set({ refreshToken: null, updatedAt: new Date() }).where(eq(users.id, userId));
   }
   deleteCookie(c, 'token', { path: '/' });
+  deleteCookie(c, 'refresh_token', { path: '/' });
   return { success: true, message: 'Logged out successfully' };
 }
 

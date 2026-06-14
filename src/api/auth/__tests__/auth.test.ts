@@ -26,12 +26,19 @@ async function signupUser(email: string, password: string): Promise<string> {
 }
 
 /**
- * Logs in and returns the token + userId.
+ * Logs in and returns the token, userId, and refresh cookie value.
  */
 async function loginUser(email: string, password: string) {
-  // Use app.fetch(req, env) so that c.env.JWT_SECRET is available inside the route handler
   const res = await app.fetch(new Request('http://localhost/auth/login', jsonRequest('POST', { email, password })), env);
-  return res.json() as Promise<{ token: string; userId: string; exp: number }>;
+  const setCookie = res.headers.get('set-cookie') ?? '';
+  const refreshMatch = /refresh_token=([^;]+)/.exec(setCookie);
+  const refreshCookie = refreshMatch?.[1] ?? '';
+  const body = (await res.json()) as { token: string; userId: string; exp: number };
+  return { ...body, refreshCookie };
+}
+
+function refreshCookieHeader(refreshCookie: string): Record<string, string> {
+  return refreshCookie ? { Cookie: `refresh_token=${refreshCookie}` } : {};
 }
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
@@ -142,20 +149,22 @@ describe('POST /auth/login', () => {
 
 describe('GET /auth/token', () => {
   let existingToken: string;
+  let refreshCookie: string;
   let userId: string;
 
   beforeEach(async () => {
     await signupUser('refresh@example.com', 'password123');
-    const { token, userId: uid } = await loginUser('refresh@example.com', 'password123');
-    existingToken = token;
-    userId = uid;
+    const login = await loginUser('refresh@example.com', 'password123');
+    existingToken = login.token;
+    refreshCookie = login.refreshCookie;
+    userId = login.userId;
   });
 
   it('200 — valid token returns a new access token', async () => {
     const res = await app.fetch(
       new Request('http://localhost/auth/token', {
         method: 'GET',
-        headers: bearerHeader(existingToken),
+        headers: { ...bearerHeader(existingToken), ...refreshCookieHeader(refreshCookie) },
       }),
       env,
     );
@@ -173,7 +182,7 @@ describe('GET /auth/token', () => {
     const res = await app.fetch(
       new Request('http://localhost/auth/token', {
         method: 'GET',
-        headers: bearerHeader(existingToken),
+        headers: { ...bearerHeader(existingToken), ...refreshCookieHeader(refreshCookie) },
       }),
       env,
     );
@@ -186,7 +195,7 @@ describe('GET /auth/token', () => {
     const res = await app.fetch(
       new Request('http://localhost/auth/token', {
         method: 'GET',
-        headers: bearerHeader(existingToken),
+        headers: { ...bearerHeader(existingToken), ...refreshCookieHeader(refreshCookie) },
       }),
       env,
     );
@@ -205,7 +214,7 @@ describe('GET /auth/token', () => {
     const res = await app.fetch(
       new Request('http://localhost/auth/token', {
         method: 'GET',
-        headers: bearerHeader(existingToken),
+        headers: { ...bearerHeader(existingToken), ...refreshCookieHeader(refreshCookie) },
       }),
       env,
     );

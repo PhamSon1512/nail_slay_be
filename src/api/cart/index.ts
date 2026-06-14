@@ -1,8 +1,10 @@
+import { rateLimit } from '../../middlewares';
 import { createAuthRouter } from '../shared/router';
 import { AddCartItemOpenAPI, DeleteCartItemOpenAPI, GetCartOpenAPI, UpdateCartItemOpenAPI } from './openapi';
 import { addCartItem, deleteCartItem, getCart, updateCartItem } from './service';
 
 const routes = createAuthRouter();
+routes.use(rateLimit);
 
 routes.openapi(GetCartOpenAPI, async (c) => c.json(await getCart(c), 200));
 routes.openapi(AddCartItemOpenAPI, async (c) => c.json(await addCartItem(c, c.req.valid('json')), 201));

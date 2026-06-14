@@ -59,31 +59,32 @@ export const auth = createMiddleware<{ Bindings: Bindings; Variables: Variables 
 
     // Transparent token refresh when access token is expired
     try {
-      const { payload: oldPayload } = decode(token);
-      const userId = oldPayload.id as string;
+      const refreshCookie = getCookie(c, 'refresh_token');
+      if (!refreshCookie) {
+        return throwError.unauthorized('Session expired, please log in again', { operation: 'token_refresh' });
+      }
 
-      const [user] = await c.var.db
+      let refreshPayload: { jti?: string };
+      try {
+        refreshPayload = (await verify(refreshCookie, c.env.JWT_SECRET, 'HS256')) as { jti?: string };
+      } catch {
+        return throwError.unauthorized('Session expired, please log in again', { operation: 'token_refresh' });
+      }
+
+      const refreshHash = await sha256Hex(refreshCookie);
+      const user = await c.var.db
         .select()
         .from(users)
-        .where(and(eq(users.id, userId), isNull(users.deletedAt)))
-        .limit(1);
+        .where(and(eq(users.refreshToken, refreshHash), isNull(users.deletedAt)))
+        .get();
 
-      if (!user?.refreshToken) {
-        return throwError.unauthorized('Session expired, please log in again', { userId, operation: 'token_refresh' });
+      if (!user) {
+        return throwError.unauthorized('Session expired, please log in again', { operation: 'token_refresh' });
       }
 
       if (user.accountStatus === 'blocked') {
         return throwError.forbidden('Tài khoản đã bị chặn', {
           reason: user.blockReason ?? 'Liên hệ admin để biết thêm chi tiết.',
-        });
-      }
-
-      const oldJti = oldPayload?.jti;
-      if (!oldJti) {
-        return throwError.unauthorized('Session expired, please log in again', {
-          userId,
-          operation: 'token_refresh',
-          reason: 'missing_jti',
         });
       }
 
@@ -107,8 +108,14 @@ export const auth = createMiddleware<{ Bindings: Bindings; Variables: Variables 
         maxAge: tokenExpiration - dayjs().unix(),
       });
 
-      // Rotate refresh token — invalidates previous session
       const newRefreshToken = await sign({ jti: newJti, exp: dayjs().add(90, 'day').unix() }, c.env.JWT_SECRET);
+      setCookie(c, 'refresh_token', newRefreshToken, {
+        sameSite: 'Lax',
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        maxAge: dayjs().add(90, 'day').unix() - dayjs().unix(),
+      });
       await c.var.db
         .update(users)
         .set({ refreshToken: await sha256Hex(newRefreshToken), updatedAt: new Date() })

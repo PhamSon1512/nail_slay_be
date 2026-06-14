@@ -5,6 +5,7 @@ import { addresses, categories, complaints, orderItems, orders, products, produc
 import { throwError } from '../../utils';
 import { collectImageFiles, optionalString, parseIntField, parseJsonField, requiredString } from '../../utils/formParse';
 import { canAdminTransition } from '../../utils/orderStatus';
+import { parseProductVariants } from '../../utils/productVariantsSchema';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
 
 export async function adminListProducts(c: HonoCtx, query: { page?: string; limit?: string; search?: string }) {
@@ -114,7 +115,7 @@ export async function adminCreateProduct(c: HonoCtx, body: Record<string, unknow
   const originalPrice = parseIntField(body['originalPrice']);
   const stock = parseIntField(body['stock']);
   const variantsStr = optionalString(body['variants']);
-  const variants = variantsStr ? parseJsonField<any[]>(variantsStr, []) : [];
+  const variants = variantsStr ? parseProductVariants(parseJsonField<unknown>(variantsStr, [])) : [];
 
   await assertCategoryExists(c, categoryId);
   await assertProductIdentifiersAvailable(c, sku, slug);
@@ -146,18 +147,20 @@ export async function adminCreateProduct(c: HonoCtx, body: Record<string, unknow
 
     if (variants.length > 0) {
       await c.var.db.insert(productVariants).values(
-        variants.map((v: any, index: number) => ({
+        variants.map((v, index) => ({
           productId: product.id,
           sku: v.sku || null,
           name: v.name || name,
           color: v.color || null,
           size: v.size || null,
-          price: Number(v.price) || price,
-          stock: Number(v.stock) || 0,
+          price: v.price ?? price,
+          stock: v.stock ?? 0,
           imageUrl: v.imageUrl || null,
           sortOrder: index,
         })),
       );
+      const variantStockSum = variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+      await c.var.db.update(products).set({ stock: variantStockSum, updatedAt: new Date() }).where(eq(products.id, product.id));
     }
 
     return product;
@@ -179,7 +182,7 @@ export async function adminUpdateProduct(c: HonoCtx, id: string, body: Record<st
   const stock = 'stock' in body ? parseIntField(body['stock']) : existing.stock;
   const status = 'status' in body ? optionalString(body['status']) : existing.status;
   const variantsStr = optionalString(body['variants']);
-  const variants = variantsStr ? parseJsonField<any[]>(variantsStr, []) : undefined;
+  const variants = variantsStr ? parseProductVariants(parseJsonField<unknown>(variantsStr, [])) : undefined;
 
   if (price !== undefined && price <= 0) return throwError.validation('Giá sản phẩm phải lớn hơn 0');
   if (originalPrice !== undefined && price !== undefined && originalPrice < price) {
@@ -223,18 +226,21 @@ export async function adminUpdateProduct(c: HonoCtx, id: string, body: Record<st
       await c.var.db.delete(productVariants).where(eq(productVariants.productId, id));
       if (variants.length > 0) {
         await c.var.db.insert(productVariants).values(
-          variants.map((v: any, index: number) => ({
+          variants.map((v, index) => ({
             productId: id,
             sku: v.sku || null,
             name: v.name || updatedProduct.name,
             color: v.color || null,
             size: v.size || null,
-            price: Number(v.price) || updatedProduct.price,
-            stock: Number(v.stock) || 0,
+            price: v.price ?? updatedProduct.price,
+            stock: v.stock ?? 0,
             imageUrl: v.imageUrl || null,
             sortOrder: index,
           })),
         );
+        const variantStockSum = variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+        await c.var.db.update(products).set({ stock: variantStockSum, updatedAt: new Date() }).where(eq(products.id, id));
+        updatedProduct.stock = variantStockSum;
       }
     }
 
@@ -365,6 +371,16 @@ export async function adminUpdateOrderStatus(c: HonoCtx, id: string, status: Ord
     return c.var.db.transaction(async (tx) => {
       const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, id)).all();
       for (const item of items) {
+        if (item.variantId) {
+          const variant = await tx.select().from(productVariants).where(eq(productVariants.id, item.variantId)).get();
+          if (variant) {
+            await tx
+              .update(productVariants)
+              .set({ stock: variant.stock + item.quantity, updatedAt: new Date() })
+              .where(eq(productVariants.id, item.variantId));
+          }
+          continue;
+        }
         const product = await tx.select().from(products).where(eq(products.id, item.productId)).get();
         if (product) {
           await tx

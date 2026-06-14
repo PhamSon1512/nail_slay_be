@@ -97,7 +97,7 @@ export async function getProductBySlug(c: HonoCtx, slug: string) {
     })
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(eq(products.slug, slug), isNull(products.deletedAt)))
+    .where(and(eq(products.slug, slug), isNull(products.deletedAt), eq(products.status, 'active')))
     .get();
 
   if (!product) return throwError.notFound('Product not found', { slug });

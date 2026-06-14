@@ -1,11 +1,11 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { schemaRelations } from '../models';
 
-export function createDb(d1: D1Database) {
+export function createDb(d1: D1Database, environment = 'development') {
   return drizzle(d1, {
     relations: schemaRelations,
     casing: 'snake_case',
-    logger: true,
+    logger: environment === 'development',
   });
 }
 

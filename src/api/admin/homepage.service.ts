@@ -3,6 +3,7 @@ import type { HomepageBanner, HomepageConfig } from '../../utils/homepage';
 import { createId } from '@paralleldrive/cuid2';
 import { SETTING_KEYS } from '../../models/setting';
 import { throwError } from '../../utils';
+import { invalidateCacheKey } from '../../utils/cache';
 import { collectFormFile, optionalString, parseBooleanField, parseIntField } from '../../utils/formParse';
 import { getHomepageConfig, saveHomepageConfig } from '../../utils/homepage';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
@@ -37,6 +38,7 @@ export async function adminUpdateHomepageSettings(
   }
 
   await saveHomepageConfig(c.var.db, homepage);
+  await invalidateCacheKey(c.env.CACHE, 'public:settings:v1');
 
   if (input.contact_info !== undefined) {
     await upsertSetting(c.var.db, SETTING_KEYS.CONTACT_INFO, input.contact_info);
@@ -68,6 +70,7 @@ export async function adminCreateBanner(c: HonoCtx, body: Record<string, unknown
 
   homepage.banners.push(banner);
   await saveHomepageConfig(c.var.db, homepage);
+  await invalidateCacheKey(c.env.CACHE, 'public:settings:v1');
   return banner;
 }
 
@@ -97,6 +100,7 @@ export async function adminUpdateBanner(c: HonoCtx, id: string, body: Record<str
 
   homepage.banners[index] = updated;
   await saveHomepageConfig(c.var.db, homepage);
+  await invalidateCacheKey(c.env.CACHE, 'public:settings:v1');
   return updated;
 }
 
@@ -108,5 +112,6 @@ export async function adminDeleteBanner(c: HonoCtx, id: string) {
   }
   homepage.banners = nextBanners;
   await saveHomepageConfig(c.var.db, homepage);
+  await invalidateCacheKey(c.env.CACHE, 'public:settings:v1');
   return { success: true };
 }

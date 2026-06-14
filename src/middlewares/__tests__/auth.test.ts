@@ -255,15 +255,18 @@ describe('auth middleware', () => {
 
   it('set-cookie — token expired nhưng refresh_token hợp lệ → response có cookie token mới', async () => {
     const jti = 77777;
-    const refreshToken = await sign({ jti, exp: dayjs().add(7, 'day').unix() }, SECRET());
-    await seedUser('user-1', refreshToken);
+    const rawRefreshToken = await sign({ jti, exp: dayjs().add(7, 'day').unix() }, SECRET());
+    await seedUser('user-1', rawRefreshToken);
 
     const expiredToken = await makeExpiredToken({ id: 'user-1', jti });
     const app = makeApp();
 
     const res = await app.fetch(
       new Request('http://localhost/api/test', {
-        headers: { Authorization: `Bearer ${expiredToken}` },
+        headers: {
+          Authorization: `Bearer ${expiredToken}`,
+          Cookie: `refresh_token=${rawRefreshToken}`,
+        },
       }),
       env,
     );

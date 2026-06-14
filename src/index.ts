@@ -11,14 +11,22 @@ import { handleError, notFoundHandler } from './utils';
 
 const app = new OpenAPIHono<{ Bindings: Bindings; Variables: Variables }>();
 
-const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://nail-slay-fe.pages.dev',
+  'https://nailslay.pages.dev',
+];
 
 app.use(
   '*',
   cors({
     origin: (origin) => {
-      // Allow any origin for ease of development / testing
-      return origin || '*';
+      if (!origin) return ALLOWED_ORIGINS[0];
+      if (ALLOWED_ORIGINS.includes(origin)) return origin;
+      return null;
     },
     credentials: true,
     allowHeaders: ['Content-Type', 'Authorization'],
@@ -40,7 +48,7 @@ app.use(
 );
 
 app.use(async (c, next) => {
-  c.set('db', createDb(c.env.DB));
+  c.set('db', createDb(c.env.DB, c.env.ENVIRONMENT));
   await next();
 });
 

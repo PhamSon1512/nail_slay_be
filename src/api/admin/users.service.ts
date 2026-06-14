@@ -3,6 +3,7 @@ import { and, desc, eq, isNull, like, sql } from 'drizzle-orm';
 import { omit } from 'ramda';
 import { categories, products, users } from '../../models';
 import { throwError } from '../../utils';
+import { invalidateCacheKey } from '../../utils/cache';
 import { collectFormFile, optionalString, requiredString } from '../../utils/formParse';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
 import { USER_SENSITIVE_FIELDS } from '../users/constants';
@@ -117,6 +118,7 @@ export async function adminCreateCategory(c: HonoCtx, body: Record<string, unkno
 
   try {
     const [created] = await c.var.db.insert(categories).values({ code, name, slug, parentId, imageUrl }).returning();
+    await invalidateCacheKey(c.env.CACHE, 'public:categories:v1');
     return created;
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes('UNIQUE')) {
@@ -131,6 +133,9 @@ export async function adminUpdateCategory(c: HonoCtx, id: string, body: Record<s
   if (!existing) return throwError.notFound('Category not found', { id });
 
   let imageUrl = existing.imageUrl;
+  if (body['remove_image'] === 'true' || body['remove_image'] === true) {
+    imageUrl = null;
+  }
   const imageFile = collectFormFile(body, 'image');
   if (imageFile) {
     const { publicUrl } = await uploadUserFileToR2(c.var.db, c.env, c.var.jwtPayload.id, 'categories', imageFile);
@@ -155,6 +160,7 @@ export async function adminUpdateCategory(c: HonoCtx, id: string, body: Record<s
     .set({ code, name, slug, parentId, imageUrl, updatedAt: new Date() })
     .where(eq(categories.id, id))
     .returning();
+  await invalidateCacheKey(c.env.CACHE, 'public:categories:v1');
   return updated;
 }
 
@@ -173,5 +179,6 @@ export async function adminDeleteCategory(c: HonoCtx, id: string) {
   if (Number(childCount?.count) > 0) return throwError.conflict('Category has child categories');
 
   await c.var.db.delete(categories).where(eq(categories.id, id));
+  await invalidateCacheKey(c.env.CACHE, 'public:categories:v1');
   return { success: true };
 }

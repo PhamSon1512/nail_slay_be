@@ -4,6 +4,7 @@ import { defaultResponseSchema, IdParamSchema } from '../../utils/schema';
 
 export const AddCartItemSchema = z.object({
   product_id: z.string(),
+  variant_id: z.string().optional(),
   quantity: z.number().int().min(1),
 });
 

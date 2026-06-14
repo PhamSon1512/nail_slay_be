@@ -1,9 +1,12 @@
 import type { HonoCtx } from '../../@types';
+import type { OrderStatus } from '../../utils/orderStatus';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
-import { complaints, orders, products, users } from '../../models';
+import { complaints, orderItems, orders, products, productVariants, users } from '../../models';
 import { SETTING_KEYS, settings } from '../../models/setting';
 import { throwError } from '../../utils';
+import { invalidateCacheKey } from '../../utils/cache';
 import { collectFormFile, optionalString, requiredString } from '../../utils/formParse';
+import { canAdminTransition } from '../../utils/orderStatus';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
 import { getSettingValue, upsertSetting } from '../../utils/settings';
 
@@ -22,6 +25,17 @@ export async function adminListComplaints(c: HonoCtx) {
 export async function adminResolveComplaint(c: HonoCtx, id: string, input: { admin_response: string; status: 'RESOLVED' }) {
   const complaint = await c.var.db.select().from(complaints).where(eq(complaints.id, id)).get();
   if (!complaint) return throwError.notFound('Complaint not found', { id });
+
+  const order = await c.var.db.select().from(orders).where(eq(orders.id, complaint.orderId)).get();
+  if (!order) return throwError.notFound('Order not found', { id: complaint.orderId });
+
+  if (order.status !== 'COMPLAINED') {
+    return throwError.badRequest('Chỉ có thể giải quyết khiếu nại khi đơn ở trạng thái COMPLAINED');
+  }
+
+  if (!canAdminTransition(order.status as OrderStatus, 'RESOLVED')) {
+    return throwError.badRequest(`Cannot transition from ${order.status} to RESOLVED`);
+  }
 
   return c.var.db.transaction(async (tx) => {
     const [updated] = await tx
@@ -93,6 +107,7 @@ export async function adminUpdateBankInfo(c: HonoCtx, body: Record<string, unkno
 
   await upsertSetting(c.var.db, SETTING_KEYS.BANK_INFO, bankInfo);
   await upsertSetting(c.var.db, SETTING_KEYS.QR_CODE_URL, qrCodeUrl);
+  await invalidateCacheKey(c.env.CACHE, 'public:settings:v1');
 
   return { bank_info: bankInfo };
 }
