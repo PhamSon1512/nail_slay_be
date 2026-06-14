@@ -3,11 +3,11 @@ import { throwError } from './errors';
 
 export const ProductVariantInputSchema = z.object({
   sku: z.string().optional().nullable(),
-  name: z.string().min(1).optional(),
+  name: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
-  price: z.coerce.number().int().positive().optional(),
-  stock: z.coerce.number().int().min(0).optional(),
+  price: z.coerce.number().int().nonnegative().optional(),
+  stock: z.coerce.number().int().nonnegative().optional(),
   imageUrl: z.string().optional().nullable(),
 });
 

@@ -98,12 +98,12 @@ routes.openapi(AdminDeleteCategoryOpenAPI, async (c) => {
 
 routes.openapi(AdminListProductsOpenAPI, async (c) => c.json(await adminListProducts(c, c.req.valid('query')), 200));
 routes.openapi(AdminCreateProductOpenAPI, async (c) => {
-  const body = await c.req.parseBody();
+  const body = await c.req.parseBody({ all: true });
   return c.json(await adminCreateProduct(c, body as Record<string, unknown>), 201);
 });
 routes.openapi(AdminUpdateProductOpenAPI, async (c) => {
   const { id } = c.req.valid('param');
-  const body = await c.req.parseBody();
+  const body = await c.req.parseBody({ all: true });
   return c.json(await adminUpdateProduct(c, id, body as Record<string, unknown>), 200);
 });
 routes.openapi(AdminDeleteProductOpenAPI, async (c) => {
