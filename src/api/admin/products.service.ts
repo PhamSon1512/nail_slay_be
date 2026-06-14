@@ -81,6 +81,28 @@ async function assertCategoryExists(c: HonoCtx, categoryId: string) {
   if (!category) return throwError.badRequest('Danh mục không tồn tại');
 }
 
+async function assertProductIdentifiersAvailable(c: HonoCtx, sku: string, slug: string, excludeId?: string) {
+  const slugRow = await c.var.db
+    .select({ id: products.id })
+    .from(products)
+    .where(and(eq(products.slug, slug), isNull(products.deletedAt)))
+    .get();
+  if (slugRow && slugRow.id !== excludeId) {
+    return throwError.conflict('Đường dẫn (slug) đã được dùng bởi sản phẩm khác. Vui lòng chọn slug khác.');
+  }
+
+  if (sku) {
+    const skuRow = await c.var.db
+      .select({ id: products.id })
+      .from(products)
+      .where(and(eq(products.sku, sku), isNull(products.deletedAt)))
+      .get();
+    if (skuRow && skuRow.id !== excludeId) {
+      return throwError.conflict('Mã SKU đã được dùng bởi sản phẩm khác. Vui lòng chọn SKU khác.');
+    }
+  }
+}
+
 export async function adminCreateProduct(c: HonoCtx, body: Record<string, unknown>) {
   const categoryId = requiredString(body['categoryId'], 'categoryId');
   const sku = requiredString(body['sku'], 'sku');
@@ -95,6 +117,7 @@ export async function adminCreateProduct(c: HonoCtx, body: Record<string, unknow
   const variants = variantsStr ? parseJsonField<any[]>(variantsStr, []) : [];
 
   await assertCategoryExists(c, categoryId);
+  await assertProductIdentifiersAvailable(c, sku, slug);
 
   if (price === undefined || price <= 0) return throwError.validation('Giá sản phẩm phải lớn hơn 0');
   if (originalPrice !== undefined && originalPrice < price) {
@@ -171,6 +194,10 @@ export async function adminUpdateProduct(c: HonoCtx, id: string, body: Record<st
     await assertCategoryExists(c, requiredString(body['categoryId'], 'categoryId'));
   }
 
+  const nextSku = optionalString(body['sku']) ?? existing.sku ?? '';
+  const nextSlug = optionalString(body['slug']) ?? existing.slug;
+  await assertProductIdentifiersAvailable(c, nextSku, nextSlug, id);
+
   try {
     const [updatedProduct] = await c.var.db
       .update(products)
@@ -218,9 +245,22 @@ export async function adminUpdateProduct(c: HonoCtx, id: string, body: Record<st
 }
 
 export async function adminDeleteProduct(c: HonoCtx, id: string) {
+  const existing = await c.var.db
+    .select()
+    .from(products)
+    .where(and(eq(products.id, id), isNull(products.deletedAt)))
+    .get();
+  if (!existing) return throwError.notFound('Không tìm thấy sản phẩm', { id });
+
+  const freedAt = Date.now();
   const [updated] = await c.var.db
     .update(products)
-    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .set({
+      deletedAt: new Date(),
+      slug: `${existing.slug}__deleted__${freedAt}`,
+      sku: existing.sku ? `${existing.sku}__deleted__${freedAt}` : null,
+      updatedAt: new Date(),
+    })
     .where(and(eq(products.id, id), isNull(products.deletedAt)))
     .returning({ id: products.id });
   if (!updated) return throwError.notFound('Không tìm thấy sản phẩm', { id });

@@ -1,4 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
+import { sql } from 'drizzle-orm';
 import { index, integer, sqliteTable as table, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { categories } from './category';
 
@@ -29,8 +30,12 @@ export const products = table(
     deletedAt: integer('deleted_at', { mode: 'timestamp' }),
   },
   (t) => [
-    uniqueIndex('products_slug_udx').on(t.slug),
-    uniqueIndex('products_sku_udx').on(t.sku),
+    uniqueIndex('products_slug_active_udx')
+      .on(t.slug)
+      .where(sql`${t.deletedAt} is null`),
+    uniqueIndex('products_sku_active_udx')
+      .on(t.sku)
+      .where(sql`${t.deletedAt} is null`),
     index('products_category_id_idx').on(t.categoryId),
     index('products_status_idx').on(t.status),
     index('products_deleted_at_idx').on(t.deletedAt),
