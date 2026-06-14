@@ -24,7 +24,11 @@ export function parseBooleanField(value: unknown, fallback = false): boolean {
 export function parseIntField(value: unknown): number | undefined {
   if (value === undefined || value === null || value === '') return undefined;
   if (typeof value === 'number') return Number.isFinite(value) ? Math.trunc(value) : undefined;
-  const n = Number(String(value).trim());
+  const normalized = String(value)
+    .trim()
+    .replace(/[^\d-]/g, '');
+  if (!normalized || normalized === '-') return undefined;
+  const n = Number(normalized);
   return Number.isFinite(n) ? Math.trunc(n) : undefined;
 }
 

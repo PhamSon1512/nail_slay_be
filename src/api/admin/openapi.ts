@@ -25,7 +25,7 @@ export const AdminProductMultipartSchema = z.object({
   sku: z.string().openapi({ description: 'SKU sản phẩm (bắt buộc khi tạo mới), ví dụ: NS-Y2K-001' }),
   name: z.string().min(1).openapi({ description: 'Tên sản phẩm (bắt buộc khi tạo mới)' }),
   slug: z.string().min(1).openapi({ description: 'Slug URL (bắt buộc khi tạo mới)' }),
-  description: z.string().min(1).openapi({ description: 'Mô tả sản phẩm (bắt buộc)' }),
+  description: z.string().optional().openapi({ description: 'Mô tả sản phẩm (tuỳ chọn)' }),
   price: z.string().openapi({ description: 'Giá VND (số nguyên dạng text, bắt buộc khi tạo mới)' }),
   originalPrice: z.string().optional().openapi({ description: 'Giá gốc VND (số nguyên dạng text, tuỳ chọn)' }),
   status: z.enum(['active', 'hidden', 'draft']).optional().openapi({ description: 'Trạng thái hiển thị' }),
