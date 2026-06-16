@@ -10,4 +10,5 @@ export * from './order';
 export * from './orderItem';
 export * from './complaint';
 export * from './setting';
+export * from './article';
 export * from './relations';

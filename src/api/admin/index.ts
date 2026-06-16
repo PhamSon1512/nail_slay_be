@@ -1,6 +1,13 @@
 import { getHomepageConfig } from '../../utils/homepage';
 import { createAdminRouter } from '../shared/router';
 import {
+  adminCreateArticle,
+  adminDeleteArticle,
+  adminListArticles,
+  adminUpdateArticle,
+  adminUploadContentImage,
+} from './articles.service';
+import {
   adminCreateBanner,
   adminDeleteBanner,
   adminGetHomepageSettings,
@@ -8,9 +15,11 @@ import {
   adminUpdateHomepageSettings,
 } from './homepage.service';
 import {
+  AdminCreateArticleOpenAPI,
   AdminCreateBannerOpenAPI,
   AdminCreateCategoryOpenAPI,
   AdminCreateProductOpenAPI,
+  AdminDeleteArticleOpenAPI,
   AdminDeleteBannerOpenAPI,
   AdminDeleteCategoryOpenAPI,
   AdminDeleteProductOpenAPI,
@@ -18,6 +27,7 @@ import {
   AdminGetOrderOpenAPI,
   AdminGetSettingsOpenAPI,
   AdminGetUserOpenAPI,
+  AdminListArticlesOpenAPI,
   AdminListBannersOpenAPI,
   AdminListCategoriesOpenAPI,
   AdminListComplaintsOpenAPI,
@@ -26,6 +36,7 @@ import {
   AdminListUsersOpenAPI,
   AdminResolveComplaintOpenAPI,
   AdminStatsOpenAPI,
+  AdminUpdateArticleOpenAPI,
   AdminUpdateBankInfoOpenAPI,
   AdminUpdateBannerOpenAPI,
   AdminUpdateCategoryOpenAPI,
@@ -34,6 +45,7 @@ import {
   AdminUpdateProductOpenAPI,
   AdminUpdateSettingsOpenAPI,
   AdminUpdateUserOpenAPI,
+  AdminUploadContentImageOpenAPI,
 } from './openapi';
 import {
   adminCreateProduct,
@@ -109,6 +121,25 @@ routes.openapi(AdminUpdateProductOpenAPI, async (c) => {
 routes.openapi(AdminDeleteProductOpenAPI, async (c) => {
   const { id } = c.req.valid('param');
   return c.json(await adminDeleteProduct(c, id), 200);
+});
+
+routes.openapi(AdminListArticlesOpenAPI, async (c) => c.json(await adminListArticles(c, c.req.valid('query')), 200));
+routes.openapi(AdminCreateArticleOpenAPI, async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  return c.json(await adminCreateArticle(c, body as Record<string, unknown>), 201);
+});
+routes.openapi(AdminUpdateArticleOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  const body = await c.req.parseBody({ all: true });
+  return c.json(await adminUpdateArticle(c, id, body as Record<string, unknown>), 200);
+});
+routes.openapi(AdminDeleteArticleOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminDeleteArticle(c, id), 200);
+});
+routes.openapi(AdminUploadContentImageOpenAPI, async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  return c.json(await adminUploadContentImage(c, body as Record<string, unknown>), 200);
 });
 
 routes.openapi(AdminListOrdersOpenAPI, async (c) => c.json(await adminListOrders(c, c.req.valid('query')), 200));

@@ -1,5 +1,6 @@
 import AddressesRoutes from './addresses';
 import AdminRoutes from './admin';
+import ArticlesRoutes from './articles';
 import AuthRoutes from './auth';
 import CartRoutes from './cart';
 import CategoriesRoutes from './categories';
@@ -21,6 +22,7 @@ routes.route('/profile', ProfileRoutes);
 routes.route('/users', UsersRoutes);
 routes.route('/categories', CategoriesRoutes);
 routes.route('/products', ProductsRoutes);
+routes.route('/articles', ArticlesRoutes);
 routes.route('/settings', SettingsRoutes);
 routes.route('/cart', CartRoutes);
 routes.route('/checkout', CheckoutRoutes);

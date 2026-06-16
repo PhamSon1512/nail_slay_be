@@ -421,3 +421,88 @@ export const AdminUpdateBankInfoOpenAPI = createRoute({
     ...defaultResponseSchema,
   },
 });
+
+export const AdminArticleMultipartSchema = z.object({
+  title: z.string().min(1).openapi({ description: 'Tiêu đề bài viết (bắt buộc)' }),
+  slug: z.string().min(1).openapi({ description: 'Slug URL (bắt buộc)' }),
+  excerpt: z.string().optional().openapi({ description: 'Tóm tắt ngắn' }),
+  content: z.string().optional().openapi({ description: 'Nội dung HTML từ rich editor' }),
+  status: z.enum(['draft', 'published']).optional().openapi({ description: 'Trạng thái xuất bản' }),
+  cover: fileBinary('Ảnh bìa (tuỳ chọn). Upload R2 thư mục `articles/`.').optional(),
+  remove_cover: z.string().optional().openapi({ description: 'true để xoá ảnh bìa khi cập nhật' }),
+});
+
+export const AdminListArticlesOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/articles',
+  security: [{ Bearer: [] }],
+  request: { query: PaginationQuerySchema },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminCreateArticleOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/articles',
+  summary: 'Tạo bài viết — multipart',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': { schema: AdminArticleMultipartSchema },
+      },
+    },
+  },
+  responses: { 201: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminUpdateArticleOpenAPI = createRoute({
+  method: 'put',
+  tags: ['Admin'],
+  path: '/articles/{id}',
+  summary: 'Cập nhật bài viết — multipart',
+  security: [{ Bearer: [] }],
+  request: {
+    params: IdParamSchema,
+    body: {
+      content: {
+        'multipart/form-data': { schema: AdminArticleMultipartSchema.partial() },
+      },
+    },
+  },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminDeleteArticleOpenAPI = createRoute({
+  method: 'delete',
+  tags: ['Admin'],
+  path: '/articles/{id}',
+  security: [{ Bearer: [] }],
+  request: { params: IdParamSchema },
+  responses: { 200: jsonSchemaBuilder(z.object({ success: z.boolean() })), ...defaultResponseSchema },
+});
+
+export const AdminUploadContentImageOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/upload/content-image',
+  summary: 'Upload ảnh nội dung editor (paste/drag)',
+  description: 'Gửi `multipart/form-data` với field `image`. Upload R2 thư mục `content/`.',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: z.object({
+            image: fileBinary('Ảnh nội dung (bắt buộc).'),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: jsonSchemaBuilder(z.object({ url: z.string() })),
+    ...defaultResponseSchema,
+  },
+});
