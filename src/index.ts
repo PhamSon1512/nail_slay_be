@@ -18,6 +18,8 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3000',
   'https://nail-slay-fe.pages.dev',
   'https://nailslay.pages.dev',
+  'https://nailslaystudio.com',
+  'https://www.nailslaystudio.com',
 ];
 
 app.use(
