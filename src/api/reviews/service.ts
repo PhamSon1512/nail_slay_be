@@ -1,10 +1,10 @@
-import type { DrizzleDB } from '../../@types';
+import type { DrizzleDb } from '../../db';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { orderItems, orders, productReviews, users } from '../../models';
 import { throwError } from '../../utils';
 
 export class ReviewService {
-  constructor(private readonly db: DrizzleDB) {}
+  constructor(private readonly db: DrizzleDb) {}
 
   async createReview(userId: string, data: { productId: string; rating: number; content?: string; images?: string[] }) {
     // Check if the user has purchased the product
@@ -51,7 +51,6 @@ export class ReviewService {
         user: {
           firstName: users.firstName,
           lastName: users.lastName,
-          avatar: users.avatar,
         },
       })
       .from(productReviews)
@@ -67,7 +66,7 @@ export class ReviewService {
       .where(eq(productReviews.productId, productId));
 
     return {
-      data: data.map((d) => ({
+      data: data.map((d: any) => ({
         ...d.review,
         user: d.user,
       })),
