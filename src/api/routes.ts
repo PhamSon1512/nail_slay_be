@@ -9,6 +9,7 @@ import MediaRoutes from './media';
 import OrdersRoutes from './orders';
 import ProductsRoutes from './products';
 import ProfileRoutes from './profile';
+import ReviewsRoutes from './reviews';
 import SettingsRoutes from './settings';
 import { createRouter } from './shared/router';
 import UploadRoutes from './upload';
@@ -30,5 +31,6 @@ routes.route('/orders', OrdersRoutes);
 routes.route('/addresses', AddressesRoutes);
 routes.route('/upload', UploadRoutes);
 routes.route('/admin', AdminRoutes);
+routes.route('/reviews', ReviewsRoutes);
 
 export default routes;

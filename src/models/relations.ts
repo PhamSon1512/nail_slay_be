@@ -8,6 +8,7 @@ import { media } from './media';
 import { orders } from './order';
 import { orderItems } from './orderItem';
 import { products } from './product';
+import { productReviews } from './productReview';
 import { productVariants } from './productVariant';
 import { settings } from './setting';
 import { users } from './user';
@@ -24,6 +25,7 @@ export const schemaRelations = defineRelations(
     cartItems,
     orders,
     orderItems,
+    productReviews,
     complaints,
     settings,
   },
@@ -93,6 +95,10 @@ export const schemaRelations = defineRelations(
     complaints: {
       order: helpers.one.orders({ from: helpers.complaints.orderId, to: helpers.orders.id }),
       user: helpers.one.users({ from: helpers.complaints.userId, to: helpers.users.id }),
+    },
+    productReviews: {
+      user: helpers.one.users({ from: helpers.productReviews.userId, to: helpers.users.id }),
+      product: helpers.one.products({ from: helpers.productReviews.productId, to: helpers.products.id }),
     },
   }),
 );

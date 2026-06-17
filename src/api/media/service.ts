@@ -23,6 +23,10 @@ export async function uploadMedia(c: HonoCtx) {
       maxSize: MAX_FILE_SIZE_BYTES,
     });
 
+  if (file.size > 2 * 1024 * 1024) {
+    return throwError.badRequest('Kích thước ảnh không được vượt quá 2MB.');
+  }
+
   const fileKey = createId();
   const fileType = file.type;
   const fileSize = file.size;
