@@ -74,6 +74,7 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
       excerpt,
       content,
       coverImageUrl,
+      authorId: c.var.jwtPayload.id,
       status,
       publishedAt: status === 'published' ? now : null,
       createdAt: now,

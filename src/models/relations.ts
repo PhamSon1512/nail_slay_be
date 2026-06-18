@@ -1,5 +1,6 @@
 import { defineRelations } from 'drizzle-orm';
 import { addresses } from './address';
+import { articles } from './article';
 import { auditLogs } from './auditLog';
 import { cartItems } from './cartItem';
 import { categories } from './category';
@@ -28,6 +29,7 @@ export const schemaRelations = defineRelations(
     productReviews,
     complaints,
     settings,
+    articles,
   },
   (helpers) => ({
     users: {
@@ -37,6 +39,7 @@ export const schemaRelations = defineRelations(
       cartItems: helpers.many.cartItems(),
       orders: helpers.many.orders(),
       complaints: helpers.many.complaints(),
+      articles: helpers.many.articles(),
     },
     media: {
       uploader: helpers.one.users({
@@ -99,6 +102,9 @@ export const schemaRelations = defineRelations(
     productReviews: {
       user: helpers.one.users({ from: helpers.productReviews.userId, to: helpers.users.id }),
       product: helpers.one.products({ from: helpers.productReviews.productId, to: helpers.products.id }),
+    },
+    articles: {
+      author: helpers.one.users({ from: helpers.articles.authorId, to: helpers.users.id }),
     },
   }),
 );

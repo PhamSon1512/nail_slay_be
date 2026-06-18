@@ -13,6 +13,7 @@ export const articles = table(
     excerpt: text('excerpt'),
     content: text('content').notNull().default(''),
     coverImageUrl: text('cover_image_url'),
+    authorId: text('author_id'),
     status: text('status', { enum: ['draft', 'published'] })
       .notNull()
       .default('draft'),

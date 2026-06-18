@@ -2,7 +2,7 @@ import type { HonoCtx } from '../../@types';
 import type { ArticleListQuerySchema } from './openapi';
 import type { z } from 'zod';
 import { and, asc, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
-import { articles } from '../../models';
+import { articles, users } from '../../models';
 import { throwError } from '../../utils';
 
 export async function listArticles(c: HonoCtx, query: z.infer<typeof ArticleListQuerySchema>) {
@@ -53,8 +53,13 @@ export async function listArticles(c: HonoCtx, query: z.infer<typeof ArticleList
       coverImageUrl: articles.coverImageUrl,
       publishedAt: articles.publishedAt,
       createdAt: articles.createdAt,
+      author: {
+        id: users.id,
+        name: users.fullName,
+      },
     })
     .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
     .where(whereClause)
     .orderBy(orderBy)
     .limit(limit)
@@ -69,8 +74,24 @@ export async function listArticles(c: HonoCtx, query: z.infer<typeof ArticleList
 
 export async function getArticleBySlug(c: HonoCtx, slug: string) {
   const article = await c.var.db
-    .select()
+    .select({
+      id: articles.id,
+      title: articles.title,
+      slug: articles.slug,
+      excerpt: articles.excerpt,
+      content: articles.content,
+      coverImageUrl: articles.coverImageUrl,
+      status: articles.status,
+      publishedAt: articles.publishedAt,
+      createdAt: articles.createdAt,
+      updatedAt: articles.updatedAt,
+      author: {
+        id: users.id,
+        name: users.fullName,
+      },
+    })
     .from(articles)
+    .leftJoin(users, eq(articles.authorId, users.id))
     .where(and(eq(articles.slug, slug), isNull(articles.deletedAt), eq(articles.status, 'published')))
     .get();
 
