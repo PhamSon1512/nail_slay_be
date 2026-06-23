@@ -1,12 +1,12 @@
 import type { Bindings, Variables } from './@types';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import { trimTrailingSlash } from 'hono/trailing-slash';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
 import ApiRoutes from './api/routes';
 import { createDb } from './db';
+import { slashRootPaths } from './middlewares/slashRoot';
 import { handleError, notFoundHandler } from './utils';
 import { findRedirect } from './utils/redirectLookup';
 
@@ -36,8 +36,6 @@ app.use(
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   }),
 );
-
-app.use(trimTrailingSlash());
 
 app.use(
   secureHeaders({
@@ -70,6 +68,11 @@ app.use('*', async (c, next) => {
   }
   await next();
 });
+
+app.use(
+  '*',
+  slashRootPaths((request, env, executionCtx) => app.fetch(request, env, executionCtx)),
+);
 
 app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', { type: 'http', scheme: 'bearer' });
 app.doc('/openapi', { info: { title: 'My API', version: '1.0' }, openapi: '3.1.0' });
