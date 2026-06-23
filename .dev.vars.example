@@ -1,0 +1,4 @@
+JWT_SECRET=your-local-jwt-secret
+GEMINI_API_KEY=your-google-ai-studio-api-key
+SITE_BASE_URL=https://nailslaystudio.com
+INDEXNOW_KEY=your-32-char-indexnow-verification-key

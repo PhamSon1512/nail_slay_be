@@ -8,6 +8,7 @@ import { Scalar } from '@scalar/hono-api-reference';
 import ApiRoutes from './api/routes';
 import { createDb } from './db';
 import { handleError, notFoundHandler } from './utils';
+import { findRedirect } from './utils/redirectLookup';
 
 const app = new OpenAPIHono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -54,13 +55,21 @@ app.use(async (c, next) => {
   await next();
 });
 
-// app.get(
-//   '*',
-//   cache({
-//     cacheName: 'hono',
-//     cacheControl: 'max-age=3600',
-//   }),
-// );
+app.use('*', async (c, next) => {
+  const method = c.req.method;
+  if (method === 'GET' || method === 'HEAD') {
+    const redirect = await findRedirect(c, c.req.path);
+    if (redirect) {
+      const target = redirect.toPath.startsWith('http')
+        ? redirect.toPath
+        : redirect.toPath.startsWith('/')
+          ? redirect.toPath
+          : `/${redirect.toPath}`;
+      return c.redirect(target, redirect.statusCode as 301 | 302);
+    }
+  }
+  await next();
+});
 
 app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', { type: 'http', scheme: 'bearer' });
 app.doc('/openapi', { info: { title: 'My API', version: '1.0' }, openapi: '3.1.0' });
@@ -68,20 +77,36 @@ app.get('/doc', swaggerUI({ url: '/openapi' }));
 app.get('/ref', Scalar({ url: '/openapi' }));
 app.get('/', (c) => c.text('Hello Hono!'));
 
+app.get('/sitemap.xml', async (c) => {
+  const { generateSitemapXml } = await import('./api/seo/service');
+  const xml = await generateSitemapXml(c);
+  return c.body(xml, 200, { 'Content-Type': 'application/xml; charset=utf-8' });
+});
+
+app.get('/robots.txt', async (c) => {
+  const { generateRobotsTxt } = await import('./api/seo/service');
+  return c.body(generateRobotsTxt(c), 200, { 'Content-Type': 'text/plain; charset=utf-8' });
+});
+
+app.get('/:key.txt', async (c) => {
+  const key = c.req.param('key');
+  const indexKey = c.env.INDEXNOW_KEY;
+  if (!indexKey || key !== indexKey) {
+    return c.notFound();
+  }
+  return c.body(indexKey, 200, { 'Content-Type': 'text/plain; charset=utf-8' });
+});
+
 app.route('/', ApiRoutes);
 
-// Global error handling using onError
 app.onError((error, c) => handleError(c, error));
-
-// Handle 404 errors
 app.notFound(notFoundHandler);
 
 export default {
   fetch: app.fetch,
-  // Xử lý sự kiện scheduled từ Cron Trigger
   async scheduled(_: ScheduledController, env: Bindings) {
     try {
-      await env.DB.prepare('SELECT 1 as ping').first(); // Ping nhẹ D1 để giữ connection warm
+      await env.DB.prepare('SELECT 1 as ping').first();
     } catch (error) {
       console.error('Warmup ping failed:', error);
     }

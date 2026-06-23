@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { and, asc, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
 import { articles, users } from '../../models';
 import { throwError } from '../../utils';
+import { getArticleTaxonomyForPublic } from '../admin/articleTaxonomy.service';
 
 export async function listArticles(c: HonoCtx, query: z.infer<typeof ArticleListQuerySchema>) {
   const page = Math.max(1, Number(query.page ?? 1));
@@ -85,6 +86,14 @@ export async function getArticleBySlug(c: HonoCtx, slug: string) {
       publishedAt: articles.publishedAt,
       createdAt: articles.createdAt,
       updatedAt: articles.updatedAt,
+      metaTitle: articles.metaTitle,
+      metaDescription: articles.metaDescription,
+      focusKeyword: articles.focusKeyword,
+      ogImageUrl: articles.ogImageUrl,
+      canonicalUrl: articles.canonicalUrl,
+      schemaType: articles.schemaType,
+      noIndex: articles.noIndex,
+      readingTime: articles.readingTime,
       author: {
         id: users.id,
         name: users.fullName,
@@ -96,6 +105,8 @@ export async function getArticleBySlug(c: HonoCtx, slug: string) {
     .get();
 
   if (!article) return throwError.notFound('Article not found', { slug });
+
+  const taxonomy = await getArticleTaxonomyForPublic(c, article.id);
 
   const similar = await c.var.db
     .select({
@@ -112,5 +123,5 @@ export async function getArticleBySlug(c: HonoCtx, slug: string) {
     .limit(4)
     .all();
 
-  return { article, similar };
+  return { article: { ...article, ...taxonomy }, similar };
 }

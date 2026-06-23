@@ -1,12 +1,20 @@
 import { getHomepageConfig } from '../../utils/homepage';
 import { createAdminRouter } from '../shared/router';
 import {
+  adminCheckFocusKeyword,
   adminCreateArticle,
   adminDeleteArticle,
+  adminGetArticleById,
   adminListArticles,
   adminUpdateArticle,
   adminUploadContentImage,
 } from './articles.service';
+import {
+  adminCreateArticleCategory,
+  adminCreateArticleTag,
+  adminListArticleCategories,
+  adminListArticleTags,
+} from './articleTaxonomy.service';
 import {
   adminCreateBanner,
   adminDeleteBanner,
@@ -15,26 +23,39 @@ import {
   adminUpdateHomepageSettings,
 } from './homepage.service';
 import {
+  AdminCheckFocusKeywordOpenAPI,
+  AdminCreateArticleCategoryOpenAPI,
   AdminCreateArticleOpenAPI,
+  AdminCreateArticleTagOpenAPI,
   AdminCreateBannerOpenAPI,
   AdminCreateCategoryOpenAPI,
   AdminCreateProductOpenAPI,
+  AdminCreateRedirectOpenAPI,
   AdminDeleteArticleOpenAPI,
   AdminDeleteBannerOpenAPI,
   AdminDeleteCategoryOpenAPI,
+  AdminDeleteNotFoundLogOpenAPI,
   AdminDeleteProductOpenAPI,
+  AdminDeleteRedirectOpenAPI,
   AdminDeleteUserOpenAPI,
+  AdminGetArticleOpenAPI,
   AdminGetOrderOpenAPI,
   AdminGetSettingsOpenAPI,
   AdminGetUserOpenAPI,
+  AdminLinkSuggestionsOpenAPI,
+  AdminListArticleCategoriesOpenAPI,
   AdminListArticlesOpenAPI,
+  AdminListArticleTagsOpenAPI,
   AdminListBannersOpenAPI,
   AdminListCategoriesOpenAPI,
   AdminListComplaintsOpenAPI,
+  AdminListNotFoundLogsOpenAPI,
   AdminListOrdersOpenAPI,
   AdminListProductsOpenAPI,
+  AdminListRedirectsOpenAPI,
   AdminListUsersOpenAPI,
   AdminResolveComplaintOpenAPI,
+  AdminSeoAiSuggestOpenAPI,
   AdminStatsOpenAPI,
   AdminUpdateArticleOpenAPI,
   AdminUpdateBankInfoOpenAPI,
@@ -43,6 +64,7 @@ import {
   AdminUpdateHomepageSettingsOpenAPI,
   AdminUpdateOrderStatusOpenAPI,
   AdminUpdateProductOpenAPI,
+  AdminUpdateRedirectOpenAPI,
   AdminUpdateSettingsOpenAPI,
   AdminUpdateUserOpenAPI,
   AdminUploadContentImageOpenAPI,
@@ -56,6 +78,15 @@ import {
   adminUpdateOrderStatus,
   adminUpdateProduct,
 } from './products.service';
+import {
+  adminCreateRedirect,
+  adminDeleteNotFoundLog,
+  adminDeleteRedirect,
+  adminListNotFoundLogs,
+  adminListRedirects,
+  adminUpdateRedirect,
+} from './seo.service';
+import { adminSeoAiSuggest } from './seoAi.service';
 import {
   adminGetSettings,
   adminListComplaints,
@@ -124,6 +155,36 @@ routes.openapi(AdminDeleteProductOpenAPI, async (c) => {
 });
 
 routes.openapi(AdminListArticlesOpenAPI, async (c) => c.json(await adminListArticles(c, c.req.valid('query')), 200));
+routes.openapi(AdminCheckFocusKeywordOpenAPI, async (c) => {
+  const { keyword, excludeId } = c.req.valid('query');
+  return c.json(await adminCheckFocusKeyword(c, keyword, excludeId), 200);
+});
+routes.openapi(AdminSeoAiSuggestOpenAPI, async (c) =>
+  c.json(await adminSeoAiSuggest(c, c.req.valid('json') as Record<string, unknown>), 200),
+);
+routes.openapi(AdminLinkSuggestionsOpenAPI, async (c) => {
+  const { adminLinkSuggestions } = await import('../seo/service');
+  return c.json(await adminLinkSuggestions(c, c.req.valid('query')), 200);
+});
+routes.openapi(AdminListNotFoundLogsOpenAPI, async (c) => c.json(await adminListNotFoundLogs(c), 200));
+routes.openapi(AdminDeleteNotFoundLogOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminDeleteNotFoundLog(c, id), 200);
+});
+routes.openapi(AdminListRedirectsOpenAPI, async (c) => c.json(await adminListRedirects(c), 200));
+routes.openapi(AdminCreateRedirectOpenAPI, async (c) => c.json(await adminCreateRedirect(c, c.req.valid('json')), 201));
+routes.openapi(AdminUpdateRedirectOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminUpdateRedirect(c, id, c.req.valid('json')), 200);
+});
+routes.openapi(AdminDeleteRedirectOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminDeleteRedirect(c, id), 200);
+});
+routes.openapi(AdminGetArticleOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminGetArticleById(c, id), 200);
+});
 routes.openapi(AdminCreateArticleOpenAPI, async (c) => {
   const body = await c.req.parseBody({ all: true });
   return c.json(await adminCreateArticle(c, body as Record<string, unknown>), 201);
@@ -141,6 +202,15 @@ routes.openapi(AdminUploadContentImageOpenAPI, async (c) => {
   const body = await c.req.parseBody({ all: true });
   return c.json(await adminUploadContentImage(c, body as Record<string, unknown>), 200);
 });
+
+routes.openapi(AdminListArticleCategoriesOpenAPI, async (c) => c.json(await adminListArticleCategories(c), 200));
+routes.openapi(AdminCreateArticleCategoryOpenAPI, async (c) =>
+  c.json(await adminCreateArticleCategory(c, c.req.valid('json') as Record<string, unknown>), 201),
+);
+routes.openapi(AdminListArticleTagsOpenAPI, async (c) => c.json(await adminListArticleTags(c), 200));
+routes.openapi(AdminCreateArticleTagOpenAPI, async (c) =>
+  c.json(await adminCreateArticleTag(c, c.req.valid('json') as Record<string, unknown>), 201),
+);
 
 routes.openapi(AdminListOrdersOpenAPI, async (c) => c.json(await adminListOrders(c, c.req.valid('query')), 200));
 routes.openapi(AdminGetOrderOpenAPI, async (c) => {

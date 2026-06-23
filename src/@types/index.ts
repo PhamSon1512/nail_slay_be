@@ -28,6 +28,12 @@ export interface Bindings {
   ENABLE_CASBIN?: string;
   /** Public R2.dev or custom domain base URL, e.g. https://pub-xxx.r2.dev */
   R2_PUBLIC_BASE_URL?: string;
+  /** Google Gemini API key for SEO Content AI suggestions */
+  GEMINI_API_KEY?: string;
+  /** Public site URL for sitemap, canonical, IndexNow */
+  SITE_BASE_URL?: string;
+  /** IndexNow API verification key */
+  INDEXNOW_KEY?: string;
 }
 
 export type Variables = {

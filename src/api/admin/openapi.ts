@@ -430,6 +430,19 @@ export const AdminArticleMultipartSchema = z.object({
   status: z.enum(['draft', 'published']).optional().openapi({ description: 'Trạng thái xuất bản' }),
   cover: fileBinary('Ảnh bìa (tuỳ chọn). Upload R2 thư mục `articles/`.').optional(),
   remove_cover: z.string().optional().openapi({ description: 'true để xoá ảnh bìa khi cập nhật' }),
+  meta_title: z.string().optional().openapi({ description: 'Tiêu đề SEO' }),
+  meta_description: z.string().optional().openapi({ description: 'Mô tả meta SEO' }),
+  focus_keyword: z.string().optional().openapi({ description: 'Từ khóa chính' }),
+  og_image_url: z.string().optional().openapi({ description: 'URL ảnh Open Graph' }),
+  og_image: fileBinary('Ảnh OG upload (tuỳ chọn)').optional(),
+  remove_og_image: z.string().optional().openapi({ description: 'true để xoá ảnh OG' }),
+  canonical_url: z.string().optional().openapi({ description: 'URL chuẩn' }),
+  schema_type: z.string().optional().openapi({ description: 'Loại schema: Article, BlogPosting, NewsArticle' }),
+  no_index: z.string().optional().openapi({ description: 'true = noindex' }),
+  seo_score: z.string().optional().openapi({ description: 'Điểm SEO 0-100 từ FE' }),
+  category_ids: z.string().optional().openapi({ description: 'JSON array category IDs' }),
+  tag_ids: z.string().optional().openapi({ description: 'JSON array tag IDs' }),
+  tag_names: z.string().optional().openapi({ description: 'JSON array tag names (tạo mới nếu chưa có)' }),
 });
 
 export const AdminListArticlesOpenAPI = createRoute({
@@ -505,4 +518,203 @@ export const AdminUploadContentImageOpenAPI = createRoute({
     200: jsonSchemaBuilder(z.object({ url: z.string() })),
     ...defaultResponseSchema,
   },
+});
+
+export const AdminGetArticleOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/articles/{id}',
+  summary: 'Chi tiết bài viết (admin)',
+  security: [{ Bearer: [] }],
+  request: { params: IdParamSchema },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminCheckFocusKeywordOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/articles/check-focus-keyword',
+  security: [{ Bearer: [] }],
+  request: {
+    query: z.object({
+      keyword: z.string().min(1),
+      excludeId: z.string().optional(),
+    }),
+  },
+  responses: {
+    200: jsonSchemaBuilder(z.object({ isUnique: z.boolean(), usedBy: z.string().nullable() })),
+    ...defaultResponseSchema,
+  },
+});
+
+export const AdminListArticleCategoriesOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/article-categories',
+  security: [{ Bearer: [] }],
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
+export const AdminCreateArticleCategoryOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/article-categories',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().min(1),
+            slug: z.string().optional(),
+            parent_id: z.string().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 201: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminListArticleTagsOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/article-tags',
+  security: [{ Bearer: [] }],
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
+export const AdminCreateArticleTagOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/article-tags',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().min(1),
+            slug: z.string().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 201: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminSeoAiSuggestOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/articles/seo-ai-suggest',
+  summary: 'Gợi ý SEO bằng Gemini AI',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            title: z.string().min(1),
+            content: z.string().optional(),
+            excerpt: z.string().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminListNotFoundLogsOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/seo/404-logs',
+  security: [{ Bearer: [] }],
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
+export const AdminDeleteNotFoundLogOpenAPI = createRoute({
+  method: 'delete',
+  tags: ['Admin'],
+  path: '/seo/404-logs/{id}',
+  security: [{ Bearer: [] }],
+  request: { params: IdParamSchema },
+  responses: { 200: jsonSchemaBuilder(z.object({ success: z.boolean() })), ...defaultResponseSchema },
+});
+
+export const AdminListRedirectsOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/seo/redirects',
+  security: [{ Bearer: [] }],
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
+export const AdminCreateRedirectOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/seo/redirects',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            fromPath: z.string().min(1),
+            toPath: z.string().min(1),
+            statusCode: z.number().optional(),
+            enabled: z.boolean().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 201: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminUpdateRedirectOpenAPI = createRoute({
+  method: 'put',
+  tags: ['Admin'],
+  path: '/seo/redirects/{id}',
+  security: [{ Bearer: [] }],
+  request: {
+    params: IdParamSchema,
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            fromPath: z.string().optional(),
+            toPath: z.string().optional(),
+            statusCode: z.number().optional(),
+            enabled: z.boolean().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminDeleteRedirectOpenAPI = createRoute({
+  method: 'delete',
+  tags: ['Admin'],
+  path: '/seo/redirects/{id}',
+  security: [{ Bearer: [] }],
+  request: { params: IdParamSchema },
+  responses: { 200: jsonSchemaBuilder(z.object({ success: z.boolean() })), ...defaultResponseSchema },
+});
+
+export const AdminLinkSuggestionsOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/articles/link-suggestions',
+  security: [{ Bearer: [] }],
+  request: {
+    query: z.object({
+      articleId: z.string().optional(),
+      q: z.string().optional(),
+    }),
+  },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
 });

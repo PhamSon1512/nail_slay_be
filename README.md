@@ -252,6 +252,16 @@ API runs at **`http://localhost:8787`**
 ```bash
 JWT_SECRET=your-jwt-secret
 ENVIRONMENT=development
+GEMINI_API_KEY=your-google-ai-studio-api-key
+SITE_BASE_URL=https://nailslaystudio.com
+INDEXNOW_KEY=your-indexnow-verification-key
+```
+
+Production secrets (never commit):
+
+```bash
+npx wrangler secret put GEMINI_API_KEY
+npx wrangler secret put INDEXNOW_KEY
 ```
 
 ### `wrangler.jsonc` — Cloudflare vars (non-secret)

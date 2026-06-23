@@ -23,6 +23,15 @@ export const articles = table(
       .$default(() => new Date()),
     updatedAt: integer('updated_at', { mode: 'timestamp' }),
     deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+    metaTitle: text('meta_title'),
+    metaDescription: text('meta_description'),
+    focusKeyword: text('focus_keyword'),
+    ogImageUrl: text('og_image_url'),
+    canonicalUrl: text('canonical_url'),
+    schemaType: text('schema_type').default('Article'),
+    noIndex: integer('no_index').default(0),
+    readingTime: integer('reading_time'),
+    seoScore: integer('seo_score'),
   },
   (t) => [
     uniqueIndex('articles_slug_active_udx')

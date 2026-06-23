@@ -1,9 +1,52 @@
 import type { HonoCtx } from '../../@types';
-import { and, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, like, ne, or, sql } from 'drizzle-orm';
 import { articles } from '../../models';
 import { throwError } from '../../utils';
-import { collectFormFile, optionalString, requiredString } from '../../utils/formParse';
+import { calcReadingTimeMinutes } from '../../utils/articleText';
+import {
+  collectFormFile,
+  optionalString,
+  parseBooleanField,
+  parseIntField,
+  parseJsonField,
+  requiredString,
+} from '../../utils/formParse';
+import { articlePublicUrl, pingIndexNow } from '../../utils/indexNow';
 import { uploadUserFileToR2 } from '../../utils/r2Upload';
+import {
+  ensureTagIdsByNames,
+  getArticleCategoryIds,
+  getArticleTagIds,
+  getArticleTaxonomyForPublic,
+  syncArticleCategories,
+  syncArticleTags,
+  validateCategoryIds,
+} from './articleTaxonomy.service';
+
+function parseSeoFields(body: Record<string, unknown>, existing?: typeof articles.$inferSelect) {
+  const metaTitle = 'meta_title' in body ? (optionalString(body['meta_title']) ?? null) : (existing?.metaTitle ?? null);
+  const metaDescription =
+    'meta_description' in body ? (optionalString(body['meta_description']) ?? null) : (existing?.metaDescription ?? null);
+  const focusKeyword = 'focus_keyword' in body ? (optionalString(body['focus_keyword']) ?? null) : (existing?.focusKeyword ?? null);
+  const canonicalUrl = 'canonical_url' in body ? (optionalString(body['canonical_url']) ?? null) : (existing?.canonicalUrl ?? null);
+  const schemaType =
+    'schema_type' in body ? (optionalString(body['schema_type']) ?? 'Article') : (existing?.schemaType ?? 'Article');
+  const noIndex = 'no_index' in body ? (parseBooleanField(body['no_index']) ? 1 : 0) : (existing?.noIndex ?? 0);
+  const seoScore = 'seo_score' in body ? (parseIntField(body['seo_score']) ?? null) : (existing?.seoScore ?? null);
+
+  let ogImageUrl = existing?.ogImageUrl ?? null;
+  if ('og_image_url' in body) {
+    ogImageUrl = optionalString(body['og_image_url']) ?? null;
+  }
+
+  return { metaTitle, metaDescription, focusKeyword, ogImageUrl, canonicalUrl, schemaType, noIndex, seoScore };
+}
+
+function parseTaxonomyIds(body: Record<string, unknown>): { categoryIds: string[]; tagIds: string[] } {
+  const categoryIds = parseJsonField<string[]>(body['category_ids'], []);
+  const tagIds = parseJsonField<string[]>(body['tag_ids'], []);
+  return { categoryIds, tagIds };
+}
 
 export async function adminListArticles(c: HonoCtx, query: { page?: string; limit?: string; search?: string }) {
   const page = Math.max(1, Number(query.page ?? 1));
@@ -49,14 +92,48 @@ async function assertSlugAvailable(c: HonoCtx, slug: string, excludeId?: string)
   }
 }
 
+export async function adminGetArticleById(c: HonoCtx, id: string) {
+  const article = await c.var.db
+    .select()
+    .from(articles)
+    .where(and(eq(articles.id, id), isNull(articles.deletedAt)))
+    .get();
+  if (!article) return throwError.notFound('Article not found', { id });
+
+  const categoryIds = await getArticleCategoryIds(c, id);
+  const tagIds = await getArticleTagIds(c, id);
+  const taxonomy = await getArticleTaxonomyForPublic(c, id);
+
+  return { ...article, categoryIds, tagIds, tags: taxonomy.tags };
+}
+
+export async function adminCheckFocusKeyword(c: HonoCtx, keyword: string, excludeId?: string) {
+  const trimmed = keyword.trim();
+  if (!trimmed) return { isUnique: true, usedBy: null as string | null };
+
+  const conditions = [isNull(articles.deletedAt), eq(articles.focusKeyword, trimmed)];
+  if (excludeId) conditions.push(ne(articles.id, excludeId));
+
+  const existing = await c.var.db
+    .select({ id: articles.id, title: articles.title })
+    .from(articles)
+    .where(and(...conditions))
+    .get();
+
+  return { isUnique: !existing, usedBy: existing?.title ?? null };
+}
+
 export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknown>) {
   const title = requiredString(body['title'], 'title');
   const slug = requiredString(body['slug'], 'slug');
   const excerpt = optionalString(body['excerpt']) ?? '';
   const content = optionalString(body['content']) ?? '';
   const status = optionalString(body['status']) === 'published' ? 'published' : 'draft';
+  const seo = parseSeoFields(body);
+  const { categoryIds, tagIds } = parseTaxonomyIds(body);
 
   await assertSlugAvailable(c, slug);
+  await validateCategoryIds(c, categoryIds);
 
   let coverImageUrl: string | null = null;
   const coverFile = collectFormFile(body, 'cover');
@@ -65,7 +142,16 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
     coverImageUrl = publicUrl;
   }
 
+  let ogImageUrl = seo.ogImageUrl;
+  const ogFile = collectFormFile(body, 'og_image');
+  if (ogFile) {
+    const { publicUrl } = await uploadUserFileToR2(c.var.db, c.env, c.var.jwtPayload.id, 'articles/og', ogFile);
+    ogImageUrl = publicUrl;
+  }
+
+  const readingTime = calcReadingTimeMinutes(content);
   const now = new Date();
+
   const [created] = await c.var.db
     .insert(articles)
     .values({
@@ -78,10 +164,27 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
       status,
       publishedAt: status === 'published' ? now : null,
       createdAt: now,
+      metaTitle: seo.metaTitle,
+      metaDescription: seo.metaDescription,
+      focusKeyword: seo.focusKeyword,
+      ogImageUrl,
+      canonicalUrl: seo.canonicalUrl,
+      schemaType: seo.schemaType,
+      noIndex: seo.noIndex,
+      readingTime,
+      seoScore: seo.seoScore,
     })
     .returning();
 
-  return created;
+  const finalTagIds = tagIds.length > 0 ? tagIds : await ensureTagIdsByNames(c, parseJsonField<string[]>(body['tag_names'], []));
+  await syncArticleCategories(c, created.id, categoryIds);
+  await syncArticleTags(c, created.id, finalTagIds);
+
+  if (status === 'published') {
+    c.executionCtx.waitUntil(pingIndexNow(c.env, [articlePublicUrl(c.env, slug)]));
+  }
+
+  return adminGetArticleById(c, created.id);
 }
 
 export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<string, unknown>) {
@@ -97,6 +200,7 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
   const excerpt = 'excerpt' in body ? (optionalString(body['excerpt']) ?? '') : existing.excerpt;
   const content = 'content' in body ? (optionalString(body['content']) ?? '') : existing.content;
   const status = 'status' in body ? (optionalString(body['status']) === 'published' ? 'published' : 'draft') : existing.status;
+  const seo = parseSeoFields(body, existing);
 
   if (slug !== existing.slug) await assertSlugAvailable(c, slug, id);
 
@@ -110,6 +214,16 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
     coverImageUrl = publicUrl;
   }
 
+  let ogImageUrl = seo.ogImageUrl;
+  if (body['remove_og_image'] === 'true' || body['remove_og_image'] === true) {
+    ogImageUrl = null;
+  }
+  const ogFile = collectFormFile(body, 'og_image');
+  if (ogFile) {
+    const { publicUrl } = await uploadUserFileToR2(c.var.db, c.env, c.var.jwtPayload.id, 'articles/og', ogFile);
+    ogImageUrl = publicUrl;
+  }
+
   let publishedAt = existing.publishedAt;
   if (status === 'published' && existing.status !== 'published') {
     publishedAt = new Date();
@@ -118,7 +232,9 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
     publishedAt = null;
   }
 
-  const [updated] = await c.var.db
+  const readingTime = calcReadingTimeMinutes(content);
+
+  await c.var.db
     .update(articles)
     .set({
       title,
@@ -129,11 +245,36 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
       status,
       publishedAt,
       updatedAt: new Date(),
+      metaTitle: seo.metaTitle,
+      metaDescription: seo.metaDescription,
+      focusKeyword: seo.focusKeyword,
+      ogImageUrl,
+      canonicalUrl: seo.canonicalUrl,
+      schemaType: seo.schemaType,
+      noIndex: seo.noIndex,
+      readingTime,
+      seoScore: seo.seoScore,
     })
-    .where(eq(articles.id, id))
-    .returning();
+    .where(eq(articles.id, id));
 
-  return updated;
+  if ('category_ids' in body) {
+    const { categoryIds } = parseTaxonomyIds(body);
+    await validateCategoryIds(c, categoryIds);
+    await syncArticleCategories(c, id, categoryIds);
+  }
+
+  if ('tag_ids' in body || 'tag_names' in body) {
+    const { tagIds } = parseTaxonomyIds(body);
+    const finalTagIds = tagIds.length > 0 ? tagIds : await ensureTagIdsByNames(c, parseJsonField<string[]>(body['tag_names'], []));
+    await syncArticleTags(c, id, finalTagIds);
+  }
+
+  const shouldPing = status === 'published' && (existing.status !== 'published' || slug !== existing.slug);
+  if (shouldPing) {
+    c.executionCtx.waitUntil(pingIndexNow(c.env, [articlePublicUrl(c.env, slug)]));
+  }
+
+  return adminGetArticleById(c, id);
 }
 
 export async function adminDeleteArticle(c: HonoCtx, id: string) {

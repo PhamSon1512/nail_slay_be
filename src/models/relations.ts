@@ -1,6 +1,8 @@
 import { defineRelations } from 'drizzle-orm';
 import { addresses } from './address';
 import { articles } from './article';
+import { articleCategories, articleCategoryMap } from './articleCategory';
+import { articleTagMap, articleTags } from './articleTag';
 import { auditLogs } from './auditLog';
 import { cartItems } from './cartItem';
 import { categories } from './category';
@@ -30,6 +32,10 @@ export const schemaRelations = defineRelations(
     complaints,
     settings,
     articles,
+    articleCategories,
+    articleTags,
+    articleCategoryMap,
+    articleTagMap,
   },
   (helpers) => ({
     users: {
@@ -105,6 +111,35 @@ export const schemaRelations = defineRelations(
     },
     articles: {
       author: helpers.one.users({ from: helpers.articles.authorId, to: helpers.users.id }),
+      categoryMaps: helpers.many.articleCategoryMap(),
+      tagMaps: helpers.many.articleTagMap(),
+    },
+    articleCategories: {
+      parent: helpers.one.articleCategories({
+        from: helpers.articleCategories.parentId,
+        to: helpers.articleCategories.id,
+        alias: 'article_category_parent',
+      }),
+      children: helpers.many.articleCategories({
+        from: helpers.articleCategories.id,
+        to: helpers.articleCategories.parentId,
+        alias: 'article_category_children',
+      }),
+      articleMaps: helpers.many.articleCategoryMap(),
+    },
+    articleTags: {
+      articleMaps: helpers.many.articleTagMap(),
+    },
+    articleCategoryMap: {
+      article: helpers.one.articles({ from: helpers.articleCategoryMap.articleId, to: helpers.articles.id }),
+      category: helpers.one.articleCategories({
+        from: helpers.articleCategoryMap.categoryId,
+        to: helpers.articleCategories.id,
+      }),
+    },
+    articleTagMap: {
+      article: helpers.one.articles({ from: helpers.articleTagMap.articleId, to: helpers.articles.id }),
+      tag: helpers.one.articleTags({ from: helpers.articleTagMap.tagId, to: helpers.articleTags.id }),
     },
   }),
 );

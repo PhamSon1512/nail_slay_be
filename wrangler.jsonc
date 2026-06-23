@@ -32,7 +32,8 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "R2_PUBLIC_BASE_URL": "https://pub-2dcdd3b2d1f24e60bec5a548a82636ae.r2.dev"
+    "R2_PUBLIC_BASE_URL": "https://pub-2dcdd3b2d1f24e60bec5a548a82636ae.r2.dev",
+    "SITE_BASE_URL": "https://nailslaystudio.com"
   },
   "compatibility_flags": [
     "nodejs_compat"

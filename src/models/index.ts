@@ -11,5 +11,8 @@ export * from './orderItem';
 export * from './complaint';
 export * from './setting';
 export * from './article';
+export * from './articleCategory';
+export * from './articleTag';
+export * from './seo';
 export * from './productReview';
 export * from './relations';

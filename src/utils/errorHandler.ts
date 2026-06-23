@@ -63,6 +63,14 @@ export const notFoundHandler = (c: iContext) => {
   const message = `Route not found: ${c.req.method} ${c.req.path}`;
   Logger.warn(`⚠️ ${message}`, undefined, c);
   c.header('X-Error-Code', 'ROUTE_NOT_FOUND');
+
+  const logPromise = import('./notFoundLogger').then(({ logNotFoundHit }) => logNotFoundHit(c, c.req.path));
+  if (c.executionCtx?.waitUntil) {
+    c.executionCtx.waitUntil(logPromise);
+  } else {
+    void logPromise.catch(() => undefined);
+  }
+
   return c.json(
     {
       ...buildErrorBody({ message, code: 'ROUTE_NOT_FOUND', statusCode: 404, path: c.req.path, method: c.req.method }),
