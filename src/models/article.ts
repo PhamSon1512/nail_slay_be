@@ -17,6 +17,9 @@ export const articles = table(
     status: text('status', { enum: ['draft', 'published'] })
       .notNull()
       .default('draft'),
+    visibility: text('visibility', { enum: ['public', 'private'] })
+      .notNull()
+      .default('public'),
     publishedAt: integer('published_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()

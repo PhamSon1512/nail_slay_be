@@ -12,7 +12,7 @@ import {
   requiredString,
 } from '../../utils/formParse';
 import { articlePublicUrl, pingIndexNow } from '../../utils/indexNow';
-import { uploadUserFileToR2 } from '../../utils/r2Upload';
+import { uploadContentAssetToR2, uploadUserFileToR2 } from '../../utils/r2Upload';
 import {
   ensureTagIdsByNames,
   getArticleCategoryIds,
@@ -129,6 +129,7 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
   const excerpt = optionalString(body['excerpt']) ?? '';
   const content = optionalString(body['content']) ?? '';
   const status = optionalString(body['status']) === 'published' ? 'published' : 'draft';
+  const visibility = optionalString(body['visibility']) === 'private' ? 'private' : 'public';
   const seo = parseSeoFields(body);
   const { categoryIds, tagIds } = parseTaxonomyIds(body);
 
@@ -162,6 +163,7 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
       coverImageUrl,
       authorId: c.var.jwtPayload.id,
       status,
+      visibility,
       publishedAt: status === 'published' ? now : null,
       createdAt: now,
       metaTitle: seo.metaTitle,
@@ -180,7 +182,7 @@ export async function adminCreateArticle(c: HonoCtx, body: Record<string, unknow
   await syncArticleCategories(c, created.id, categoryIds);
   await syncArticleTags(c, created.id, finalTagIds);
 
-  if (status === 'published') {
+  if (status === 'published' && visibility === 'public') {
     c.executionCtx.waitUntil(pingIndexNow(c.env, [articlePublicUrl(c.env, slug)]));
   }
 
@@ -200,6 +202,12 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
   const excerpt = 'excerpt' in body ? (optionalString(body['excerpt']) ?? '') : existing.excerpt;
   const content = 'content' in body ? (optionalString(body['content']) ?? '') : existing.content;
   const status = 'status' in body ? (optionalString(body['status']) === 'published' ? 'published' : 'draft') : existing.status;
+  const visibility =
+    'visibility' in body
+      ? optionalString(body['visibility']) === 'private'
+        ? 'private'
+        : 'public'
+      : (existing.visibility ?? 'public');
   const seo = parseSeoFields(body, existing);
 
   if (slug !== existing.slug) await assertSlugAvailable(c, slug, id);
@@ -243,6 +251,7 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
       content,
       coverImageUrl,
       status,
+      visibility,
       publishedAt,
       updatedAt: new Date(),
       metaTitle: seo.metaTitle,
@@ -269,7 +278,10 @@ export async function adminUpdateArticle(c: HonoCtx, id: string, body: Record<st
     await syncArticleTags(c, id, finalTagIds);
   }
 
-  const shouldPing = status === 'published' && (existing.status !== 'published' || slug !== existing.slug);
+  const shouldPing =
+    status === 'published' &&
+    visibility === 'public' &&
+    (existing.status !== 'published' || existing.visibility !== 'public' || slug !== existing.slug);
   if (shouldPing) {
     c.executionCtx.waitUntil(pingIndexNow(c.env, [articlePublicUrl(c.env, slug)]));
   }
@@ -304,4 +316,12 @@ export async function adminUploadContentImage(c: HonoCtx, body: Record<string, u
 
   const { publicUrl } = await uploadUserFileToR2(c.var.db, c.env, c.var.jwtPayload.id, 'content', imageFile);
   return { url: publicUrl };
+}
+
+export async function adminUploadContentAsset(c: HonoCtx, body: Record<string, unknown>) {
+  const file = collectFormFile(body, 'file') ?? collectFormFile(body, 'image');
+  if (!file) return throwError.badRequest('File is required (field `file`)');
+
+  const uploaded = await uploadContentAssetToR2(c.var.db, c.env, c.var.jwtPayload.id, 'content', file);
+  return { url: uploaded.publicUrl, mimeType: uploaded.mimeType, fileName: uploaded.fileName };
 }

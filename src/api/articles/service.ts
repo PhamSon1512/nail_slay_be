@@ -11,7 +11,7 @@ export async function listArticles(c: HonoCtx, query: z.infer<typeof ArticleList
   const limit = Math.min(50, Math.max(1, Number(query.limit ?? 12)));
   const offset = (page - 1) * limit;
 
-  const conditions = [isNull(articles.deletedAt), eq(articles.status, 'published')];
+  const conditions = [isNull(articles.deletedAt), eq(articles.status, 'published'), eq(articles.visibility, 'public')];
 
   if (query.q) {
     const term = `%${query.q}%`;
@@ -101,7 +101,9 @@ export async function getArticleBySlug(c: HonoCtx, slug: string) {
     })
     .from(articles)
     .leftJoin(users, eq(articles.authorId, users.id))
-    .where(and(eq(articles.slug, slug), isNull(articles.deletedAt), eq(articles.status, 'published')))
+    .where(
+      and(eq(articles.slug, slug), isNull(articles.deletedAt), eq(articles.status, 'published'), eq(articles.visibility, 'public')),
+    )
     .get();
 
   if (!article) return throwError.notFound('Article not found', { slug });
@@ -118,7 +120,14 @@ export async function getArticleBySlug(c: HonoCtx, slug: string) {
       publishedAt: articles.publishedAt,
     })
     .from(articles)
-    .where(and(isNull(articles.deletedAt), eq(articles.status, 'published'), sql`${articles.id} != ${article.id}`))
+    .where(
+      and(
+        isNull(articles.deletedAt),
+        eq(articles.status, 'published'),
+        eq(articles.visibility, 'public'),
+        sql`${articles.id} != ${article.id}`,
+      ),
+    )
     .orderBy(desc(articles.publishedAt))
     .limit(4)
     .all();

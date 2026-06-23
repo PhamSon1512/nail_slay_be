@@ -428,6 +428,10 @@ export const AdminArticleMultipartSchema = z.object({
   excerpt: z.string().optional().openapi({ description: 'Tóm tắt ngắn' }),
   content: z.string().optional().openapi({ description: 'Nội dung HTML từ rich editor' }),
   status: z.enum(['draft', 'published']).optional().openapi({ description: 'Trạng thái xuất bản' }),
+  visibility: z
+    .enum(['public', 'private'])
+    .optional()
+    .openapi({ description: 'Hiển thị: public | private (chỉ admin xem khi private)' }),
   cover: fileBinary('Ảnh bìa (tuỳ chọn). Upload R2 thư mục `articles/`.').optional(),
   remove_cover: z.string().optional().openapi({ description: 'true để xoá ảnh bìa khi cập nhật' }),
   meta_title: z.string().optional().openapi({ description: 'Tiêu đề SEO' }),
@@ -520,6 +524,29 @@ export const AdminUploadContentImageOpenAPI = createRoute({
   },
 });
 
+export const AdminUploadContentAssetOpenAPI = createRoute({
+  method: 'post',
+  tags: ['Admin'],
+  path: '/upload/content-asset',
+  summary: 'Upload tệp editor (ảnh, nhạc, tài liệu)',
+  security: [{ Bearer: [] }],
+  request: {
+    body: {
+      content: {
+        'multipart/form-data': {
+          schema: z.object({
+            file: fileBinary('Tệp nội dung (bắt buộc).'),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: jsonSchemaBuilder(z.object({ url: z.string(), mimeType: z.string(), fileName: z.string() })),
+    ...defaultResponseSchema,
+  },
+});
+
 export const AdminGetArticleOpenAPI = createRoute({
   method: 'get',
   tags: ['Admin'],
@@ -555,6 +582,15 @@ export const AdminListArticleCategoriesOpenAPI = createRoute({
   responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
 });
 
+export const AdminListPopularArticleCategoriesOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/article-categories/popular',
+  security: [{ Bearer: [] }],
+  request: { query: z.object({ limit: z.string().optional() }) },
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
 export const AdminCreateArticleCategoryOpenAPI = createRoute({
   method: 'post',
   tags: ['Admin'],
@@ -581,6 +617,15 @@ export const AdminListArticleTagsOpenAPI = createRoute({
   tags: ['Admin'],
   path: '/article-tags',
   security: [{ Bearer: [] }],
+  responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
+});
+
+export const AdminListPopularArticleTagsOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/article-tags/popular',
+  security: [{ Bearer: [] }],
+  request: { query: z.object({ limit: z.string().optional() }) },
   responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
 });
 

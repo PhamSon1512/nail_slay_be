@@ -7,6 +7,7 @@ import {
   adminGetArticleById,
   adminListArticles,
   adminUpdateArticle,
+  adminUploadContentAsset,
   adminUploadContentImage,
 } from './articles.service';
 import {
@@ -14,6 +15,8 @@ import {
   adminCreateArticleTag,
   adminListArticleCategories,
   adminListArticleTags,
+  adminListPopularArticleCategories,
+  adminListPopularArticleTags,
 } from './articleTaxonomy.service';
 import {
   adminCreateBanner,
@@ -51,6 +54,8 @@ import {
   AdminListComplaintsOpenAPI,
   AdminListNotFoundLogsOpenAPI,
   AdminListOrdersOpenAPI,
+  AdminListPopularArticleCategoriesOpenAPI,
+  AdminListPopularArticleTagsOpenAPI,
   AdminListProductsOpenAPI,
   AdminListRedirectsOpenAPI,
   AdminListUsersOpenAPI,
@@ -67,6 +72,7 @@ import {
   AdminUpdateRedirectOpenAPI,
   AdminUpdateSettingsOpenAPI,
   AdminUpdateUserOpenAPI,
+  AdminUploadContentAssetOpenAPI,
   AdminUploadContentImageOpenAPI,
 } from './openapi';
 import {
@@ -202,12 +208,24 @@ routes.openapi(AdminUploadContentImageOpenAPI, async (c) => {
   const body = await c.req.parseBody({ all: true });
   return c.json(await adminUploadContentImage(c, body as Record<string, unknown>), 200);
 });
+routes.openapi(AdminUploadContentAssetOpenAPI, async (c) => {
+  const body = await c.req.parseBody({ all: true });
+  return c.json(await adminUploadContentAsset(c, body as Record<string, unknown>), 200);
+});
 
 routes.openapi(AdminListArticleCategoriesOpenAPI, async (c) => c.json(await adminListArticleCategories(c), 200));
+routes.openapi(AdminListPopularArticleCategoriesOpenAPI, async (c) => {
+  const limit = Number(c.req.valid('query').limit ?? 20);
+  return c.json(await adminListPopularArticleCategories(c, limit), 200);
+});
 routes.openapi(AdminCreateArticleCategoryOpenAPI, async (c) =>
   c.json(await adminCreateArticleCategory(c, c.req.valid('json') as Record<string, unknown>), 201),
 );
 routes.openapi(AdminListArticleTagsOpenAPI, async (c) => c.json(await adminListArticleTags(c), 200));
+routes.openapi(AdminListPopularArticleTagsOpenAPI, async (c) => {
+  const limit = Number(c.req.valid('query').limit ?? 20);
+  return c.json(await adminListPopularArticleTags(c, limit), 200);
+});
 routes.openapi(AdminCreateArticleTagOpenAPI, async (c) =>
   c.json(await adminCreateArticleTag(c, c.req.valid('json') as Record<string, unknown>), 201),
 );

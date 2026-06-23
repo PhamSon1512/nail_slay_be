@@ -1,12 +1,67 @@
 import type { HonoCtx } from '../../@types';
-import { asc, eq, inArray } from 'drizzle-orm';
-import { articleCategories, articleCategoryMap, articleTagMap, articleTags } from '../../models';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { articleCategories, articleCategoryMap, articles, articleTagMap, articleTags } from '../../models';
 import { throwError } from '../../utils';
 import { slugifyVi } from '../../utils/articleText';
 import { optionalString, requiredString } from '../../utils/formParse';
 
 export async function adminListArticleCategories(c: HonoCtx) {
   return c.var.db.select().from(articleCategories).orderBy(asc(articleCategories.name)).all();
+}
+
+export async function adminListPopularArticleCategories(c: HonoCtx, limit = 20) {
+  const rows = await c.var.db
+    .select({
+      id: articleCategories.id,
+      name: articleCategories.name,
+      slug: articleCategories.slug,
+      parentId: articleCategories.parentId,
+      articleCount: sql<number>`count(${articles.id})`.as('article_count'),
+    })
+    .from(articleCategories)
+    .innerJoin(articleCategoryMap, eq(articleCategoryMap.categoryId, articleCategories.id))
+    .innerJoin(
+      articles,
+      and(
+        eq(articles.id, articleCategoryMap.articleId),
+        eq(articles.status, 'published'),
+        eq(articles.visibility, 'public'),
+        isNull(articles.deletedAt),
+      ),
+    )
+    .groupBy(articleCategories.id)
+    .orderBy(desc(sql`article_count`), asc(articleCategories.name))
+    .limit(limit)
+    .all();
+
+  return rows.map(({ articleCount, ...rest }) => ({ ...rest, articleCount: Number(articleCount) }));
+}
+
+export async function adminListPopularArticleTags(c: HonoCtx, limit = 20) {
+  const rows = await c.var.db
+    .select({
+      id: articleTags.id,
+      name: articleTags.name,
+      slug: articleTags.slug,
+      articleCount: sql<number>`count(${articles.id})`.as('article_count'),
+    })
+    .from(articleTags)
+    .innerJoin(articleTagMap, eq(articleTagMap.tagId, articleTags.id))
+    .innerJoin(
+      articles,
+      and(
+        eq(articles.id, articleTagMap.articleId),
+        eq(articles.status, 'published'),
+        eq(articles.visibility, 'public'),
+        isNull(articles.deletedAt),
+      ),
+    )
+    .groupBy(articleTags.id)
+    .orderBy(desc(sql`article_count`), asc(articleTags.name))
+    .limit(limit)
+    .all();
+
+  return rows.map(({ articleCount, ...rest }) => ({ ...rest, articleCount: Number(articleCount) }));
 }
 
 export async function adminCreateArticleCategory(c: HonoCtx, body: Record<string, unknown>) {

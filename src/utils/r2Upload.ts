@@ -97,3 +97,92 @@ export async function uploadUserFileToR2(
   const publicUrl = publicMediaUrl(env, fileKey);
   return { row: row!, publicUrl };
 }
+
+const CONTENT_ASSET_EXTENSIONS = [
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'gif',
+  'mp3',
+  'wav',
+  'ogg',
+  'm4a',
+  'aac',
+  'pdf',
+  'zip',
+  'doc',
+  'docx',
+  'mp4',
+  'webm',
+];
+
+const CONTENT_ASSET_MIMES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'audio/mp4',
+  'audio/aac',
+  'application/pdf',
+  'application/zip',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'video/mp4',
+  'video/webm',
+];
+
+/** Upload editor assets (image, audio, documents) to R2. */
+export async function uploadContentAssetToR2(
+  db: DrizzleD1Database<typeof schema>,
+  env: Bindings,
+  createdBy: string,
+  folder: string,
+  file: File,
+): Promise<{ row: typeof media.$inferSelect; publicUrl: string; mimeType: string; fileName: string }> {
+  const maxBytes = 15 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    return throwError.badRequest('File too large. Maximum size allowed is 15MB.');
+  }
+
+  const id = createId();
+  const leaf = leafFileName(file.name);
+  const { base: rawBase, ext: rawExt } = splitBaseAndExt(leaf);
+  const base = safeBase(rawBase);
+  const ext = safeExt(rawExt).toLowerCase();
+
+  if (!CONTENT_ASSET_EXTENSIONS.includes(ext)) {
+    return throwError.badRequest('Unsupported file format for editor upload.');
+  }
+
+  const folderSafe = safeFolder(folder);
+  const fileKey = ext ? `${folderSafe}/${base}-${id}.${ext}` : `${folderSafe}/${base}-${id}`;
+
+  const fileType = (file.type || 'application/octet-stream').toLowerCase();
+  if (!CONTENT_ASSET_MIMES.includes(fileType) && !fileType.startsWith('audio/') && !fileType.startsWith('video/')) {
+    return throwError.badRequest('Unsupported file type for editor upload.');
+  }
+
+  await env.STORAGE.put(fileKey, file.stream(), {
+    httpMetadata: { contentType: fileType },
+  });
+
+  const row = await db
+    .insert(media)
+    .values({
+      id,
+      fileName: file.name,
+      fileType,
+      fileSize: file.size,
+      bucketKey: fileKey,
+      createdBy,
+    })
+    .returning()
+    .get();
+
+  const publicUrl = publicMediaUrl(env, fileKey);
+  return { row: row!, publicUrl, mimeType: fileType, fileName: file.name };
+}
