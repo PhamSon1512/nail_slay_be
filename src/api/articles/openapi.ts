@@ -22,7 +22,7 @@ const ArticleListItemSchema = z.object({
 export const ListArticlesOpenAPI = createRoute({
   method: 'get',
   tags: ['Articles'],
-  path: '/',
+  path: '/list',
   request: { query: ArticleListQuerySchema },
   responses: {
     200: jsonSchemaBuilder(
@@ -38,7 +38,7 @@ export const ListArticlesOpenAPI = createRoute({
 export const GetArticleOpenAPI = createRoute({
   method: 'get',
   tags: ['Articles'],
-  path: '/{slug}',
+  path: '/item/{slug}',
   request: { params: z.object({ slug: z.string() }) },
   responses: {
     200: jsonSchemaBuilder(z.record(z.string(), z.unknown())),

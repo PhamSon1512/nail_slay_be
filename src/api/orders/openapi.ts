@@ -11,7 +11,7 @@ export const UpdateOrderStatusSchema = z.object({
 export const ListOrdersOpenAPI = createRoute({
   method: 'get',
   tags: ['Orders'],
-  path: '/',
+  path: '/list',
   security: [{ Bearer: [] }],
   responses: { 200: jsonSchemaBuilder(z.array(z.record(z.string(), z.unknown()))), ...defaultResponseSchema },
 });

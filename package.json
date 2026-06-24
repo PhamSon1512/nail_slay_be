@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "scripts": {
     "dev": "wrangler dev --local",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage --config vitest.coverage.config.mts",
     "test:watch": "vitest",

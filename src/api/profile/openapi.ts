@@ -31,7 +31,7 @@ export const ChangePasswordSchema = z
 export const GetProfileOpenAPI = createRoute({
   method: 'get',
   tags: ['Profile'],
-  path: '/',
+  path: '/me',
   security: [{ Bearer: [] }],
   responses: {
     200: jsonSchemaBuilder(

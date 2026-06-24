@@ -22,7 +22,7 @@ const AddressSchema = z.object({
 export const ListAddressesOpenAPI = createRoute({
   method: 'get',
   tags: ['Addresses'],
-  path: '/',
+  path: '/list',
   security: [{ Bearer: [] }],
   responses: { 200: jsonSchemaBuilder(z.array(AddressSchema)), ...defaultResponseSchema },
 });

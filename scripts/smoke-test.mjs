@@ -127,12 +127,35 @@ const testEmail = `smoke-${Date.now()}@test.local`;
   check('GET /auth/token', status, 200, data);
 }
 
+// ─── Storefront (public) ──────────────────────────────────────────────────────
+
+console.log('');
+console.log(chalk.bold.blue('── Storefront (public) ───────────────────────'));
+
+{
+  const { status, data } = await req('GET', '/products?limit=1');
+  check('GET /products?limit=1', status, 200, data);
+}
+
+{
+  const { status, data } = await req('GET', '/articles?limit=1');
+  check('GET /articles?limit=1', status, 200, data);
+}
+
+{
+  const { status, data } = await req('GET', '/categories');
+  check('GET /categories', status, 200, data);
+}
+
+{
+  const { status, data } = await req('GET', '/cart');
+  check('GET /cart', status, 200, data);
+}
+
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
 console.log('');
 console.log(chalk.bold.blue('── Profile ───────────────────────────────────'));
-
-// 6. GET /profile
 {
   const { status, data } = await req('GET', '/profile');
   check('GET /profile', status, 200, data);

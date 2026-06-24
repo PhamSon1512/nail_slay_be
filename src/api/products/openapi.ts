@@ -25,7 +25,7 @@ const ProductSchema = z.object({
 export const ListProductsOpenAPI = createRoute({
   method: 'get',
   tags: ['Products'],
-  path: '/',
+  path: '/list',
   request: { query: ProductListQuerySchema },
   responses: {
     200: jsonSchemaBuilder(
@@ -41,7 +41,7 @@ export const ListProductsOpenAPI = createRoute({
 export const GetProductOpenAPI = createRoute({
   method: 'get',
   tags: ['Products'],
-  path: '/{slug}',
+  path: '/item/{slug}',
   request: { params: z.object({ slug: z.string() }) },
   responses: {
     200: jsonSchemaBuilder(z.record(z.string(), z.unknown())),

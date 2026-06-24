@@ -15,7 +15,7 @@ export const UpdateCartItemSchema = z.object({
 export const GetCartOpenAPI = createRoute({
   method: 'get',
   tags: ['Cart'],
-  path: '/',
+  path: '/current',
   security: [{ Bearer: [] }],
   responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
 });

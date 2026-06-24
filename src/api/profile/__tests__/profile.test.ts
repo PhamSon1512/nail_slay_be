@@ -57,7 +57,7 @@ describe('GET /profile', () => {
   it('200 — returns profile without sensitive fields', async () => {
     await seedUser('profile-user-id', 'profile@test.com');
     const token = await adminToken('profile-user-id');
-    const res = await fetchWithToken('/profile', token);
+    const res = await fetchWithToken('/profile/me', token);
     expect(res.status).toBe(200);
     const body = (await res.json()) as any;
     expect(body.id).toBe('profile-user-id');
@@ -67,13 +67,13 @@ describe('GET /profile', () => {
   });
 
   it('401 — missing auth token returns 401', async () => {
-    const res = await app.fetch(new Request('http://localhost/profile'), env);
+    const res = await app.fetch(new Request('http://localhost/profile/me'), env);
     expect(res.status).toBe(401);
   });
 
   it('404 — user not in DB', async () => {
     const token = await adminToken('ghost-id');
-    const res = await fetchWithToken('/profile', token);
+    const res = await fetchWithToken('/profile/me', token);
     expect(res.status).toBe(404);
   });
 });

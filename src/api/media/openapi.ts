@@ -40,7 +40,7 @@ export const UploadOpenAPI = createRoute({
 export const DownloadOpenAPI = createRoute({
   method: 'get',
   tags: ['Media'],
-  path: '/:id',
+  path: '/{id}',
   security: [{ Bearer: [] }],
   request: {
     params: z.object({

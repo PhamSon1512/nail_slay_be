@@ -4,9 +4,9 @@ import { secureHeaders } from 'hono/secure-headers';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
-import ApiRoutes from './api/routes';
+import { registerApiRoutes } from './api/routes';
 import { createDb } from './db';
-import { slashRootPaths } from './middlewares/slashRoot';
+import { rewriteStorefrontGet } from './middlewares/rewriteStorefrontGet';
 import { handleError, notFoundHandler } from './utils';
 import { findRedirect } from './utils/redirectLookup';
 
@@ -69,11 +69,6 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-app.use(
-  '*',
-  slashRootPaths((request, env, executionCtx) => app.fetch(request, env, executionCtx)),
-);
-
 app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', { type: 'http', scheme: 'bearer' });
 app.doc('/openapi', { info: { title: 'My API', version: '1.0' }, openapi: '3.1.0' });
 app.get('/doc', swaggerUI({ url: '/openapi' }));
@@ -100,13 +95,13 @@ app.get('/:key.txt', async (c) => {
   return c.body(indexKey, 200, { 'Content-Type': 'text/plain; charset=utf-8' });
 });
 
-app.route('/', ApiRoutes);
+registerApiRoutes(app);
 
 app.onError((error, c) => handleError(c, error));
 app.notFound(notFoundHandler);
 
 export default {
-  fetch: app.fetch,
+  fetch: (request: Request, env: Bindings, ctx: ExecutionContext) => app.fetch(rewriteStorefrontGet(request), env, ctx),
   async scheduled(_: ScheduledController, env: Bindings) {
     try {
       await env.DB.prepare('SELECT 1 as ping').first();

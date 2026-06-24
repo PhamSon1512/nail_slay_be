@@ -13,7 +13,7 @@ const CategorySchema = z.object({
 export const ListCategoriesOpenAPI = createRoute({
   method: 'get',
   tags: ['Categories'],
-  path: '/',
+  path: '/list',
   responses: {
     200: jsonSchemaBuilder(z.array(CategorySchema)),
     ...defaultResponseSchema,

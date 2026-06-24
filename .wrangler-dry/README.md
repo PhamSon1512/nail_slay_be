@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "nail-slay-be" generated at 2026-06-24T08:37:08.797Z.
