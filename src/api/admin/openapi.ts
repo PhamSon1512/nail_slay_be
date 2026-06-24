@@ -612,6 +612,39 @@ export const AdminCreateArticleCategoryOpenAPI = createRoute({
   responses: { 201: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
 });
 
+export const AdminUpdateArticleCategoryOpenAPI = createRoute({
+  method: 'patch',
+  tags: ['Admin'],
+  path: '/article-categories/{id}',
+  security: [{ Bearer: [] }],
+  request: {
+    params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().min(1).optional(),
+            slug: z.string().optional(),
+            parent_id: z.string().optional(),
+          }),
+        },
+      },
+    },
+  },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
+export const AdminDeleteArticleCategoryOpenAPI = createRoute({
+  method: 'delete',
+  tags: ['Admin'],
+  path: '/article-categories/{id}',
+  security: [{ Bearer: [] }],
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: { 200: jsonSchemaBuilder(z.object({ success: z.boolean() })), ...defaultResponseSchema },
+});
+
 export const AdminListArticleTagsOpenAPI = createRoute({
   method: 'get',
   tags: ['Admin'],

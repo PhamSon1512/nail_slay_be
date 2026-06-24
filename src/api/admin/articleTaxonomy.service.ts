@@ -80,6 +80,70 @@ export async function adminCreateArticleCategory(c: HonoCtx, body: Record<string
   return created;
 }
 
+export async function adminUpdateArticleCategory(c: HonoCtx, id: string, body: Record<string, unknown>) {
+  const existing = await c.var.db
+    .select({ id: articleCategories.id })
+    .from(articleCategories)
+    .where(eq(articleCategories.id, id))
+    .get();
+  if (!existing) return throwError.notFound('Không tìm thấy danh mục');
+
+  const updates: Partial<typeof articleCategories.$inferInsert> = {};
+  if (body['name'] !== undefined) {
+    updates.name = requiredString(body['name'], 'name');
+    if (body['slug'] === undefined) {
+      updates.slug = slugifyVi(updates.name);
+    }
+  }
+  if (body['slug'] !== undefined) {
+    updates.slug = requiredString(body['slug'], 'slug');
+  }
+  if (body['parent_id'] !== undefined) {
+    updates.parentId = optionalString(body['parent_id']) ?? null;
+  }
+
+  if (updates.slug) {
+    const dupe = await c.var.db
+      .select({ id: articleCategories.id })
+      .from(articleCategories)
+      .where(and(eq(articleCategories.slug, updates.slug), sql`${articleCategories.id} != ${id}`))
+      .get();
+    if (dupe) return throwError.conflict('Slug danh mục đã tồn tại');
+  }
+
+  if (Object.keys(updates).length > 0) {
+    const [updated] = await c.var.db.update(articleCategories).set(updates).where(eq(articleCategories.id, id)).returning();
+    return updated;
+  }
+  return existing;
+}
+
+export async function adminDeleteArticleCategory(c: HonoCtx, id: string) {
+  const existing = await c.var.db
+    .select({ id: articleCategories.id })
+    .from(articleCategories)
+    .where(eq(articleCategories.id, id))
+    .get();
+  if (!existing) return throwError.notFound('Không tìm thấy danh mục');
+
+  const children = await c.var.db
+    .select({ id: articleCategories.id })
+    .from(articleCategories)
+    .where(eq(articleCategories.parentId, id))
+    .get();
+  if (children) return throwError.badRequest('Không thể xóa danh mục đang chứa danh mục con');
+
+  const linked = await c.var.db
+    .select({ categoryId: articleCategoryMap.categoryId })
+    .from(articleCategoryMap)
+    .where(eq(articleCategoryMap.categoryId, id))
+    .get();
+  if (linked) return throwError.badRequest('Không thể xóa danh mục đang có bài viết');
+
+  await c.var.db.delete(articleCategories).where(eq(articleCategories.id, id));
+  return { success: true };
+}
+
 export async function adminListArticleTags(c: HonoCtx) {
   return c.var.db.select().from(articleTags).orderBy(asc(articleTags.name)).all();
 }

@@ -13,10 +13,12 @@ import {
 import {
   adminCreateArticleCategory,
   adminCreateArticleTag,
+  adminDeleteArticleCategory,
   adminListArticleCategories,
   adminListArticleTags,
   adminListPopularArticleCategories,
   adminListPopularArticleTags,
+  adminUpdateArticleCategory,
 } from './articleTaxonomy.service';
 import {
   adminCreateBanner,
@@ -34,6 +36,7 @@ import {
   AdminCreateCategoryOpenAPI,
   AdminCreateProductOpenAPI,
   AdminCreateRedirectOpenAPI,
+  AdminDeleteArticleCategoryOpenAPI,
   AdminDeleteArticleOpenAPI,
   AdminDeleteBannerOpenAPI,
   AdminDeleteCategoryOpenAPI,
@@ -62,6 +65,7 @@ import {
   AdminResolveComplaintOpenAPI,
   AdminSeoAiSuggestOpenAPI,
   AdminStatsOpenAPI,
+  AdminUpdateArticleCategoryOpenAPI,
   AdminUpdateArticleOpenAPI,
   AdminUpdateBankInfoOpenAPI,
   AdminUpdateBannerOpenAPI,
@@ -221,6 +225,14 @@ routes.openapi(AdminListPopularArticleCategoriesOpenAPI, async (c) => {
 routes.openapi(AdminCreateArticleCategoryOpenAPI, async (c) =>
   c.json(await adminCreateArticleCategory(c, c.req.valid('json') as Record<string, unknown>), 201),
 );
+routes.openapi(AdminUpdateArticleCategoryOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminUpdateArticleCategory(c, id, c.req.valid('json') as Record<string, unknown>), 200);
+});
+routes.openapi(AdminDeleteArticleCategoryOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminDeleteArticleCategory(c, id), 200);
+});
 routes.openapi(AdminListArticleTagsOpenAPI, async (c) => c.json(await adminListArticleTags(c), 200));
 routes.openapi(AdminListPopularArticleTagsOpenAPI, async (c) => {
   const limit = Number(c.req.valid('query').limit ?? 20);
