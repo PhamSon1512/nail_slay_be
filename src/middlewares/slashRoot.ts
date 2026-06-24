@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from 'hono';
 
 /**
- * Sub-routers registered with OpenAPI `path: '/'` only match requests that include a
- * trailing slash (e.g. GET /profile/). Clients (axios, fetch) call /profile without it.
- * Re-dispatch exact root paths once with a trailing slash before route matching.
+ * List routes are registered at `path: '/'` under each mount (e.g. `/products`).
+ * Hono matches those without a trailing slash. Some clients call `/products/`.
+ * Normalize by stripping a trailing slash and re-dispatching once.
  */
 const SLASH_ROOT_PATHS = new Set([
   '/addresses',
@@ -24,12 +24,13 @@ export const slashRootPaths =
   (fetchApp: (request: Request, ...rest: unknown[]) => Response | Promise<Response>): MiddlewareHandler =>
   async (c, next) => {
     const path = c.req.path;
-    if (!SLASH_ROOT_PATHS.has(path)) {
-      await next();
-      return;
+    if (path.endsWith('/') && path.length > 1) {
+      const bare = path.slice(0, -1);
+      if (SLASH_ROOT_PATHS.has(bare)) {
+        const url = new URL(c.req.url);
+        url.pathname = bare;
+        return fetchApp(new Request(url, c.req.raw), c.env, c.executionCtx);
+      }
     }
-
-    const url = new URL(c.req.url);
-    url.pathname = `${path}/`;
-    return fetchApp(new Request(url, c.req.raw), c.env, c.executionCtx);
+    await next();
   };
