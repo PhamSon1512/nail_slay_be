@@ -46,6 +46,7 @@ import {
   AdminDeleteUserOpenAPI,
   AdminGetArticleOpenAPI,
   AdminGetOrderOpenAPI,
+  AdminGetProductOpenAPI,
   AdminGetSettingsOpenAPI,
   AdminGetUserOpenAPI,
   AdminLinkSuggestionsOpenAPI,
@@ -83,6 +84,7 @@ import {
   adminCreateProduct,
   adminDeleteProduct,
   adminGetOrder,
+  adminGetProduct,
   adminListOrders,
   adminListProducts,
   adminUpdateOrderStatus,
@@ -150,6 +152,10 @@ routes.openapi(AdminDeleteCategoryOpenAPI, async (c) => {
 });
 
 routes.openapi(AdminListProductsOpenAPI, async (c) => c.json(await adminListProducts(c, c.req.valid('query')), 200));
+routes.openapi(AdminGetProductOpenAPI, async (c) => {
+  const { id } = c.req.valid('param');
+  return c.json(await adminGetProduct(c, id), 200);
+});
 routes.openapi(AdminCreateProductOpenAPI, async (c) => {
   const body = await c.req.parseBody({ all: true });
   return c.json(await adminCreateProduct(c, body as Record<string, unknown>), 201);

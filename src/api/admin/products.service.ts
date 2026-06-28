@@ -1,6 +1,6 @@
 import type { HonoCtx } from '../../@types';
 import type { OrderStatus } from '../../utils/orderStatus';
-import { and, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, like, or, sql } from 'drizzle-orm';
 import { addresses, categories, complaints, orderItems, orders, products, productVariants, users } from '../../models';
 import { throwError } from '../../utils';
 import { collectImageFiles, optionalString, parseIntField, parseJsonField, requiredString } from '../../utils/formParse';
@@ -35,10 +35,50 @@ export async function adminListProducts(c: HonoCtx, query: { page?: string; limi
     .offset(offset)
     .all();
 
+  const productIds = items.map((p) => p.id);
+  const variantRows =
+    productIds.length > 0
+      ? await c.var.db
+          .select()
+          .from(productVariants)
+          .where(inArray(productVariants.productId, productIds))
+          .orderBy(productVariants.sortOrder)
+          .all()
+      : [];
+
+  const variantsByProduct = new Map<string, typeof variantRows>();
+  for (const variant of variantRows) {
+    const list = variantsByProduct.get(variant.productId) ?? [];
+    list.push(variant);
+    variantsByProduct.set(variant.productId, list);
+  }
+
   return {
-    items,
+    items: items.map((item) => ({
+      ...item,
+      variants: variantsByProduct.get(item.id) ?? [],
+    })),
     pagination: { total: Number(count), page, limit, totalPages: Math.ceil(Number(count) / limit) },
   };
+}
+
+export async function adminGetProduct(c: HonoCtx, id: string) {
+  const product = await c.var.db
+    .select()
+    .from(products)
+    .where(and(eq(products.id, id), isNull(products.deletedAt)))
+    .get();
+
+  if (!product) return throwError.notFound('Không tìm thấy sản phẩm', { id });
+
+  const variants = await c.var.db
+    .select()
+    .from(productVariants)
+    .where(eq(productVariants.productId, id))
+    .orderBy(productVariants.sortOrder)
+    .all();
+
+  return { ...product, variants };
 }
 
 async function uploadProductImages(c: HonoCtx, body: Record<string, unknown>, existingUrls: string[] = []) {

@@ -219,6 +219,15 @@ export const AdminListProductsOpenAPI = createRoute({
   responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
 });
 
+export const AdminGetProductOpenAPI = createRoute({
+  method: 'get',
+  tags: ['Admin'],
+  path: '/products/{id}',
+  security: [{ Bearer: [] }],
+  request: { params: IdParamSchema },
+  responses: { 200: jsonSchemaBuilder(z.record(z.string(), z.unknown())), ...defaultResponseSchema },
+});
+
 export const AdminCreateProductOpenAPI = createRoute({
   method: 'post',
   tags: ['Admin'],
